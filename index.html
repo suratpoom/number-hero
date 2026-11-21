@@ -1,0 +1,794 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>ฮีโร่ตัวเลข</title>
+<style>
+:root{--ink:#3b2a4a;--cream:#fff8ec;--gold:#ffc83d;--orange:#ff8a3d;--star:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0;height:100%}
+body{font-family:"Leelawadee UI","Sukhumvit Set","Noto Sans Thai","Thonburi",system-ui,sans-serif;overflow:hidden;background:#2a2767;color:var(--ink);user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+button{font:inherit;color:inherit;cursor:pointer}
+#app{position:fixed;inset:0;overflow:hidden;background:linear-gradient(#262460 0%,#5b3fa0 30%,#c85f9a 56%,#ff9a6b 76%,#ffd08a 100%)}
+
+/* ---------- ฉากหลัง ---------- */
+.sun{position:absolute;left:50%;top:60%;width:42vmin;height:42vmin;margin-left:-21vmin;border-radius:50%;background:radial-gradient(circle,#fff6c9 0,#ffd97a 45%,rgba(255,200,100,0) 70%);animation:glow 5s ease-in-out infinite}
+@keyframes glow{50%{transform:scale(1.08);opacity:.85}}
+.tw{position:absolute;width:3px;height:3px;border-radius:50%;background:#fff;animation:tw 3s ease-in-out infinite}
+@keyframes tw{50%{opacity:.15;transform:scale(.5)}}
+.cloud{position:absolute;height:34px;width:120px;border-radius:40px;background:rgba(255,255,255,.22);animation:drift linear infinite}
+.cloud::before,.cloud::after{content:"";position:absolute;background:inherit;border-radius:50%}
+.cloud::before{width:54px;height:54px;left:18px;top:-24px}
+.cloud::after{width:40px;height:40px;left:62px;top:-14px}
+@keyframes drift{from{transform:translateX(-160px)}to{transform:translateX(110vw)}}
+.hills{position:absolute;left:0;bottom:0;width:100%;height:36vh}
+.fly{position:absolute;width:7px;height:7px;border-radius:50%;background:#fff4a8;box-shadow:0 0 12px 4px rgba(255,240,140,.7);animation:ff 7s ease-in-out infinite}
+@keyframes ff{0%,100%{transform:translate(0,0);opacity:.2}50%{transform:translate(26px,-34px);opacity:1}}
+
+/* ---------- โครงหน้า ---------- */
+.screen{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;padding:max(14px,env(safe-area-inset-top)) 16px max(18px,env(safe-area-inset-bottom));gap:12px}
+.screen.on{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:scale(.97)}}
+.wrap{width:100%;max-width:760px}
+.top{display:flex;align-items:center;gap:10px}
+.ic{width:52px;height:52px;flex:none;border:0;border-radius:18px;background:rgba(255,255,255,.2);backdrop-filter:blur(8px);display:grid;place-items:center;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
+.ic svg{width:26px;height:26px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.ic.off{opacity:.45}
+.ic:active{transform:scale(.92)}
+.starc{margin-left:auto;display:flex;align-items:center;gap:6px;height:52px;padding:0 16px 0 12px;border-radius:26px;background:rgba(30,20,70,.45);color:#fff;font-weight:900;font-size:22px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.22)}
+.st{display:inline-block;width:28px;height:28px;background:linear-gradient(#ffe37a,#ffb41f);clip-path:var(--star)}
+
+/* ---------- หน้าแรก ---------- */
+.title{margin:2px 0 0;text-align:center;color:#fff;font-size:clamp(34px,9vw,60px);font-weight:900;line-height:1.1;text-shadow:0 4px 0 #6b3fa6,0 10px 24px rgba(0,0,0,.35);letter-spacing:.5px}
+.sub{color:#ffe9b8;font-weight:700;font-size:clamp(14px,3.6vw,18px);text-align:center;margin-top:4px}
+.hero{flex:1;min-height:0;display:grid;place-items:center;width:100%}
+.hero .fox{height:min(100%,300px);aspect-ratio:1;animation:bob 2.6s ease-in-out infinite;filter:drop-shadow(0 16px 14px rgba(20,10,60,.4))}
+@keyframes bob{50%{transform:translateY(-10px)}}
+.fox .eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
+@keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+.fox .tail,.mfox .tail,.fb .tail{transform-box:fill-box;transform-origin:60% 0;animation:wag 1.2s ease-in-out infinite}
+@keyframes wag{50%{transform:rotate(-14deg)}}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mode{border:0;border-radius:26px;background:var(--cream);padding:12px 14px;display:flex;align-items:center;gap:12px;text-align:left;box-shadow:0 6px 0 #d9c2a0,0 16px 26px rgba(20,10,60,.3);transition:transform .08s,box-shadow .08s}
+.mode:active{transform:translateY(5px);box-shadow:0 1px 0 #d9c2a0,0 6px 10px rgba(20,10,60,.3)}
+.mode:last-child{grid-column:1/-1}
+.mi{width:56px;height:56px;flex:none;border-radius:18px;background:var(--c);display:grid;place-items:center;color:#fff;font-size:38px;font-weight:900;line-height:1;box-shadow:inset 0 -5px 0 rgba(0,0,0,.16)}
+.mi svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.mode b{display:block;font-size:22px;font-weight:900}
+.mode small{display:block;font-size:13px;opacity:.65;font-weight:700;line-height:1.25}
+.modes{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px}
+.modes .mode{flex-direction:column;text-align:center;padding:10px 2px 8px;gap:5px;border-radius:20px;grid-column:auto}
+.modes .mi{width:44px;height:44px;font-size:30px;border-radius:14px}
+.modes .mi svg{width:24px;height:24px}
+.modes .mode b{font-size:14px}
+.modes .mode small{display:none}
+.advbtn{background:linear-gradient(#ffe37a,#ffc21a);box-shadow:0 6px 0 #c98f0a,0 16px 26px rgba(20,10,60,.3)}
+.advbtn:active{box-shadow:0 1px 0 #c98f0a}
+.advbtn small{opacity:.8}
+.medc{margin-left:auto;display:flex;align-items:center;gap:4px;font-weight:900;font-size:20px}
+/* ---------- แผนที่ผจญภัย ---------- */
+.maph{color:#fff;font-weight:900;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.3)}
+.map{flex:1;min-height:0;overflow-y:auto;width:100%;max-width:520px;scrollbar-width:none}
+.mapin{position:relative;width:100%}
+.mapin>svg{position:absolute;inset:0;width:100%;height:100%}
+.mn{position:absolute;transform:translate(-50%,-50%);width:130px;border:0;background:none;display:flex;flex-direction:column;align-items:center;padding:0}
+.mnc{width:76px;height:76px;border-radius:50%;background:var(--c);border:5px solid #fff;display:grid;place-items:center;color:#fff;font-size:40px;font-weight:900;line-height:1;box-shadow:0 7px 0 rgba(20,10,60,.35),0 14px 20px rgba(20,10,60,.35)}
+.mnc svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.mn em{font-style:normal;color:#fff;font-weight:800;font-size:14px;margin-top:9px;white-space:nowrap;text-shadow:0 2px 4px rgba(20,10,60,.8)}
+.mst{display:flex;height:14px;margin-top:2px}.mst .st{width:14px;height:14px}.mst .st.off{background:rgba(255,255,255,.3)}
+.mn.lock .mnc{background:#7c74a8;border-color:rgba(255,255,255,.5)}
+.mn.cur .mnc{animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.1);box-shadow:0 7px 0 rgba(20,10,60,.35),0 0 0 12px rgba(255,255,255,.22)}}
+.mn:active .mnc{transform:translateY(5px)}
+.mfox{position:absolute;top:-50px;left:50%;width:58px;height:58px;margin-left:-29px;animation:bob 1.4s ease-in-out infinite;pointer-events:none}
+.mn.chest .mnc{width:96px;height:96px;border-radius:26px;background:linear-gradient(#ffe37a,#ffb41f);padding:8px}
+.mn.chest.lock .mnc{filter:grayscale(.8);opacity:.75}
+.mn.chest .mnc svg{width:100%;height:100%;stroke:none}
+.plus{color:#ffe37a;font-weight:900;font-size:22px;line-height:1.35;text-shadow:0 2px 0 rgba(0,0,0,.35)}
+.fl{position:fixed;z-index:60;color:#fff;font-weight:900;font-size:34px;text-shadow:0 3px 0 #2f9d68;pointer-events:none;animation:flup 1s ease-out forwards;transform:translate(-50%,-50%)}
+@keyframes flup{to{transform:translate(-50%,-190%);opacity:0}}
+.chestbig{position:relative;width:min(62vw,260px)}
+.chestbig svg{display:block;width:100%;height:auto;overflow:visible}
+.lid{transform-origin:30px 90px;transition:transform .6s cubic-bezier(.3,1.6,.5,1)}
+.open .lid{transform:rotate(-36deg)}
+.medal{position:absolute;left:50%;top:48%;width:96px;height:96px;margin:-48px;background:linear-gradient(#fff6b8,#ffb41f);clip-path:var(--star);transform:scale(0);transition:transform .9s .35s cubic-bezier(.3,1.6,.5,1)}
+.open .medal{transform:translateY(-125px) scale(1.35) rotate(360deg)}
+.lv{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;padding:6px;border-radius:26px;background:rgba(30,20,70,.5);box-shadow:inset 0 0 0 2px rgba(255,255,255,.22)}
+.lv button{border:0;border-radius:20px;height:48px;background:transparent;color:#fff;font-weight:900;font-size:18px;display:flex;align-items:center;justify-content:center;gap:6px;transition:.15s}
+.lv button .st{width:16px;height:16px;margin-left:-3px}
+.lv button .st:first-of-type{margin-left:2px}
+.lv button.on{background:var(--cream);color:var(--ink);box-shadow:0 4px 0 #d9c2a0}
+.ver{color:rgba(255,255,255,.6);font-size:12px;font-weight:700}
+@media(min-width:720px){.modes{grid-template-columns:repeat(5,minmax(0,1fr))}.mode{flex-direction:column;text-align:center;padding:16px 8px}.mode:last-child{grid-column:auto}}
+
+/* ---------- ทางเดิน ---------- */
+.track{flex:1;height:52px;position:relative;margin:0 4px}
+.tin{position:absolute;left:24px;right:24px;top:0;bottom:0}
+.tin::before{content:"";position:absolute;left:0;right:0;top:34px;height:8px;border-radius:4px;background:rgba(255,255,255,.28)}
+.bar{position:absolute;left:0;top:34px;height:8px;border-radius:4px;background:var(--gold);transition:width .6s cubic-bezier(.4,1.4,.5,1)}
+.nd{position:absolute;top:28px;width:20px;height:20px;margin-left:-10px;border-radius:50%;background:#fff;opacity:.55;transition:.3s}
+.nd.done{background:var(--gold);opacity:1}
+.nd.goal{top:20px;width:36px;height:36px;margin-left:-18px;border-radius:0;background:linear-gradient(#ffe37a,#ffb41f);clip-path:var(--star);opacity:1;animation:glow 1.6s infinite}
+.walker{position:absolute;top:-8px;width:50px;height:50px;margin-left:-25px;transition:left .6s cubic-bezier(.4,1.4,.5,1);z-index:2}
+.walker.hop svg{animation:hop .6s ease}
+@keyframes hop{40%{transform:translateY(-16px) rotate(-8deg)}}
+
+/* ---------- การ์ดคำถาม ---------- */
+.card{flex:1;min-height:0;background:var(--cream);border-radius:34px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;box-shadow:0 8px 0 #e3cba6,0 22px 40px rgba(20,10,60,.35);overflow:hidden}
+.card.shake{animation:shake .4s}
+@keyframes shake{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+.cap{font-size:clamp(16px,4.2vw,22px);font-weight:800;text-align:center;color:#7a5a3a}
+.visual{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;max-width:100%}
+.grp{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;padding:10px 8px 6px;border-radius:22px;background:#fff;border:3px dashed #efd6ae;max-width:calc(var(--s)*5 + 52px)}
+.grp.wide{max-width:100%}
+.op{font-size:36px;font-weight:900;color:var(--orange)}
+.ap{width:var(--s);height:var(--s);margin:4px 3px 2px;border-radius:50% 50% 46% 46%;background:radial-gradient(circle at 32% 28%,#ffa293,#e8384f 55%,#b81f3a);position:relative;display:inline-grid;place-items:center;animation:pop .4s backwards cubic-bezier(.3,1.6,.5,1);box-shadow:inset -3px -4px 0 rgba(0,0,0,.12)}
+.ap::before{content:"";position:absolute;top:-16%;left:52%;width:36%;height:22%;background:#4cae4f;border-radius:0 80% 0 80%}
+.ap::after{content:"";position:absolute;top:-14%;left:45%;width:9%;height:18%;background:#6b4226;border-radius:2px}
+.ap.b{background:radial-gradient(circle at 32% 28%,#ffe98a,#f8ae2c 55%,#d9811a)}
+.ap.gone{animation:pop .4s backwards,eat .5s .9s forwards}
+@keyframes pop{from{transform:scale(0)}}
+@keyframes eat{to{opacity:.22;filter:grayscale(1);transform:scale(.78) rotate(18deg)}}
+.ap b{color:#fff;font-weight:900;font-size:calc(var(--s)*.52);opacity:0;transform:scale(.3);transition:.2s;text-shadow:0 1px 2px rgba(0,0,0,.4)}
+.ap.num b{opacity:1;transform:none}
+.eq{font-size:min(9vh,11.5vw,80px);white-space:nowrap;font-weight:900;display:flex;align-items:center;gap:.22em;line-height:1.1}
+.eq i{font-style:normal;color:var(--orange)}
+.qm{display:inline-grid;place-items:center;min-width:1.25em;height:1.25em;border-radius:.28em;background:#ffe9c4;border:4px dashed var(--orange);color:var(--orange);animation:bob 1.2s ease-in-out infinite}
+.qm.ans{background:#4cc38a;border:4px solid #2f9d68;color:#fff;animation:pop .4s cubic-bezier(.3,1.8,.5,1)}
+
+/* ---------- ปุ่มคำตอบ ---------- */
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.ch{border:0;border-radius:28px;height:clamp(76px,15vh,124px);font-size:clamp(38px,8vh,64px);font-weight:900;color:#fff;background:var(--c);box-shadow:0 7px 0 var(--d),0 16px 24px rgba(10,5,40,.4);transition:transform .08s,box-shadow .08s}
+.ch:active{transform:translateY(6px);box-shadow:0 1px 0 var(--d)}
+.ch.no{opacity:.35;transform:translateY(6px);box-shadow:0 1px 0 var(--d);pointer-events:none}
+.ch.ok{animation:yes .5s}
+@keyframes yes{40%{transform:scale(1.12) rotate(-3deg)}}
+.sp{position:fixed;width:24px;height:24px;margin:-12px;background:var(--gold);clip-path:var(--star);animation:flyout .8s ease-out forwards;pointer-events:none;z-index:50}
+@keyframes flyout{to{transform:translate(var(--dx),var(--dy)) rotate(220deg) scale(.3);opacity:0}}
+
+/* ---------- เขียนเลข ---------- */
+.wwrap{position:relative;height:100%;max-height:100%;aspect-ratio:1;max-width:100%;border-radius:26px;background:#fff;border:3px dashed #efd6ae;touch-action:none;flex:1;min-height:0}
+.wwrap canvas{position:absolute;inset:0;width:100%;height:100%;border-radius:24px;touch-action:none}
+.wbtns{display:grid;grid-template-columns:1fr 2fr;gap:12px}
+.wbtns .ch{font-size:clamp(22px,5vw,30px);height:clamp(64px,11vh,90px)}
+
+/* ---------- ชนะ ---------- */
+/* ---------- ต่อสู้ ---------- */
+.mhp{flex:1;min-width:0;color:#fff;font-weight:900;font-size:15px;text-shadow:0 2px 3px rgba(20,10,60,.7)}
+.mhp b{display:block;white-space:nowrap;margin-bottom:3px}
+.hpb{height:16px;border-radius:8px;background:rgba(30,20,70,.6);overflow:hidden;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
+.hpb i{display:block;height:100%;width:100%;background:linear-gradient(#ff9a9a,#e8384f);border-radius:8px;transition:width .2s}
+.hearts{display:flex;gap:1px}.hearts svg{width:26px;height:26px;fill:#ff4d6d;filter:drop-shadow(0 2px 2px rgba(20,10,60,.5))}.hearts svg.off{fill:rgba(255,255,255,.28)}
+.arena{flex:1;min-height:0;position:relative;width:100%;max-width:760px;border-radius:34px;overflow:hidden;background:linear-gradient(rgba(30,20,70,.4),rgba(30,20,70,.08));box-shadow:inset 0 0 0 3px rgba(255,255,255,.22);touch-action:none}
+.ground{position:absolute;left:0;right:0;bottom:0;height:20%;background:linear-gradient(#3f2f7a,#231b52);border-top:5px solid #7a63c9}
+.tip{position:absolute;top:12px;left:0;right:0;padding:0 14px;text-align:center;color:#fff;font-weight:800;font-size:14px;text-shadow:0 2px 3px rgba(20,10,60,.8)}
+.fb{position:absolute;left:-30%;bottom:20%;width:min(30%,140px);aspect-ratio:1;transform-origin:50% 100%}
+.fb.punch>svg{animation:lunge .2s}
+@keyframes lunge{50%{transform:translateX(22%)}}
+.floor3{position:absolute;inset:0;width:100%;height:100%}
+.ring{position:absolute;border-radius:50%;border:4px solid #ff4d6d;background:rgba(255,77,109,.32);pointer-events:none;z-index:1}
+.fpad{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.joy{width:clamp(112px,33vw,150px);aspect-ratio:1;border-radius:50%;background:rgba(30,20,70,.6);box-shadow:inset 0 0 0 3px rgba(255,255,255,.32);display:grid;place-items:center;touch-action:none;flex:none}
+.joy i{width:46%;height:46%;border-radius:50%;background:linear-gradient(#fff,#d9d2f5);box-shadow:0 5px 0 #8f7bd6;pointer-events:none}
+.pbtn{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:1;max-width:320px}
+.pbtn .ch{height:clamp(56px,9vh,78px);font-size:clamp(17px,4.6vw,24px);border-radius:22px;touch-action:none}
+.sum{width:100%;max-width:460px;background:var(--cream);border-radius:22px;padding:10px 14px;text-align:left;font-weight:800;font-size:15px;box-shadow:0 5px 0 #e3cba6}
+.sum b{display:block;font-size:17px;font-weight:900;margin-bottom:4px}
+.sum div{display:flex;flex-wrap:wrap;justify-content:space-between;gap:2px 10px;padding:3px 0;border-top:2px dashed #efd6ae;color:#2f9d68}
+.sum div.bad{color:#c94568}
+#weapon,#win{overflow-y:auto}
+#weapon>:first-child,#win>:first-child{margin-top:auto}
+#weapon>:last-child,#win>:last-child{margin-bottom:auto}
+.fb.hurt{animation:blinkh .16s 6}
+@keyframes blinkh{50%{opacity:.2}}
+.hand{position:absolute;right:-26%;top:26%;width:56%;aspect-ratio:1}
+.hand svg,.pshot svg,.ws svg,.wpbig svg{display:block;width:100%;height:100%}
+.fb.swing .hand{animation:swing .25s}
+@keyframes swing{50%{transform:rotate(75deg) translate(18%,10%)}}
+.fm{position:absolute;left:-60%;bottom:19%;width:min(40%,210px);aspect-ratio:1;transform-origin:50% 100%}
+.fm>div{width:100%;height:100%;animation:bob 1.6s ease-in-out infinite}
+.fm.hit{filter:brightness(1.9) saturate(.3)}
+.fm.dead>div{animation:none;transition:transform .9s,opacity .9s;opacity:0;transform:rotate(50deg) scale(.3)}
+.shot{position:absolute;border-radius:50%;pointer-events:none}
+.shot.lo{background:radial-gradient(circle at 35% 35%,#fff3a8,#ff9a2e 50%,#e8384f);box-shadow:0 0 18px 6px rgba(255,140,40,.65)}
+.shot.hi{background:radial-gradient(circle at 35% 35%,#f6dcff,#a56bff 50%,#5b2fb0);box-shadow:0 0 18px 6px rgba(165,107,255,.65)}
+.pshot{position:absolute;pointer-events:none}
+.pshot.spin{animation:spin .35s linear infinite}
+.pshot.big{filter:drop-shadow(0 0 14px #ffe37a) drop-shadow(0 0 6px #fff)}
+.arena.shake{animation:shake .3s}
+.fbtn{grid-template-columns:1fr .8fr 1fr!important}
+.fbtn.auto{grid-template-columns:1.3fr 1fr!important}
+.fbtn.auto #batk{display:none}
+/* แถบบนฉากสู้: กล่องฟ้า = เรา (หัวใจ) · กล่องแดง = สัตว์ประหลาด (แถบเลือด) */
+.hud{display:flex;align-items:center;gap:6px;padding:5px 8px;border-radius:18px;min-width:0;color:#fff;font-weight:900;font-size:13px;line-height:1.25;box-shadow:inset 0 0 0 2px rgba(255,255,255,.3)}
+.hud.me{background:rgba(42,116,201,.85);flex:none}
+.hud.mon{background:rgba(168,28,51,.85);flex:1;text-align:right}
+.hud b{display:block;white-space:nowrap}
+.hud .mhp{font-size:13px;text-shadow:none}
+.hud .hpb{display:block;height:14px;background:rgba(0,0,0,.4)}
+.hud .hpb i{margin-left:auto;background:linear-gradient(#ffe37a,#ffb41f)}
+.hud .hearts svg{width:19px;height:19px}
+.av{width:36px;height:36px;flex:none;border-radius:50%;background:#fff8ec;overflow:hidden;padding:2px}
+.arena.d3 .fb{width:min(36%,160px)}
+.arena.d3 .fm{width:min(46%,230px)}
+.spb{position:relative;overflow:hidden;--c:#b9a8ff!important;--d:#7a66c9!important;color:#fff}
+.spb:not(.rdy){opacity:.8}
+.spb i{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(#ffe37a,#ffb41f);transition:width .2s}
+.spb span{position:relative}
+.spb.rdy{color:var(--ink);animation:pulse2 .7s ease-in-out infinite}
+@keyframes pulse2{50%{transform:scale(1.06)}}
+.qov{position:absolute;inset:0;background:rgba(20,12,50,.78);display:grid;place-items:center;padding:14px;z-index:90}
+.qcard{background:var(--cream);border-radius:28px;padding:16px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:12px;align-items:center;animation:pop .3s}
+.qcard .choices{width:100%}
+.qcard .ch{height:clamp(64px,11vh,96px)}
+.qcard .ch.ok{outline:5px solid #2f9d68}
+@keyframes spin{to{transform:rotate(360deg)}}
+.dmg{position:absolute;color:#fff;font-weight:900;font-size:30px;text-shadow:0 3px 0 #b81f3a;animation:flup .8s ease-out forwards;pointer-events:none;transform:translate(-50%,-50%)}
+.fbtn{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fbtn .ch{font-size:clamp(19px,5.2vw,34px);touch-action:none}
+.wpbig{flex:none;width:min(30vw,120px);aspect-ratio:1;animation:pop .7s cubic-bezier(.3,1.6,.5,1);filter:drop-shadow(0 0 22px rgba(255,225,130,.95))}
+.vs{display:flex;align-items:center;gap:12px;color:#fff;font-weight:800;font-size:17px;background:rgba(30,20,70,.55);padding:8px 18px 8px 8px;border-radius:24px;text-align:left;line-height:1.35}
+.vs .mm{width:68px;height:68px;flex:none}
+.sad{filter:grayscale(.8)}
+.wbar{display:flex;gap:6px;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:15px;text-shadow:0 2px 3px rgba(20,10,60,.7)}
+.ws{width:40px;height:40px;border-radius:13px;background:rgba(30,20,70,.55);padding:5px;box-shadow:inset 0 0 0 2px rgba(255,255,255,.22)}
+.ws.off svg{opacity:.18;filter:grayscale(1)}
+#win,#reward,#weapon,#lose{justify-content:center;gap:18px;text-align:center}
+#lose .fox{width:min(40vw,190px)}
+#reward h2,#weapon h2,#lose h2{margin:0;color:#fff;font-size:clamp(34px,9vw,56px);font-weight:900;text-shadow:0 4px 0 #6b3fa6,0 10px 24px rgba(0,0,0,.35)}
+#win .fox{width:min(46vw,220px);animation:bob 1s ease-in-out infinite}
+#win h2{margin:0;color:#fff;font-size:clamp(34px,9vw,56px);font-weight:900;text-shadow:0 4px 0 #6b3fa6,0 10px 24px rgba(0,0,0,.35)}
+.row5{display:flex;gap:8px;justify-content:center}
+.row5 .st{width:clamp(44px,13vw,70px);height:clamp(44px,13vw,70px);animation:pop .5s backwards cubic-bezier(.3,1.8,.5,1)}
+.row5 .st.off{background:rgba(255,255,255,.25)}
+.wact{display:grid;grid-template-columns:1fr 1fr;gap:12px;width:100%;max-width:460px}
+.wact .ch{font-size:22px;height:74px}
+.cf{position:absolute;top:-20px;width:12px;height:18px;border-radius:3px;animation:fall linear forwards;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg)}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+.sheet{position:fixed;inset:0;z-index:200;background:rgba(20,12,50,.72);display:grid;place-items:center;padding:16px}
+.shc{background:var(--cream);border-radius:30px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;padding:14px 16px 18px;animation:pop .25s}
+.shh{display:flex;align-items:center;justify-content:space-between;font-size:22px;font-weight:900;margin-bottom:6px}
+.shh .ic{background:#e9dcc6;box-shadow:none;width:44px;height:44px;backdrop-filter:none}
+.shh .ic svg{stroke:var(--ink)}
+.shb{font-weight:800;font-size:15px}
+.shb h3{margin:12px 0 6px;font-size:16px;font-weight:900;color:#7a5a3a}
+.cg{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.cc{background:#fff;border-radius:18px;padding:8px 4px;text-align:center;font-weight:800;font-size:13px;line-height:1.25;border:2px solid #efd6ae;display:flex;flex-direction:column;align-items:center;gap:4px}
+.cc .pic{width:58px;height:58px;display:block}
+.cc .pic svg{display:block;width:100%;height:100%}
+.cc.no{color:#b3a48c}
+.cc.no .pic{filter:brightness(0);opacity:.22}
+.cc button{border:0;border-radius:12px;padding:7px 10px;font-weight:900;font-size:13px;background:#35b97c;color:#fff}
+.cc button.on{background:#ffc21a;color:var(--ink)}
+.cc button:disabled{background:#cfc6b6}
+.pt{width:100%;border-collapse:collapse;font-weight:800;font-size:14px}
+.pt td,.pt th{padding:7px 4px;border-bottom:2px dashed #efd6ae;text-align:center}
+.pt td:first-child,.pt th:first-child{text-align:left}
+.toast{position:fixed;left:50%;top:84px;z-index:150;background:var(--cream);border-radius:22px;padding:8px 18px 8px 8px;display:flex;align-items:center;gap:8px;font-weight:900;font-size:18px;box-shadow:0 6px 0 #e3cba6,0 14px 24px rgba(20,10,60,.4);animation:tin 2s forwards;white-space:nowrap;pointer-events:none}
+.toast svg{width:38px;height:38px}
+@keyframes tin{0%{opacity:0;transform:translate(-50%,-20px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-20px)}}
+#home .top{gap:6px}
+#home .ic{width:46px;height:46px}
+.lv{grid-template-columns:repeat(4,minmax(0,1fr))}
+.lv button{font-size:15px;gap:3px}
+.lv button .st{width:12px;height:12px;margin-left:-3px}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="sun"></div>
+  <div id="sky"></div>
+  <svg class="hills" viewBox="0 0 1200 400" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 200 Q200 110 420 190 T820 170 T1200 180 V400 H0Z" fill="#7a479a" opacity=".6"/>
+    <path d="M0 270 Q250 170 520 260 T1000 240 T1200 260 V400 H0Z" fill="#43307e"/>
+    <path d="M0 335 Q300 265 600 325 T1200 315 V400 H0Z" fill="#231b52"/>
+  </svg>
+
+  <!-- หน้าแรก -->
+  <section id="home" class="screen on">
+    <div class="wrap top">
+      <button class="ic" id="snd" aria-label="เสียง"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
+      <button class="ic" id="bbook" aria-label="สมุดสะสม"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M9 8h6"/></svg></button>
+      <button class="ic" id="bshop" aria-label="ร้านหมวก"><svg viewBox="0 0 24 24"><path d="M2 18h20M6 18v-6a6 6 0 0 1 12 0v6"/></svg></button>
+      <button class="ic" id="bpar" aria-label="สำหรับผู้ปกครอง"><svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-6M21 20H3"/></svg></button>
+      <div class="starc"><i class="st"></i><span class="scv">0</span></div>
+    </div>
+    <div>
+      <h1 class="title">ฮีโร่ตัวเลข</h1>
+      <div class="sub">ตอบเลขเก็บอาวุธ แล้วไปสู้กับสัตว์ประหลาด</div>
+    </div>
+    <div class="hero"><div class="fox" id="heroFox"></div></div>
+    <div class="wrap lv" id="lv"></div>
+    <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span><b>ออกผจญภัย</b><small id="advsub"></small></span><span class="medc"><i class="st"></i><span id="medc">0</span></span></button>
+    <div class="wrap modes" id="modes"></div>
+    <div class="ver">v1.1</div>
+  </section>
+
+  <!-- แผนที่ผจญภัย -->
+  <section id="map" class="screen">
+    <div class="wrap top">
+      <button class="ic" id="mapback" aria-label="กลับ"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></button>
+      <div class="maph">แผนที่ผจญภัย</div>
+      <div class="starc"><i class="st"></i><span class="scv">0</span></div>
+    </div>
+    <div class="wrap wbar" id="wbar"></div>
+    <div class="map" id="mapsc"><div class="mapin" id="mapin"></div></div>
+  </section>
+
+  <!-- ได้อาวุธ -->
+  <section id="weapon" class="screen">
+    <div class="wpbig" id="wpi"></div>
+    <h2 id="wph"></h2>
+    <div class="plus" id="wpp"></div>
+    <div class="sum" id="wps"></div>
+    <div class="vs" id="wpv"></div>
+    <div class="wact"><button class="ch" id="wpgo3" style="--c:#e8384f;--d:#a81c33;font-size:19px">เดินสู้ 3 มิติ</button><button class="ch" id="wpgo" style="--c:#ff8a3d;--d:#c9611d;font-size:19px">ยืนสู้แบบเดิม</button></div>
+  </section>
+
+  <!-- ต่อสู้ -->
+  <section id="fight" class="screen">
+    <div class="wrap top">
+      <button class="ic" id="fback" aria-label="กลับแผนที่"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></button>
+      <div class="hud me"><span class="av" id="avme"></span><span><b>เรา</b><span class="hearts" id="hearts"></span></span></div>
+      <div class="hud mon"><span class="mhp"><b id="mname"></b><span class="hpb"><i id="hpf"></i></span></span><span class="av" id="avmon"></span></div>
+    </div>
+    <div class="arena" id="arena"><div class="tip" id="ftip"></div><div class="ground" id="ground"></div>
+      <svg class="floor3" id="floor3" hidden viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,100 100,100 100,94 85,44 15,44 0,94" fill="#33276e"/><polygon points="15,44 85,44 85,42 15,42" fill="#7a63c9"/><g stroke="rgba(255,255,255,.16)" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"><path d="M3.750 81.500h92.500M7.500 69h85M11.250 56.500h77.500M0 94 15 44M25 94l7.500-50M50 94V44M75 94l-7.500-50M100 94 85 44" vector-effect="non-scaling-stroke"/></g></svg><div class="fm" id="fm"></div><div class="fb" id="fb"></div>
+      <div class="qov" id="qov" hidden><div class="qcard"><div class="cap">ตอบถูก ปล่อยท่าไม้ตาย</div><div class="eq" id="qeq"></div><div class="choices" id="qch"></div></div></div>
+    </div>
+    <div class="wrap fbtn" id="fbtn">
+      <button class="ch" id="bjump" style="--c:#4aa3ff;--d:#2a74c9">กระโดด</button>
+      <button class="ch spb" id="bsp" style="--c:#8f7bd6;--d:#5d49a8"><i id="spf"></i><span>ไม้ตาย</span></button>
+      <button class="ch" id="batk" style="--c:#e8384f;--d:#a81c33">โจมตี</button>
+    </div>
+    <div class="wrap fpad" id="fpad" hidden>
+      <div class="joy" id="joy" aria-label="เดิน"><i id="knob"></i></div>
+      <div class="pbtn">
+        <button class="ch" id="ppunch" style="--c:#ff8a3d;--d:#c9611d">ต่อย</button>
+        <button class="ch" id="pwpn" style="--c:#e8384f;--d:#a81c33">อาวุธ</button>
+        <button class="ch" id="pjump" style="--c:#4aa3ff;--d:#2a74c9">กระโดด</button>
+        <button class="ch spb" id="psp" style="--c:#8f7bd6;--d:#5d49a8"><i></i><span>ไม้ตาย</span></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- แพ้ -->
+  <section id="lose" class="screen">
+    <div class="fox sad" id="loseFox"></div>
+    <h2>แพ้แล้ว ไม่เป็นไร</h2>
+    <div class="plus">ไปฝึกเลขให้เก่งขึ้น<br>แล้วกลับมาสู้ใหม่</div>
+    <div class="wact">
+      <button class="ch" id="retry" style="--c:#35b97c;--d:#218a58">ฝึกเลขใหม่</button>
+      <button class="ch" id="lmap" style="--c:#ff8a3d;--d:#c9611d">กลับแผนที่</button>
+    </div>
+  </section>
+
+  <!-- เจอสมบัติ -->
+  <section id="reward" class="screen">
+    <div class="chestbig" id="chest"></div>
+    <h2>เจอสมบัติแล้ว</h2>
+    <div class="plus" id="rwp"></div>
+    <div class="wact" style="grid-template-columns:1fr"><button class="ch" id="rwgo" style="--c:#35b97c;--d:#218a58">ผจญภัยรอบใหม่</button></div>
+  </section>
+
+  <!-- หน้าเล่น -->
+  <section id="play" class="screen">
+    <div class="wrap top">
+      <button class="ic" id="back" aria-label="กลับ"><svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8M5 10v10h14V10"/></svg></button>
+      <div class="track"><div class="tin" id="tin"></div></div>
+      <div class="starc" style="margin-left:0"><i class="st"></i><span class="scv">0</span></div>
+    </div>
+    <div class="wrap card" id="card">
+      <div class="cap" id="cap"></div>
+      <div class="visual" id="vis"></div>
+      <div class="eq" id="eq"></div>
+      <div class="wwrap" id="wwrap" hidden>
+        <canvas id="guide" width="600" height="600"></canvas>
+        <canvas id="ink" width="600" height="600"></canvas>
+      </div>
+    </div>
+    <div class="wrap choices" id="choices"></div>
+    <div class="wrap wbtns" id="wbtns" hidden>
+      <button class="ch" id="wclear" style="--c:#8f7bd6;--d:#6652ad">ลบ</button>
+      <button class="ch" id="wcheck" style="--c:#35b97c;--d:#218a58">เขียนเสร็จแล้ว</button>
+    </div>
+  </section>
+
+  <!-- หน้าชนะ -->
+  <section id="win" class="screen">
+    <div class="fox" id="winFox"></div>
+    <h2 id="winh">ถึงบ้านแล้ว เก่งมาก</h2>
+    <div class="row5" id="row5"></div>
+    <div class="plus" id="winp"></div>
+    <div class="sum" id="wins"></div>
+    <div class="wact">
+      <button class="ch" id="again" style="--c:#35b97c;--d:#218a58">เล่นอีกครั้ง</button>
+      <button class="ch" id="gohome" style="--c:#ff8a3d;--d:#c9611d">เลือกเกมอื่น</button>
+    </div>
+  </section>
+</div>
+
+<div class="sheet" id="sheet" hidden><div class="shc"><div class="shh"><span id="sht"></span><button class="ic" id="shx" aria-label="ปิด"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="shb" id="shb"></div></div></div>
+
+<script>
+/* ============ ตัวละคร ============ */
+let FOX=`<svg viewBox="0 0 120 120" width="100%" height="100%">
+<path class="tail" d="M46 64Q26 86 30 111l32-11z" fill="#e8384f"/>
+<rect x="45" y="90" width="13" height="20" rx="5" fill="#e6d8c3"/><rect x="62" y="90" width="13" height="20" rx="5" fill="#e6d8c3"/>
+<rect x="46.500" y="99" width="6" height="6" rx="1.500" fill="#d3c2a8"/><rect x="67.500" y="99" width="6" height="6" rx="1.500" fill="#d3c2a8"/>
+<ellipse cx="51" cy="112" rx="9" ry="5" fill="#3b2a4a"/><ellipse cx="69" cy="112" rx="9" ry="5" fill="#3b2a4a"/>
+<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088" stroke-width="8.500" stroke-linecap="round" fill="none"/>
+<rect x="42" y="62" width="36" height="34" rx="11" fill="#fbfbfb" stroke="#d5dae2" stroke-width="1.500"/>
+<circle cx="44" cy="71" r="6.500" fill="#fbfbfb" stroke="#d5dae2" stroke-width="1.500"/><circle cx="76" cy="71" r="6.500" fill="#fbfbfb" stroke="#d5dae2" stroke-width="1.500"/><rect x="45" y="65" width="30" height="14" fill="#fbfbfb"/>
+<path d="M60 72 61.760 76.570 66.660 76.840 62.850 79.930 64.110 84.660 60 82 55.890 84.660 57.150 79.930 53.340 76.840 58.240 76.570z" fill="#e8384f"/>
+<circle cx="37" cy="45" r="5" fill="#e3b088"/><circle cx="83" cy="45" r="5" fill="#e3b088"/>
+<circle cx="60" cy="42" r="24" fill="#e3b088"/>
+<path d="M35 47Q31 15 60 15q29 0 25 32l-4-13q-21 7-42 0z" fill="#1c1717"/>
+<g class="eye"><circle cx="51" cy="46" r="4.500" fill="#3b2a4a"/><circle cx="52.400" cy="44.400" r="1.500" fill="#fff"/></g>
+<g class="eye"><circle cx="69" cy="46" r="4.500" fill="#3b2a4a"/><circle cx="70.400" cy="44.400" r="1.500" fill="#fff"/></g>
+<circle cx="44" cy="54" r="4" fill="#ff7d6b" opacity=".45"/><circle cx="76" cy="54" r="4" fill="#ff7d6b" opacity=".45"/>
+<path d="M51 54q9 9 18 0" fill="none" stroke="#3b2a4a" stroke-width="2.600" stroke-linecap="round"/>
+</svg>`;
+/* ============ อาวุธ และ สัตว์ประหลาด ============ */
+const sword=c=>`<svg viewBox="0 0 60 60"><g transform="rotate(45 30 30)"><rect x="26.500" y="2" width="7" height="36" rx="3.500" fill="${c}" stroke="rgba(0,0,0,.25)" stroke-width="1.500"/><rect x="17" y="36" width="26" height="6" rx="3" fill="#e9a91c"/><rect x="27.500" y="42" width="5" height="13" rx="2" fill="#6b4226"/></g></svg>`;
+const SLING='<svg viewBox="0 0 60 60"><path d="M30 56V32M30 32 17 10M30 32l13-22" stroke="#8a5a2b" stroke-width="7" stroke-linecap="round" fill="none"/><path d="M17 10q13 18 26 0" stroke="#e8384f" stroke-width="3.500" fill="none"/><circle cx="30" cy="20" r="5" fill="#cfd8e3"/></svg>';
+const BOW='<svg viewBox="0 0 60 60"><path d="M22 5q30 25 0 50" stroke="#8a5a2b" stroke-width="6" stroke-linecap="round" fill="none"/><path d="M22 5v50" stroke="#fff" stroke-width="2"/><path d="M10 30h38" stroke="#e9a91c" stroke-width="3.500" stroke-linecap="round"/><path d="M56 30 46 24v12z" fill="#cfd8e3"/></svg>';
+const HAMMER='<svg viewBox="0 0 60 60"><rect x="27" y="22" width="6" height="34" rx="3" fill="#8a5a2b"/><rect x="10" y="5" width="40" height="20" rx="6" fill="#8fa3b8" stroke="rgba(0,0,0,.25)" stroke-width="1.500"/><path d="M33 8l-8 8h6l-4 7 9-9h-6z" fill="#ffd34d"/></svg>';
+const STONE='<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="#cfd8e3" stroke="#8fa3b8" stroke-width="4"/></svg>';
+const ARROW='<svg viewBox="0 0 60 60"><path d="M4 30h40" stroke="#e9a91c" stroke-width="5" stroke-linecap="round"/><path d="M58 30 42 20v20z" fill="#dfe6ee"/><path d="M4 30l8-8M4 30l8 8" stroke="#e8384f" stroke-width="4" stroke-linecap="round"/></svg>';
+/* a=พลัง · sp=ความเร็วพุ่ง (เท่าของความกว้างสนาม/วิ) · cd=หน่วงระหว่างโจมตี (วิ) · mul=ตัวคูณดาเมจต่อครั้ง · proj=รูปกระสุน · kill=ทำลายลูกไฟได้ */
+const WPN=[
+ {n:'ดาบไม้',a:2,svg:sword('#c68a4a'),sp:1.1,cd:.45,mul:1,spin:1,d:'ขว้างหมุน ใช้ง่าย'},
+ {n:'หนังสติ๊ก',a:3,svg:SLING,sp:1.8,cd:.3,mul:.7,proj:STONE,ps:.6,d:'ยิงรัว เบาแต่ไว'},
+ {n:'ดาบเหล็ก',a:4,svg:sword('#dfe6ee'),sp:1.2,cd:.45,mul:1,spin:1,d:'ขว้างหมุน คมกว่าเดิม'},
+ {n:'ธนูพราน',a:5,svg:BOW,sp:2.2,cd:.5,mul:1.15,proj:ARROW,d:'ลูกธนูพุ่งเร็วมาก'},
+ {n:'ค้อนสายฟ้า',a:6,svg:HAMMER,sp:.75,cd:.8,mul:1.9,spin:1,ps:1.3,shake:1,d:'ช้าแต่หนักมาก'},
+ {n:'ดาบดวงดาว',a:8,svg:sword('#ffd34d'),sp:1.3,cd:.4,mul:1,spin:1,kill:1,d:'ฟันลูกไฟแตกได้'}];
+const MON=[{n:'เจ้าเมือกเขียว',c:'#5cc46a',e:2,h:0,hits:10},{n:'ผีถ้ำตาเดียว',c:'#8f7bd6',e:1,h:0,hits:13},{n:'ยักษ์หินเขาแหลม',c:'#8d99ae',e:2,h:1,hits:16},{n:'อสูรสามตา',c:'#ff6f91',e:3,h:0,hits:19},{n:'ปีศาจไฟ',c:'#ff7b3d',e:2,h:1,hits:22},{n:'ราชามังกรดารา',c:'#3d6bd6',e:3,h:1,hits:28}];
+function monSVG(m){const ex=m.e===1?[70]:m.e===2?[52,88]:[44,70,96];
+ return `<svg viewBox="0 0 140 140" width="100%" height="100%">${m.h?'<path d="M40 46 30 12l26 24zM100 46l10-34-26 24z" fill="#fff3e0"/>':''}<path d="M20 122Q8 40 70 30q62 10 50 92-25 12-50 0-25 12-50 0z" fill="${m.c}"/><ellipse cx="70" cy="106" rx="30" ry="14" fill="#fff" opacity=".18"/>${ex.map(x=>`<g class="eye"><circle cx="${x}" cy="64" r="${m.e===1?16:11}" fill="#fff"/><circle cx="${x-3}" cy="66" r="${m.e===1?7:5}" fill="#2a1e3f"/></g>`).join('')}<path d="M46 92q24 20 48 0z" fill="#2a1e3f"/><path d="M54 92l5 8 5-8zM76 92l5 8 5-8z" fill="#fff"/></svg>`}
+const $=id=>document.getElementById(id);
+const r=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+$('heroFox').innerHTML=FOX;$('winFox').innerHTML=FOX;$('loseFox').innerHTML=FOX;
+
+/* ============ ฉากหลัง ============ */
+(function(){let h='';
+ for(let i=0;i<34;i++)h+=`<i class="tw" style="left:${r(0,100)}%;top:${r(0,42)}%;animation-delay:${Math.random()*3}s"></i>`;
+ for(let i=0;i<3;i++)h+=`<i class="cloud" style="top:${10+i*11}%;animation-duration:${50+i*22}s;animation-delay:-${i*24}s;transform:scale(${1-i*.2})"></i>`;
+ for(let i=0;i<9;i++)h+=`<i class="fly" style="left:${r(4,94)}%;top:${r(62,94)}%;animation-delay:-${Math.random()*7}s"></i>`;
+ $('sky').innerHTML=h;})();
+
+/* ============ สถานะ ============ */
+const PENCIL='<svg viewBox="0 0 24 24"><path d="M4 20l1-5L16 4l4 4L9 19l-5 1zM14 6l4 4"/></svg>';
+const MODES=[
+ {id:'add',name:'บวก',sub:'นับผลไม้รวมกัน',sym:'+',c:'#35b97c'},
+ {id:'sub',name:'ลบ',sub:'กินไปเหลือกี่ผล',sym:'−',c:'#ff6f91'},
+ {id:'mul',name:'คูณ',sub:'ตะกร้าละเท่าๆ กัน',sym:'×',c:'#4aa3ff'},
+ {id:'div',name:'หาร',sub:'แบ่งให้เพื่อนเท่ากัน',sym:'÷',c:'#a56bff'},
+ {id:'write',name:'เขียนเลข',sub:'ลากนิ้วตามรอย',sym:PENCIL,c:'#ff9f2e'}];
+const ROUNDS=5;
+const S={mode:null,i:0,q:null,first:true,earn:0,lock:false,tries:0,sound:true,total:0};
+try{S.total=+localStorage.getItem('fnf_stars')||0}catch(e){}
+/* ระดับความยาก: ช่วงตัวเลขของแต่ละโหมด + จำนวนตัวเลือก + ความเข้มของการตรวจลายมือ */
+const LEVELS=[
+ {name:'ง่าย',  add:[1,3,1,3], sub:[2,5],  mul:[2,2,1,3], div:[2,2,1,3], nch:2, cov:.32, pass:2, fill:.2},
+ {name:'กลาง', add:[1,5,1,5], sub:[3,9],  mul:[2,4,1,5], div:[2,4,1,4], nch:3, cov:.42, pass:3, fill:.16},
+ {name:'ยาก',  add:[4,10,2,10],sub:[8,18],mul:[2,5,2,6], div:[2,5,2,6], nch:3, cov:.5,  pass:4, fill:0}];
+S.lv=0;S.auto=true;try{const v=localStorage.getItem('fnf_lv');if(v!==null&&v!=='a'){S.auto=false;S.lv=Math.min(2,Math.max(0,+v||0))}}catch(e){}
+const L=()=>LEVELS[S.lv];
+function saveLv(){try{localStorage.setItem('fnf_lv',S.auto?'a':S.lv)}catch(e){}}
+/* ปรับเอง = เกมเลือกระดับของแต่ละเรื่องจากผลการตอบของเด็ก (ดู track / autoLv) */
+function drawLv(){$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}">ปรับเอง</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('')}
+drawLv();
+$('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'ปรับระดับให้เอง':'ระดับ'+L().name)};
+function setStars(){document.querySelectorAll('.scv').forEach(e=>e.textContent=S.total)}
+function saveT(){try{localStorage.setItem('fnf_stars',S.total)}catch(e){}setStars()}
+setStars();
+$('modes').innerHTML=MODES.map(m=>`<button class="mode" data-m="${m.id}"><span class="mi" style="--c:${m.c}">${m.sym}</span><span><b>${m.name}</b><small>${m.sub}</small></span></button>`).join('');
+$('modes').onclick=e=>{const b=e.target.closest('.mode');if(b){S.stage=null;start(b.dataset.m)}};
+
+/* ============ ผจญภัย ============ */
+const STAGES=[{m:'add',n:'ทุ่งแอปเปิล'},{m:'sub',n:'ลำธารหิ่งห้อย'},{m:'write',n:'ถ้ำตัวเลข'},{m:'mul',n:'สวนตะกร้า'},{m:'div',n:'สะพานแบ่งปัน'},{m:'mix',n:'ภูเขารวมมิตร'}];
+const NS=STAGES.length,PT={q:[10,5,2],stage:20,chest:50}; /* แต้มต่อข้อ: ถูกครั้งแรก 10 · ผิด 1 ครั้ง 5 · ผิด 2 ครั้งขึ้นไป 2 แล้วคูณตามระดับ (ง่าย x1 กลาง x2 ยาก x3) */
+const LOCK='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+const CHEST=`<svg viewBox="0 0 200 180"><rect x="30" y="88" width="140" height="74" rx="10" fill="#a5622a"/><rect x="30" y="88" width="140" height="13" fill="#e9a91c"/><rect x="48" y="88" width="13" height="74" fill="#e9a91c"/><rect x="139" y="88" width="13" height="74" fill="#e9a91c"/>
+<g class="lid"><path d="M30 90V70q0-30 30-30h80q30 0 30 30v20z" fill="#bf7632"/><rect x="48" y="40" width="13" height="50" fill="#e9a91c"/><rect x="139" y="40" width="13" height="50" fill="#e9a91c"/><rect x="88" y="76" width="24" height="28" rx="5" fill="#ffd34d" stroke="#8a5a12" stroke-width="3"/></g></svg>`;
+S.stage=null;
+let A={adv:0,medals:0,stars:[],w:[]}; /* w[k] = ขั้นของอาวุธด่าน k (0 = ยังไม่มี) เก็บข้ามรอบ */
+const atkOf=k=>Math.round(WPN[k].a*(1+.5*((A.w[k]||1)-1)));
+const bestW=()=>{let b=-1;WPN.forEach((_,k)=>{if(A.w[k]&&(b<0||atkOf(k)>atkOf(b)))b=k});return b};
+const monHP=k=>Math.round(MON[k].hits*WPN[k].a*(1+.5*A.medals)*[.75,1,1.3][S.lv]);
+try{const v=JSON.parse(localStorage.getItem('fnf_adv'));if(v&&typeof v.adv==='number')A=Object.assign(A,v)}catch(e){}
+function saveA(){try{localStorage.setItem('fnf_adv',JSON.stringify(A))}catch(e){}}
+function drawHome(){$('advsub').textContent=A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`;$('medc').textContent=A.medals}
+function goHome(){drawHome();show('home')}
+function openMap(){show('map');const XS=[30,70,30,70,30,70,50],GAP=122,H=(NS+1)*GAP+60,y=k=>H-80-k*GAP;
+ const pts=k=>XS.slice(0,k+1).map((x,i)=>`${x},${y(i)}`).join(' ');
+ const ln=(p,c)=>`<polyline points="${p}" fill="none" stroke="${c}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="1 18" vector-effect="non-scaling-stroke"/>`;
+ let h=`<svg viewBox="0 0 100 ${H}" preserveAspectRatio="none">${ln(pts(NS),'rgba(255,255,255,.55)')}${ln(pts(Math.min(A.adv,NS)),'#ffc83d')}</svg>`;
+ STAGES.forEach((s,k)=>{const md=MODES.find(m=>m.id===s.m),lock=k>A.adv,cur=k===A.adv,st=A.stars[k]||0;
+  h+=`<button class="mn ${lock?'lock':''} ${cur?'cur':''}" data-k="${k}" style="left:${XS[k]}%;top:${y(k)}px">${cur?`<span class="mfox">${FOX}</span>`:''}<span class="mnc" style="--c:${md?md.c:'#ff5fa2'}">${lock?LOCK:md?md.sym:'?'}</span><em>${k+1}. ${s.n}</em>${k<A.adv?`<span class="mst">${[0,1,2,3,4].map(i=>`<i class="st ${i<st?'':'off'}"></i>`).join('')}</span>`:''}</button>`});
+ const cl=A.adv<NS;h+=`<button class="mn chest ${cl?'lock':'cur'}" data-k="${NS}" style="left:${XS[NS]}%;top:${y(NS)}px">${cl?'':`<span class="mfox">${FOX}</span>`}<span class="mnc">${CHEST}</span><em>หีบสมบัติ</em></button>`;
+ const bw=bestW();$('wbar').innerHTML=WPN.map((w,k)=>`<span class="ws ${A.w[k]?'':'off'}">${w.svg}</span>`).join('')+`<span>พลัง ${bw<0?0:atkOf(bw)}</span>`;
+ const mi=$('mapin');mi.style.height=H+'px';mi.innerHTML=h;
+ const sc=$('mapsc');sc.scrollTop=Math.max(0,y(Math.min(A.adv,NS))-sc.clientHeight/2)}
+$('adv').onclick=()=>{sfx.tap();openMap()};
+$('mapback').onclick=()=>{sfx.tap();goHome()};
+$('mapin').onclick=e=>{const b=e.target.closest('.mn');if(!b)return;const k=+b.dataset.k;
+ if(k>A.adv){sfx.no();say('ต้องผ่านด่านก่อนหน้าก่อนนะ');return}
+ if(k===NS)return reward();S.stage=k;start(STAGES[k].m)};
+function confetti(box){const col=['#ffc83d','#ff6f91','#4aa3ff','#35b97c','#fff'];
+ for(let k=0;k<46;k++){const c=document.createElement('i');c.className='cf';c.style.cssText=`left:${r(0,100)}%;background:${col[k%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*1.2}s`;box.appendChild(c);setTimeout(()=>c.remove(),6000)}}
+function reward(){show('reward');const c=$('chest');c.classList.remove('open');c.innerHTML=CHEST+'<i class="medal"></i>';
+ A.adv=0;A.stars=[];A.medals++;saveA();S.total+=PT.chest;saveT();
+ $('rwp').innerHTML=`เหรียญนักผจญภัย เหรียญที่ ${A.medals}<br>ได้เพิ่ม ${PT.chest} แต้ม`;
+ $('rwgo').textContent=!S.auto&&S.lv<2?'ผจญภัยรอบใหม่ ยากขึ้นอีกนิด':'ผจญภัยรอบใหม่';
+ setTimeout(()=>{c.classList.add('open');sfx.win();confetti($('reward'));say('เจอสมบัติแล้ว เก่งที่สุดเลย')},500)}
+$('rwgo').onclick=()=>{sfx.tap();if(!S.auto&&S.lv<2){S.lv++;saveLv();drawLv()}openMap()};
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+
+/* ============ เสียง ============ */
+let AC;
+function tone(f,t0,d,type,v){if(!S.sound)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==='suspended')AC.resume();
+ const o=AC.createOscillator(),g=AC.createGain();o.type=type||'sine';o.frequency.value=f;o.connect(g);g.connect(AC.destination);
+ const t=AC.currentTime+t0;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v||.18,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+d);o.start(t);o.stop(t+d+.05)}catch(e){}}
+const sfx={ok(){[523,659,784,1047].forEach((f,k)=>tone(f,k*.09,.22,'triangle'))},no(){tone(220,0,.25,'sine',.14);tone(180,.12,.3,'sine',.14)},
+ tap(){tone(660,0,.08,'triangle',.1)},win(){[523,659,784,659,784,1047,1319].forEach((f,k)=>tone(f,k*.13,.3,'triangle'))}};
+function say(t){if(!S.sound||!('speechSynthesis'in window))return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='th-TH';u.rate=.9;u.pitch=1.25;speechSynthesis.speak(u)}catch(e){}}
+$('snd').onclick=()=>{S.sound=!S.sound;$('snd').classList.toggle('off',!S.sound);if(!S.sound&&'speechSynthesis'in window)speechSynthesis.cancel();sfx.tap()};
+const PRAISE=['เก่งมาก','ถูกต้อง','เยี่ยมเลย','สุดยอด'];
+
+/* ============ ทางเดิน ============ */
+function drawTrack(){let h='<div class="bar" id="bar"></div>';
+ for(let k=0;k<=ROUNDS;k++)h+=`<i class="nd ${k===ROUNDS?'goal':''} ${k<=S.i&&k<ROUNDS?'done':''}" style="left:${k*100/ROUNDS}%"></i>`;
+ h+=`<div class="walker" id="walker" style="left:${S.i*100/ROUNDS}%">${FOX}</div>`;$('tin').innerHTML=h;$('bar').style.width=(S.i*100/ROUNDS)+'%'}
+function moveFox(){const w=$('walker');w.style.left=(S.i*100/ROUNDS)+'%';$('bar').style.width=(S.i*100/ROUNDS)+'%';
+ w.classList.remove('hop');void w.offsetWidth;w.classList.add('hop');
+ document.querySelectorAll('.nd').forEach((n,k)=>{if(k<=S.i&&k<ROUNDS)n.classList.add('done')})}
+
+/* ============ เริ่มเกม ============ */
+S.run=0; /* เลขรอบ: ตัวจับเวลาของรอบเก่าจะไม่ทำงานหลังออกจากหน้าเล่น */
+function start(mode){S.run++;sfx.tap();S.mode=mode;S.i=0;S.earn=0;S.pts=0;S.log=[];show('play');drawTrack();next()}
+function next(){if(S.i>=ROUNDS)return win();S.first=true;S.lock=false;S.tries=0;S.miss=0;S.wr=[];
+ S.cur=S.mode==='mix'?['add','sub','mul','div'][r(0,3)]:S.mode;if(S.auto)S.lv=autoLv(S.cur);
+ const w=S.cur==='write';$('wwrap').hidden=!w;$('wbtns').hidden=!w;$('choices').hidden=w;$('vis').hidden=w;$('eq').hidden=w;
+ w?setupWrite():setupQ()}
+
+function gen(m){let a,b,ans,sym,cap,q;const g=L()[m],c=P.miss.filter(x=>x.m===m),rv=c.length&&Math.random()<.35?c[r(0,c.length-1)]:null;
+ if(m==='add'){a=rv?rv.a:r(g[0],g[1]);b=rv?rv.b:r(g[2],g[3]);ans=a+b;sym='+';cap=`มี ${a} ผล ได้มาอีก ${b} ผล`;q=`${a} บวก ${b} ได้เท่าไหร่`}
+ else if(m==='sub'){a=rv?rv.a:r(g[0],g[1]);b=rv?rv.b:r(1,a-1);ans=a-b;sym='−';cap=`มี ${a} ผล กินไป ${b} ผล`;q=`${a} ลบ ${b} เหลือเท่าไหร่`}
+ else if(m==='mul'){a=rv?rv.a:r(g[0],g[1]);b=rv?rv.b:r(g[2],g[3]);ans=a*b;sym='×';cap=`${a} ตะกร้า ตะกร้าละ ${b} ผล`;q=`${a} คูณ ${b} ได้เท่าไหร่`}
+ else{b=rv?rv.b:r(g[0],g[1]);ans=rv?rv.a/rv.b:r(g[2],g[3]);a=b*ans;sym='÷';cap=`${a} ผล แบ่งใส่ ${b} ตะกร้า เท่าๆ กัน`;q=`${a} หาร ${b} ได้ตะกร้าละเท่าไหร่`}
+ const set=new Set([ans]);while(set.size<L().nch){const d=ans+r(-3,3);if(d>=0&&d!==ans)set.add(d)}
+ return{a,b,ans,sym,cap,q,rv:!!rv,ch:[...set].sort(()=>Math.random()-.5)}}
+function aps(n,cls,gone){let h='';for(let k=0;k<n;k++)h+=`<i class="ap ${cls||''} ${gone&&k>=n-gone?'gone':''}" style="animation-delay:${k*45}ms"><b></b></i>`;return h}
+const grp=(n,cls,gone,wide)=>{const cols=n<=5?n:Math.ceil(n/2);return `<div class="grp ${wide?'wide':''}" ${wide?'':`style="max-width:calc((var(--s) + 6px)*${cols} + 26px)"`}>${aps(n,cls,gone)}</div>`};
+function drawVis(q,reveal){const m=S.cur,v=$('vis');let h='',T;
+ if(m==='add'){T=q.a+q.b;h=grp(q.a)+'<span class="op">+</span>'+grp(q.b,'b')}
+ else if(m==='sub'){T=q.a;h=grp(q.a,'',q.b,true)}
+ else if(m==='mul'){T=q.a*q.b;for(let k=0;k<q.a;k++)h+=grp(q.b,k%2?'b':'')}
+ else{T=q.a;if(reveal){for(let k=0;k<q.b;k++)h+=grp(q.ans,k%2?'b':'')}else h=grp(q.a,'',0,true)}
+ v.style.setProperty('--s',(T<=10?'clamp(30px,6.2vh,46px)':T<=16?'clamp(24px,4.6vh,36px)':T<=24?'clamp(20px,3.6vh,30px)':'clamp(17px,3vh,25px)'));v.innerHTML=h}
+function setupQ(){const q=S.q=gen(S.cur);$('cap').textContent=q.cap;drawVis(q);
+ $('eq').innerHTML=`${q.a}<i>${q.sym}</i>${q.b}<i>=</i><span class="qm" id="qm">?</span>`;
+ const col=[['#35b97c','#218a58'],['#ff6f91','#c94568'],['#4aa3ff','#2a74c9']];
+ $('choices').style.gridTemplateColumns=`repeat(${q.ch.length},minmax(0,1fr))`;
+ $('choices').innerHTML=q.ch.map((n,k)=>`<button class="ch" data-n="${n}" style="--c:${col[k][0]};--d:${col[k][1]}">${n}</button>`).join('');
+ say(q.q)}
+$('choices').onclick=e=>{const b=e.target.closest('.ch');if(b)answer(+b.dataset.n,b)};
+document.addEventListener('keydown',e=>{if(!$('play').classList.contains('on')||S.cur==='write')return;const b=$('choices').children[+e.key-1];if(b&&!b.classList.contains('no'))b.click()});
+
+function countUp(){let els;if(S.cur==='div'){drawVis(S.q,true);els=$('vis').querySelector('.grp').querySelectorAll('.ap')}
+ else els=$('vis').querySelectorAll('.ap:not(.gone)');
+ els.forEach((el,k)=>{el.classList.remove('num');setTimeout(()=>{el.firstChild.textContent=k+1;el.classList.add('num');tone(500+k*30,0,.08,'triangle',.08)},350+k*230)})}
+function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){const s=document.createElement('i');s.className='sp';const g=Math.PI*2*k/12,d=70+Math.random()*70;
+ s.style.cssText=`left:${c.left+c.width/2}px;top:${c.top+c.height/2}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),850)}}
+function good(el){S.lock=true;sfx.ok();burst(el);const p=PT.q[Math.min(S.miss,2)]*(S.lv+1);if(S.first)S.earn++;S.pts+=p;S.total+=p;saveT();
+ S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q}`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p});track(S.first);
+ const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
+ const run=S.run;say(PRAISE[r(0,PRAISE.length-1)]);S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
+function answer(n,btn){if(S.lock)return;
+ if(n===S.q.ans){btn.classList.add('ok');const qm=$('qm');qm.textContent=n;qm.classList.add('ans');if(S.cur==='div')drawVis(S.q,true);good(btn)}
+ else{S.first=false;S.miss++;S.wr.push(n);noteMiss();btn.classList.add('no');sfx.no();const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');say('ลองนับดูอีกทีนะ');countUp()}}
+
+/* ============ เขียนเลข ============ */
+const gctx=$('guide').getContext('2d'),ictx=$('ink').getContext('2d',{willReadFrequently:true});
+const mask=document.createElement('canvas');mask.width=mask.height=600;const mctx=mask.getContext('2d',{willReadFrequently:true});
+const DFONT='bold 440px "Arial Rounded MT Bold","Segoe UI",Arial,sans-serif';
+function glyph(c,d){c.font=DFONT;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';return[String(d),300,325]}
+let digits=[];
+function setupWrite(){if(S.i===0)digits=[0,1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-.5).slice(0,ROUNDS);
+ const d=S.q=digits[S.i];$('cap').textContent=`ลากนิ้วเขียนเลข ${d} ตามรอย`;
+ gctx.clearRect(0,0,600,600);ictx.clearRect(0,0,600,600);mctx.clearRect(0,0,600,600);
+ let t=glyph(gctx,d);if(L().fill){gctx.fillStyle=`rgba(255,138,61,${L().fill})`;gctx.fillText(...t)}gctx.setLineDash([16,14]);gctx.lineWidth=5;gctx.strokeStyle='rgba(255,138,61,.75)';gctx.strokeText(...t);
+ t=glyph(mctx,d);mctx.fillStyle='#000';mctx.strokeStyle='#000';mctx.lineWidth=34;mctx.fillText(...t);mctx.strokeText(...t);
+ say(`เขียนเลข ${d}`)}
+let pen=null;const ink=$('ink');
+function pos(e){const c=ink.getBoundingClientRect();return[(e.clientX-c.left)*600/c.width,(e.clientY-c.top)*600/c.height]}
+ink.addEventListener('pointerdown',e=>{if(S.lock)return;ink.setPointerCapture(e.pointerId);pen=pos(e);ictx.fillStyle='#5b3fa0';ictx.beginPath();ictx.arc(pen[0],pen[1],27,0,7);ictx.fill()});
+ink.addEventListener('pointermove',e=>{if(!pen)return;const p=pos(e);ictx.strokeStyle='#5b3fa0';ictx.lineWidth=54;ictx.lineCap='round';ictx.lineJoin='round';ictx.beginPath();ictx.moveTo(pen[0],pen[1]);ictx.lineTo(p[0],p[1]);ictx.stroke();pen=p});
+['pointerup','pointercancel'].forEach(n=>ink.addEventListener(n,()=>pen=null));
+$('wclear').onclick=()=>{sfx.tap();ictx.clearRect(0,0,600,600)};
+$('wcheck').onclick=()=>{if(S.lock)return;const m=mctx.getImageData(0,0,600,600).data,k=ictx.getImageData(0,0,600,600).data;let M=0,C=0,I=0,O=0;
+ for(let p=3;p<m.length;p+=16){const a=m[p]>80,b=k[p]>80;if(a)M++;if(b)I++;if(a&&b)C++;if(b&&!a)O++}
+ const cov=C/M,out=I?O/I:1;S.tries++;
+ if(I>0&&((cov>=L().cov&&out<=.5)||S.tries>=L().pass)){good($('wcheck'))}
+ else{S.first=false;S.miss++;sfx.no();const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');say(I?'เกือบแล้ว ลากตามเส้นประอีกนิดนะ':'ลองลากนิ้วตามเส้นประดูนะ');if(I)setTimeout(()=>ictx.clearRect(0,0,600,600),600)}};
+
+/* ============ ชนะ ============ */
+/* ผจญภัย: ตอบเลขครบ -> ได้อาวุธ -> สู้สัตว์ประหลาด -> ชนะจึงผ่านด่าน / แพ้ต้องกลับไปตอบเลขใหม่ */
+function win(){S.stage!==null?gotWeapon():showWin(false)}
+function gotWeapon(){const k=S.stage,isNew=(A.w[k]||0)<A.medals+1;A.w[k]=Math.max(A.w[k]||0,A.medals+1);saveA();
+ S.hearts=3+(S.earn===ROUNDS?1:0);const b=bestW(),m=MON[k];show('weapon');sfx.win();
+ $('wpi').innerHTML=WPN[k].svg;$('wph').textContent=isNew?'ได้อาวุธใหม่':'อาวุธพร้อมแล้ว';
+ $('wpp').innerHTML=`${WPN[k].n} พลังโจมตี ${atkOf(k)}<br>${WPN[k].d}`+(b!==k?`<br>ใช้${WPN[b].n}ที่แรงกว่า พลัง ${atkOf(b)}`:'')+(S.hearts>3?'<br>ตอบถูกทุกข้อ<br>ได้หัวใจเพิ่ม 1 ดวง':'');
+ $('wps').innerHTML=sumHTML();
+ $('wpv').innerHTML=`<span class="mm">${monSVG(m)}</span><span>ศัตรู: ${m.n}<br>พลังชีวิต ${monHP(k)}</span>`;
+ say((isNew?'ได้อาวุธใหม่ ':'')+WPN[k].n)}
+/* สรุปรอบตอบเลข: แต้มที่ได้ และข้อไหนตอบผิด (พร้อมคำตอบที่เลือกผิด) */
+function sumHTML(){const max=PT.q[0]*(S.lv+1)*ROUNDS,got=S.log.reduce((s,l)=>s+l.p,0),bad=S.log.filter(l=>l.miss).length;
+ return `<b>ตอบเลขได้ ${got} จาก ${max} แต้ม${bad?` ผิด ${bad} ข้อ`:' ถูกทุกข้อ'}</b>`+S.log.map((l,i)=>`<div class="${l.miss?'bad':''}"><span>${i+1}. ${l.t}</span><span>${l.miss?`ผิด ${l.miss} ครั้ง${l.wr.length?' (ตอบ '+l.wr.join(', ')+')':''}`:'ถูกเลย'} +${l.p}</span></div>`).join('')}
+$('wpgo').onclick=()=>{sfx.tap();fight(false)};
+$('wpgo3').onclick=()=>{sfx.tap();fight(true)};
+let F=null;const JUMP=.9,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),zi=z=>Math.round(60-z*40);
+const HEART='<svg viewBox="0 0 24 24"><path d="M12 21C5 15 2 11.500 2 8a5 5 0 0 1 10-1.500A5 5 0 0 1 22 8c0 3.500-3 7-10 13z"/></svg>';
+function drawHearts(){$('hearts').innerHTML=Array.from({length:F.maxh},(_,i)=>HEART.replace('<svg',`<svg class="${i<F.h?'':'off'}"`)).join('')}
+/* ฉากสู้ 2 แบบใช้เครื่องยนต์เดียวกัน: d3=false ยืนสู้ (กระโดดหลบ) · d3=true เดินได้ทั้งซ้ายขวาและลึกตื้น มีต่อยระยะประชิด
+   ตำแหน่งเก็บเป็น x (0-1 ซ้ายไปขวา) และ z (0 ใกล้จอ - 1 ไกล) แล้วแปลงเป็นจุดบนจอด้วย proj() */
+function fight(d3){const k=S.stage,m=MON[k],w=bestW(),ar=$('arena');show('fight');
+ $('mname').textContent=m.n;$('avme').innerHTML=FOX;$('avmon').innerHTML=monSVG(m);$('fm').className='fm';$('fm').innerHTML=`<div>${monSVG(m)}</div>`;
+ $('fb').className='fb';$('fb').innerHTML=FOX+`<span class="hand">${WPN[w].svg}</span>`;
+ ar.querySelectorAll('.shot,.pshot,.dmg,.ring').forEach(e=>e.remove());
+ ar.classList.toggle('d3',d3);$('floor3').toggleAttribute('hidden',!d3);$('ground').hidden=d3;$('fbtn').hidden=d3;$('fpad').hidden=!d3;$('knob').style.transform='';
+ /* ยิ่งด่านไกล ระดับยาก: ลูกไฟเร็วขึ้น ถี่ขึ้น และมีลูกลอยสูง (ห้ามกระโดด) ปนมา */
+ const hi=S.lv===0?(k>=4?.2:0):(k>=2?.3:0)+(S.lv===2?.15:0),hp=Math.round(monHP(k)*(d3?1.5:1));
+ F={k,w,d3,hp,max:hp,h:S.hearts,maxh:S.hearts,atk:atkOf(w),j:0,jy:0,cd:0,pcd:0,inv:0,next:2.2,charge:null,shots:[],ps:[],over:false,last:performance.now(),
+  v:(30+k*3+S.lv*5)/100,intv:Math.max(1.1,2.6-k*.18-S.lv*.3),hi,en:0,paused:false,qlock:false,auto:S.lv===0,
+  P:{x:.18,z:d3?.5:0},M:{x:d3?.8:.72,z:d3?.5:0},mv:{x:0,z:0},keys:{},slam:null,slamCd:2,mz:.12+k*.03+S.lv*.04};
+ $('hpf').style.width='100%';drawHearts();setEn();$('qov').hidden=true;ar.classList.remove('shake');$('fbtn').classList.toggle('auto',F.auto);
+ $('ftip').textContent=d3?'มือซ้ายเดิน มือขวาต่อยหรือใช้อาวุธ':hi?'ลูกส้มกระโดดข้าม ลูกม่วงอย่ากระโดด':F.auto?'โจมตีให้เอง กดกระโดดหลบอย่างเดียว':'กระโดดข้ามลูกไฟ แล้วกดโจมตี';
+ say('สู้กับ'+m.n);tick(F.last);runLoop(F)}
+/* ผูก loop กับรอบสู้นี้เท่านั้น กัน loop ซ้อนเมื่อเริ่มสู้ใหม่ */
+function runLoop(me){requestAnimationFrame(function step(ts){if(F!==me||me.over||!$('fight').classList.contains('on'))return;tick(ts);requestAnimationFrame(step)})}
+function setEn(){document.querySelectorAll('#fight .spb').forEach(b=>{b.firstElementChild.style.width=(F.en*100)+'%';b.classList.toggle('rdy',F.en>=1)})}
+function proj(x,z){const ar=$('arena'),W=ar.clientWidth,H=ar.clientHeight;
+ return F.d3?{sx:W*(.5+(x-.5)*(1-.3*z)),fy:H*(.06+.5*z),sc:1-.32*z,W,H}:{sx:x*W,fy:H*.2,sc:1,W,H}}
+function tick(ts){if(F.paused){F.last=ts;return}const dt=Math.max(0,Math.min(.05,(ts-F.last)/1000));F.last=ts;
+ const ar=$('arena'),fb=$('fb'),fm=$('fm'),bh=fb.offsetHeight,P=F.P,M=F.M,rr=Math.max(15,bh*.2);
+ if(F.d3){const mx=clamp(F.mv.x+(F.keys.r?1:0)-(F.keys.l?1:0),-1,1),mz=clamp(F.mv.z+(F.keys.u?1:0)-(F.keys.d?1:0),-1,1);
+  P.x=clamp(P.x+mx*.5*dt,.08,M.x-.14);P.z=clamp(P.z+mz*.8*dt,0,1);
+  const dz=P.z-M.z;M.z+=Math.sign(dz)*Math.min(Math.abs(dz),F.mz*dt)}
+ if(F.auto&&F.cd<=0&&Math.abs(P.z-M.z)<.18)attack();
+ if(F.j>0){F.j-=dt;F.jy=Math.sin(Math.PI*(1-Math.max(0,F.j)/JUMP))*bh*1.25}else F.jy=0;
+ F.cd-=dt;F.pcd-=dt;F.inv-=dt;
+ const pp=proj(P.x,P.z),pm=proj(M.x,M.z);
+ fb.style.left=pp.sx+'px';fb.style.bottom=pp.fy+'px';fb.style.transform=`translate(-50%,${-F.jy*pp.sc}px) scale(${pp.sc})`;fb.style.zIndex=zi(P.z);
+ fm.style.left=pm.sx+'px';fm.style.bottom=(pm.fy-pm.H*.01)+'px';fm.style.transform=`translateX(-50%) scale(${pm.sc})`;fm.style.zIndex=zi(M.z);
+ /* ลูกไฟ: ชาร์จให้เห็นก่อน 0.6 วิ แล้วพุ่งตามแนวที่สัตว์ประหลาดยืนอยู่ตอนปล่อย */
+ F.next-=dt*(F.hp<F.max*.4?1.3:1);
+ if(!F.charge&&F.next<=.6){const hi=Math.random()<F.hi,e=document.createElement('i');e.className='shot '+(hi?'hi':'lo');ar.appendChild(e);F.charge={e,hi,x:M.x,z:M.z,go:false}}
+ if(F.charge){F.charge.z=M.z;if(F.next<=0){F.charge.go=true;F.shots.push(F.charge);F.charge=null;F.next=F.intv*(.8+Math.random()*.4);tone(300,0,.12,'sawtooth',.05)}}
+ const all=F.charge?F.shots.concat(F.charge):F.shots;
+ for(const s of all){if(s.go)s.x-=F.v*dt;const q=proj(s.x,s.z),sy=s.hi?bh*1.6:bh*.22,d=rr*2*(s.go?1:Math.max(.2,1-F.next/.6))*q.sc;
+  s.e.style.cssText=`width:${d}px;height:${d}px;left:${q.sx-d/2}px;bottom:${q.fy+sy*q.sc-d/2}px;z-index:${zi(s.z)}`;
+  /* ช่วงโดนตัวต้องแคบกว่าเวลาลอยกลางอากาศมาก (แคบ 0.09 ของสนาม เทียบกับลอย ~0.75 วิ) ไม่งั้นกระโดดไม่พ้น */
+  if(s.go&&!s.dead&&F.inv<=0&&Math.abs(s.x-P.x)<.045&&Math.abs(s.z-P.z)<.17&&sy+rr*.5>F.jy&&sy-rr*.5<F.jy+bh*.92){s.dead=true;hurt()}
+  if(s.x<-.12)s.dead=true}
+ for(const p of F.ps){p.x+=p.sp*dt;const q=proj(p.x,p.z),d=p.d*q.sc;p.e.style.width=p.e.style.height=d+'px';p.e.style.left=(q.sx-d/2)+'px';p.e.style.bottom=(q.fy+p.up*q.sc-d/2)+'px';p.e.style.zIndex=zi(p.z);
+  if(p.kill)for(const s of F.shots)if(!s.dead&&Math.abs(s.x-p.x)<.08&&Math.abs(s.z-p.z)<.2){s.dead=true;tone(900,0,.06,'triangle',.06)}
+  if(p.x>=M.x-.04&&Math.abs(p.z-M.z)<.28&&!F.over){p.dead=true;hitMon(p.dmg,p.big)}else if(p.x>1.15)p.dead=true}
+ F.shots=F.shots.filter(s=>{if(s.dead)s.e.remove();return!s.dead});
+ F.ps=F.ps.filter(p=>{if(p.dead)p.e.remove();return!p.dead});
+ /* โหมด 3 มิติ: เข้าใกล้เกินไปสัตว์ประหลาดจะทุบพื้น มีวงแดงเตือน 0.9 วิ เดินออกหรือกระโดดหลบได้ */
+ if(F.d3&&!F.over){F.slamCd-=dt;
+  if(!F.slam&&F.slamCd<=0&&M.x-P.x<.3&&Math.abs(P.z-M.z)<.28){const e=document.createElement('i');e.className='ring';ar.appendChild(e);F.slam={e,t:.9,x:M.x-.17,z:M.z}}
+  if(F.slam){const s=F.slam;s.t-=dt;const q=proj(s.x,s.z),w=q.W*.4*q.sc;s.e.style.cssText=`width:${w}px;height:${w*.42}px;left:${q.sx-w/2}px;bottom:${q.fy-w*.21}px;opacity:${.35+.65*(1-Math.max(0,s.t)/.9)}`;
+   if(s.t<=0){s.e.remove();F.slam=null;F.slamCd=1.8;tone(110,0,.2,'sawtooth',.08);ar.classList.remove('shake');void ar.offsetWidth;ar.classList.add('shake');
+    if(F.inv<=0&&Math.abs(P.x-s.x)<.2&&Math.abs(P.z-s.z)<.26&&F.jy<bh*.3)hurt()}}}}
+function attack(){if(!F||F.over||F.paused||F.cd>0)return;F.cd=WPN[F.w].cd*(F.auto?1.5:1);shoot(false)}
+/* big = ท่าไม้ตาย: ดาเมจ 4 เท่า และทำลายลูกไฟที่ขวางทาง */
+function shoot(big){const wp=WPN[F.w],fb=$('fb'),bh=fb.offsetHeight,e=document.createElement('i');
+ e.className='pshot'+(wp.spin||big?' spin':'')+(big?' big':'');e.innerHTML=big?wp.svg:(wp.proj||wp.svg);e.style.left='-999px';$('arena').appendChild(e);
+ F.ps.push({e,x:F.P.x+.08,z:big?F.M.z:F.P.z,up:F.jy+bh*.5,d:bh*(big?1.1:.48*(wp.ps||1)),sp:big?1.4:wp.sp,dmg:big?F.atk*4:Math.max(1,Math.round(F.atk*wp.mul)),kill:big||wp.kill,big});
+ fb.classList.remove('swing');void fb.offsetWidth;fb.classList.add('swing');big?sfx.ok():tone(700,0,.07,'square',.05)}
+/* ต่อย (เฉพาะโหมดเดิน): แรง 1.2 เท่าของอาวุธ แต่ต้องเดินเข้าไปใกล้ */
+function punch(){if(!F||F.over||F.paused||F.pcd>0)return;F.pcd=.35;const fb=$('fb');fb.classList.remove('punch');void fb.offsetWidth;fb.classList.add('punch');tone(240,0,.06,'square',.06);
+ if(F.M.x-F.P.x<.24&&Math.abs(F.P.z-F.M.z)<.22)hitMon(Math.max(1,Math.round(F.atk*1.2)),false)}
+function openQ(){if(!F||F.over||F.paused||F.en<1)return;F.paused=true;F.qlock=false;F.mv.x=F.mv.z=0;F.keys={};$('knob').style.transform='';
+ const sm=STAGES[F.k].m,m=sm==='mix'?['add','sub','mul','div'][r(0,3)]:sm==='write'?'add':sm,q=F.q=gen(m);
+ $('qeq').innerHTML=`${q.a}<i>${q.sym}</i>${q.b}<i>=</i><span class="qm">?</span>`;
+ const col=[['#35b97c','#218a58'],['#ff6f91','#c94568'],['#4aa3ff','#2a74c9']],qc=$('qch');qc.style.gridTemplateColumns=`repeat(${q.ch.length},minmax(0,1fr))`;
+ qc.innerHTML=q.ch.map((n,k)=>`<button class="ch" data-n="${n}" style="--c:${col[k][0]};--d:${col[k][1]}">${n}</button>`).join('');$('qov').hidden=false;say(q.q)}
+$('qch').onclick=e=>{const b=e.target.closest('.ch');if(!b||!F||!F.paused||F.qlock)return;F.qlock=true;const me=F,ok=+b.dataset.n===F.q.ans;
+ [...$('qch').children].forEach(c=>{if(+c.dataset.n===me.q.ans)c.classList.add('ok');else if(c===b)c.classList.add('no')});
+ if(ok){const p=PT.q[0]*(S.lv+1);S.pts+=p;S.total+=p;saveT();say(PRAISE[r(0,PRAISE.length-1)])}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
+ setTimeout(()=>{if(F!==me)return;$('qov').hidden=true;me.qlock=false;me.paused=false;me.last=performance.now();me.en=0;setEn();if(ok&&!me.over)shoot(true)},ok?500:1200)};
+function jump(){if(!F||F.over||F.paused||F.j>0)return;F.j=JUMP;tone(420,0,.12,'triangle',.1);tone(620,.07,.12,'triangle',.1)}
+function hitMon(dmg,big){F.hp-=dmg;$('hpf').style.width=Math.max(0,F.hp/F.max*100)+'%';const fm=$('fm'),ar=$('arena');fm.classList.add('hit');setTimeout(()=>fm.classList.remove('hit'),120);
+ if(!big){F.en=Math.min(1,F.en+.125);setEn()}
+ if(big||WPN[F.w].shake){ar.classList.remove('shake');void ar.offsetWidth;ar.classList.add('shake')}
+ const q=proj(F.M.x,F.M.z),d=document.createElement('div');d.className='dmg';d.textContent='-'+dmg;if(big)d.style.fontSize='46px';
+ d.style.left=q.sx+'px';d.style.bottom=(q.fy+fm.offsetHeight*q.sc*.85)+'px';d.style.zIndex=70;ar.appendChild(d);setTimeout(()=>d.remove(),800);tone(160,0,.1,'square',.07);
+ if(F.hp<=0){const me=F;F.over=true;fm.classList.add('dead');sfx.ok();setTimeout(()=>{if(F===me)finishStage()},1100)}}
+function hurt(){F.h--;F.inv=1;drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
+ if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
+function finishStage(){if(!$('fight').classList.contains('on'))return;P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
+ const b=PT.stage*(S.lv+1);S.pts+=b;S.total+=b;saveT();showWin(true)}
+const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
+tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
+/* จอยมือซ้าย: ลากจากกลางวงเพื่อเดิน (ขึ้น = เดินลึกเข้าไป) */
+const joy=$('joy');let jid=null;
+function joyMove(e){const c=joy.getBoundingClientRect(),R=c.width/2,lim=R*.6;let dx=e.clientX-(c.left+R),dy=e.clientY-(c.top+R);const m=Math.hypot(dx,dy);if(m>lim){dx*=lim/m;dy*=lim/m}
+ $('knob').style.transform=`translate(${dx}px,${dy}px)`;if(F&&!F.paused){F.mv.x=dx/lim;F.mv.z=-dy/lim}}
+joy.onpointerdown=e=>{e.preventDefault();jid=e.pointerId;try{joy.setPointerCapture(jid)}catch(_){}joyMove(e)};
+joy.onpointermove=e=>{if(e.pointerId===jid)joyMove(e)};
+joy.onpointerup=joy.onpointercancel=e=>{if(e.pointerId!==jid)return;jid=null;$('knob').style.transform='';if(F){F.mv.x=0;F.mv.z=0}};
+const KM={ArrowLeft:'l',KeyA:'l',ArrowRight:'r',KeyD:'r',ArrowUp:'u',KeyW:'u',ArrowDown:'d',KeyS:'d'};
+document.addEventListener('keydown',e=>{if(!F||!$('fight').classList.contains('on'))return;
+ if(F.paused){const b=$('qch').children[+e.key-1];if(b)b.click();return}
+ if(F.d3){if(KM[e.code]){F.keys[KM[e.code]]=1;e.preventDefault()}else if(e.code==='Space'){e.preventDefault();jump()}
+  else if(e.code==='KeyJ'||e.code==='KeyX')punch();else if(e.code==='KeyK'||e.code==='KeyC'||e.code==='Enter'){e.preventDefault();attack()}else if(e.code==='KeyL'||e.code==='KeyZ')openQ();return}
+ if(e.code==='KeyZ'||e.code==='ArrowDown'){e.preventDefault();openQ()}else if(e.code==='Space'||e.code==='ArrowUp'){e.preventDefault();jump()}else if(['Enter','KeyX','KeyF','ArrowRight'].includes(e.code)){e.preventDefault();attack()}});
+document.addEventListener('keyup',e=>{if(F&&KM[e.code])F.keys[KM[e.code]]=0});
+$('fback').onclick=()=>{sfx.tap();if(F)F.over=true;F=null;openMap()};
+$('retry').onclick=()=>start(STAGES[S.stage].m);
+$('lmap').onclick=()=>{sfx.tap();openMap()};
+function showWin(adv){
+ show('win');sfx.win();say(adv?'ชนะแล้ว เก่งมากเลย':'ถึงบ้านแล้ว เก่งมากเลย');
+ $('wins').hidden=adv;if(!adv)$('wins').innerHTML=sumHTML();
+ $('winh').textContent=adv?'ชนะแล้ว เก่งมาก':'ถึงบ้านแล้ว เก่งมาก';$('winp').textContent=`ได้ ${S.pts} แต้ม`;$('gohome').textContent=adv?'ไปต่อ':'เลือกเกมอื่น';
+ let h='';for(let k=0;k<ROUNDS;k++)h+=`<i class="st ${k<S.earn?'':'off'}" style="animation-delay:${k*160}ms"></i>`;$('row5').innerHTML=h;
+ confetti($('win'))}
+$('again').onclick=()=>start(S.mode);
+$('gohome').onclick=$('back').onclick=()=>{S.run++;sfx.tap();if('speechSynthesis'in window)speechSynthesis.cancel();S.stage!==null?openMap():goHome()};
+drawHome();
+
+/* ============ โปรไฟล์ผู้เล่น: ปรับระดับเอง · ข้อที่เคยผิด · ของสะสม · หมวก · สถิติ ============ */
+const MN={add:'บวก',sub:'ลบ',mul:'คูณ',div:'หาร',write:'เขียนเลข'},SYM={add:'+',sub:'−',mul:'×',div:'÷'};
+let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],hat:0,owned:[0],mon:[]};
+try{const v=JSON.parse(localStorage.getItem('fnf_p'));if(v&&v.skill)P=Object.assign(P,v)}catch(e){}
+function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
+/* skill 0-2 ต่อเรื่อง: ถูกครั้งแรก +0.12 · ผิด -0.25 แล้วปัดเป็นระดับ ง่าย/กลาง/ยาก */
+function autoLv(m){const k=P.skill,s=m&&k[m]!==undefined?k[m]:(k.add+k.sub+k.mul+k.div)/4;return clamp(Math.round(s),0,2)}
+function track(first){const m=S.cur,st=P.stat[m]||(P.stat[m]={n:0,ok:0});st.n++;if(first)st.ok++;
+ if(P.skill[m]!==undefined)P.skill[m]=clamp(P.skill[m]+(first?.12:-.25),0,2);
+ if(first&&S.q&&S.q.rv)P.miss=P.miss.filter(x=>!(x.m===m&&x.a===S.q.a&&x.b===S.q.b));
+ saveP();if(first&&Math.random()<.12)dropGem()}
+function noteMiss(){const m=S.cur,q=S.q;if(S.miss!==1||m==='write'||P.miss.some(x=>x.m===m&&x.a===q.a&&x.b===q.b))return;P.miss.push({m,a:q.a,b:q.b});if(P.miss.length>12)P.miss.shift();saveP()}
+/* อัญมณีหายาก: ตอบถูกครั้งแรกมีโอกาส 12% ได้ 1 เม็ด (w = น้ำหนักการสุ่ม) */
+const GEMS=[{n:'ทับทิม',c:'#e8384f',w:35},{n:'มรกต',c:'#35b97c',w:30},{n:'ไพลิน',c:'#4aa3ff',w:20},{n:'บุษราคัม',c:'#ffc21a',w:12},{n:'เพชรดารา',c:'#c9f1ff',w:3}];
+const gemSVG=c=>`<svg viewBox="0 0 40 40"><path d="M10 6h20l8 10-18 20L2 16z" fill="${c}" stroke="rgba(0,0,0,.25)" stroke-width="1.500"/><path d="M10 6l4 10h12l4-10M2 16h36M14 16l6 20 6-20" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.500"/></svg>`;
+function toast(html){const t=document.createElement('div');t.className='toast';t.innerHTML=html;document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
+function dropGem(){let x=Math.random()*100,i=0;for(;i<GEMS.length-1;i++){x-=GEMS[i].w;if(x<0)break}P.gems[i]++;saveP();toast(gemSVG(GEMS[i].c)+`<span>เจอ${GEMS[i].n}</span>`);tone(1200,0,.15,'triangle',.1);tone(1600,.1,.2,'triangle',.1)}
+/* หมวก: ใช้แต้มแลก แล้วตัวละครใส่ทุกหน้า */
+const BOY=FOX;
+const HATS=[{n:'ไม่ใส่หมวก',p:0,s:''},
+ {n:'หมวกบัณฑิต',p:150,s:'<path d="M42 16v9q18 7 36 0v-9z" fill="#1c1717"/><path d="M60 3 97 14 60 25 23 14z" fill="#2b2626"/><path d="M60 14h30v13" fill="none" stroke="#ffc21a" stroke-width="2.500"/><circle cx="90" cy="28" r="3" fill="#ffc21a"/>'},
+ {n:'หมวกอัศวิน',p:300,s:'<path d="M35 36Q33 6 60 6q27 0 25 30l-6-6H41z" fill="#cfd8e3" stroke="#8fa3b8" stroke-width="2"/><path d="M60 7q8-9 20-3-11 1-13 7z" fill="#e8384f"/>'},
+ {n:'หมวกพ่อมด',p:450,s:'<path d="M36 26 64 0l20 26z" fill="#5b3fa0"/><ellipse cx="60" cy="26" rx="31" ry="5.500" fill="#4a3290"/><circle cx="62" cy="15" r="3.500" fill="#ffd34d"/>'},
+ {n:'มงกุฎทอง',p:700,s:'<path d="M38 24 36 6l12 9 12-13 12 13 12-9-2 18z" fill="#ffd34d" stroke="#c98f0a" stroke-width="2"/><circle cx="60" cy="17" r="3" fill="#e8384f"/><circle cx="46" cy="19" r="2.200" fill="#4aa3ff"/><circle cx="74" cy="19" r="2.200" fill="#4aa3ff"/>'}];
+function wear(){if(!HATS[P.hat])P.hat=0;FOX=BOY.replace('</svg>',HATS[P.hat].s+'</svg>');['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
+function sheet(title,html){$('sht').textContent=title;$('shb').innerHTML=html;$('sheet').hidden=false}
+$('shx').onclick=()=>{sfx.tap();$('sheet').hidden=true};
+$('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true};
+function openBook(){const card=(pic,name,has)=>`<div class="cc ${has?'':'no'}"><span class="pic">${pic}</span>${has?name:'ยังไม่เจอ'}</div>`;
+ sheet('สมุดสะสม',`<h3>สัตว์ประหลาดที่ชนะแล้ว ${P.mon.filter(Boolean).length}/${MON.length}</h3><div class="cg">${MON.map((m,k)=>card(monSVG(m),m.n,P.mon[k])).join('')}</div>
+ <h3>อาวุธ ${A.w.filter(Boolean).length}/${WPN.length}</h3><div class="cg">${WPN.map((w,k)=>card(w.svg,w.n+' พลัง '+atkOf(k),A.w[k])).join('')}</div>
+ <h3>อัญมณีหายาก ตอบถูกครั้งแรกมีลุ้นเจอ</h3><div class="cg">${GEMS.map((g,i)=>card(gemSVG(g.c),g.n+' x'+P.gems[i],P.gems[i]>0)).join('')}</div>`)}
+function openShop(){sheet('ร้านหมวก',`<h3>มี ${S.total} แต้ม ใช้แต้มแลกหมวกได้</h3><div class="cg">${HATS.map((h,i)=>{const own=P.owned.includes(i);
+ return `<div class="cc"><span class="pic">${BOY.replace('</svg>',h.s+'</svg>')}</span>${h.n}<button data-h="${i}" class="${P.hat===i?'on':''}" ${!own&&S.total<h.p?'disabled':''}>${P.hat===i?'ใส่อยู่':own?'ใส่':h.p+' แต้ม'}</button></div>`}).join('')}</div>`)}
+$('shb').onclick=e=>{const b=e.target.closest('button[data-h]');if(!b)return;const i=+b.dataset.h;
+ if(!P.owned.includes(i)){if(S.total<HATS[i].p)return;S.total-=HATS[i].p;saveT();P.owned.push(i);sfx.win()}else sfx.tap();
+ P.hat=i;saveP();wear();openShop()};
+function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
+ return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
+ sheet('สำหรับผู้ปกครอง',`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
+ <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
+$('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
+wear();if(S.auto)S.lv=autoLv();
+</script>
+</body>
+</html>
