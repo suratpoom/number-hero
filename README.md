@@ -4,4 +4,6 @@
 
 เล่นที่ https://suratpoom.github.io/number-hero/
 
-ไฟล์เดียว `index.html` ไม่ใช้ library ภายนอก ความคืบหน้าเก็บในเครื่องผู้เล่น (localStorage)
+ติดตั้งลงหน้าจอมือถือได้และเล่นได้ตอนไม่มีเน็ต (`manifest.json` + `sw.js`)
+
+ตัวเกมอยู่ใน `index.html` ไฟล์เดียว ไม่ใช้ library ภายนอก ความคืบหน้าเก็บในเครื่องผู้เล่น (localStorage)

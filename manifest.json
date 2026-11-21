@@ -1,0 +1,16 @@
+{
+  "name": "เจ้าคุณผจญภัย",
+  "short_name": "เจ้าคุณ",
+  "description": "เกมฝึกบวก ลบ คูณ หาร และเขียนเลข สำหรับเด็ก",
+  "lang": "th",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#2a2767",
+  "theme_color": "#2a2767",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

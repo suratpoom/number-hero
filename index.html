@@ -4,6 +4,17 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <title>เจ้าคุณผจญภัย</title>
+<meta name="description" content="เกมฝึกบวก ลบ คูณ หาร และเขียนเลข สำหรับเด็ก">
+<meta name="theme-color" content="#2a2767">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="เจ้าคุณ">
+<script>/* เปิดจากในไลน์: ให้เด้งไปเบราว์เซอร์จริง เพราะในไลน์ติดตั้งและเก็บความคืบหน้าไม่ได้ดี */
+if(/Line\//i.test(navigator.userAgent)&&!/openExternalBrowser=1/.test(location.search))location.replace(location.pathname+'?openExternalBrowser=1');</script>
 <style>
 :root{--ink:#3b2a4a;--cream:#fff8ec;--gold:#ffc83d;--orange:#ff8a3d;--star:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
 *{box-sizing:border-box}
@@ -315,6 +326,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tpic{width:44px;height:44px;flex:none}.tpic svg{width:100%;height:100%}
 #win .fox{animation:cheer .9s ease-in-out infinite}
 @keyframes cheer{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-16px) rotate(5deg)}}
+.inst{border:0;border-radius:18px;padding:9px 18px;background:rgba(255,255,255,.92);color:var(--ink);font-weight:900;font-size:15px;box-shadow:0 4px 0 rgba(20,10,60,.35);flex:none}
 </style>
 </head>
 <body>
@@ -346,7 +358,8 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
-    <div class="ver">v1.9</div>
+    <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
+    <div class="ver">v1.10</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -945,10 +958,20 @@ $('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTa
 function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
  const tg=`<h3>เลือกเรื่องที่ให้ฝึก แตะเพื่อเปิดหรือปิด</h3><div class="tg">${['add','sub','mul','div','write'].map(m=>`<button data-off="${m}" class="${P.off[m]?'':'on'}">${MN[m]}</button>`).join('')}</div><div class="note">เรื่องที่ปิด ปุ่มฝึกจะหายไป และด่านผจญภัยของเรื่องนั้นจะเป็นโจทย์รวมจากเรื่องที่เปิดอยู่</div><h3>ผลการฝึก</h3>`;
- sheet('สำหรับผู้ปกครอง',tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
+ sheet('สำหรับผู้ปกครอง',instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
  <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
 $('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
-if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();if(S.auto)S.lv=autoLv();
+if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();
+/* ============ ติดตั้งลงเครื่อง + เล่นไม่ใช้เน็ต ============ */
+const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
+let instEvt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();instEvt=e;$('inst').hidden=false});
+window.addEventListener('appinstalled',()=>{instEvt=null;$('inst').hidden=true;toast('<span>ติดตั้งแล้ว เปิดจากไอคอนบนหน้าจอได้เลย</span>')});
+$('inst').onclick=()=>{sfx.tap();if(instEvt){instEvt.prompt();instEvt.userChoice.then(()=>{instEvt=null;$('inst').hidden=true})}};
+function instHTML(){if(STANDALONE)return '<h3>ติดตั้งลงเครื่องแล้ว เล่นได้แม้ไม่มีเน็ต</h3>';
+ return '<h3>ติดตั้งลงมือถือ เล่นได้แม้ไม่มีเน็ต</h3><div class="note">'+(IOS?'iPhone หรือ iPad: เปิดด้วย Safari กดปุ่มแชร์ แล้วเลือก เพิ่มไปยังหน้าจอโฮม':instEvt?'กดปุ่ม ติดตั้งเกมลงเครื่อง ที่หน้าแรก':'Android: เปิดด้วย Chrome กดเมนูจุดสามจุด แล้วเลือก ติดตั้งแอป หรือ เพิ่มลงในหน้าจอหลัก')+'</div>'}
+if('serviceWorker'in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+if(S.auto)S.lv=autoLv();
 </script>
 </body>
 </html>
