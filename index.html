@@ -339,6 +339,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .mtg span{flex-basis:100%;text-align:center;color:#ffe9b8;font-weight:800;font-size:12.5px;text-shadow:0 1px 3px rgba(20,10,60,.7)}
 .mtg button{padding:7px 12px;font-size:13px;border-radius:14px}
 .mtg button:not(.on){background:rgba(30,20,70,.6);color:rgba(255,255,255,.6)}
+.wl{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.wl button{border:2px solid #efd6ae;border-radius:16px;background:#fff;padding:10px 12px;font:inherit;color:var(--ink);text-align:left}
+.wl b{display:block;font-size:17px;font-weight:900}
+.wl small{font-size:12px;font-weight:700;color:#7a5a3a}
 </style>
 </head>
 <body>
@@ -372,8 +376,8 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
-    <button class="inst" id="glog" hidden>เข้าสู่ระบบ Google เพื่อเก็บความคืบหน้า</button>
-    <div class="ver">v1.14</div>
+    <button class="inst" id="glog" hidden>เลือกผู้เล่น</button>
+    <div class="ver">v1.15</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -854,7 +858,8 @@ drawHome();
 
 /* ============ โปรไฟล์ผู้เล่น: ปรับระดับเอง · ข้อที่เคยผิด · ของสะสม · หมวก · สถิติ ============ */
 const MN={add:'บวก',sub:'ลบ',mul:'คูณ',div:'หาร',write:'เขียนเลข'},SYM={add:'+',sub:'−',mul:'×',div:'÷'};
-let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],shoe:0,ownSh:[0],fx:0,ownF:[0],icon:0,ownI:[0],mon:[]};
+const P_DEF=()=>({skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],shoe:0,ownSh:[0],fx:0,ownF:[0],icon:0,ownI:[0],mon:[]});
+let P=P_DEF();
 try{const v=JSON.parse(localStorage.getItem('fnf_p'));if(v&&v.skill)P=Object.assign(P,v)}catch(e){}
 function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}try{cloudDirty()}catch(e){}}
 /* skill 0-2 ต่อเรื่อง: ถูกครั้งแรก +0.12 · ผิด -0.25 แล้วปัดเป็นระดับ ง่าย/กลาง/ยาก */
@@ -1006,7 +1011,9 @@ function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:
  const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
  sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${head}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
 $('shb').onclick=e=>{const ga=e.target.closest('button[data-g]');
- if(ga){sfx.tap();if(ga.dataset.g==='out')gLogout();else if(ga.dataset.g==='cloud')useCloud();else if(ga.dataset.g==='local')useLocal();return}
+ if(ga){sfx.tap();openWho();return}
+ const wb=e.target.closest('button[data-who]');if(wb){sfx.tap();pickWho(wb.dataset.who);return}
+ const wn=e.target.closest('button[data-new]');if(wn){sfx.tap();pickWho($('wname').value);return}
  const nb=e.target.closest('button[data-name]');
  if(nb){P.name=$('pname').value.trim().slice(0,12);saveP();drawHome();sfx.tap();toast('<span>บันทึกชื่อแล้ว</span>');return}
  const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
@@ -1024,8 +1031,8 @@ function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
  const tg=`<h3>เลือกเรื่องที่ให้ฝึก แตะเพื่อเปิดหรือปิด</h3><div class="tg">${['add','sub','mul','div','write'].map(m=>`<button data-off="${m}" class="${P.off[m]?'':'on'}">${MN[m]}</button>`).join('')}</div><div class="note">เรื่องที่ปิด ปุ่มฝึกจะหายไป และด่านผจญภัยของเรื่องนั้นจะเป็นโจทย์รวมจากเรื่องที่เปิดอยู่</div><h3>ผลการฝึก</h3>`;
  const nmh=`<h3>ชื่อน้องในเกม</h3><div class="nm"><input id="pname" maxlength="12" placeholder="พิมพ์ชื่อเล่น" value="${esc(P.name||'')}"><button data-name="1">บันทึก</button></div><div class="note">ชื่อเก็บในเครื่องนี้เท่านั้น ไม่ถูกส่งไปที่ไหน</div>`;
- sheet('สำหรับผู้ปกครอง',acctHTML()+nmh+instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
- <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`);drawGBtn()}
+ sheet('สำหรับผู้ปกครอง',whoHTML()+instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
+ <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
 $('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();shopTab=$('bshop').classList.contains('dot')?'now':shopTab==='now'?'h':shopTab;openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
 if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();drawHome();
 /* ============ ติดตั้งลงเครื่อง + เล่นไม่ใช้เน็ต ============ */
@@ -1036,51 +1043,52 @@ window.addEventListener('appinstalled',()=>{instEvt=null;$('inst').hidden=true;t
 $('inst').onclick=()=>{sfx.tap();if(instEvt){instEvt.prompt();instEvt.userChoice.then(()=>{instEvt=null;$('inst').hidden=true})}};
 function instHTML(){if(STANDALONE)return '<h3>ติดตั้งลงเครื่องแล้ว เล่นได้แม้ไม่มีเน็ต</h3>';
  return '<h3>ติดตั้งลงมือถือ เล่นได้แม้ไม่มีเน็ต</h3><div class="note">'+(IOS?'iPhone หรือ iPad: เปิดด้วย Safari กดปุ่มแชร์ แล้วเลือก เพิ่มไปยังหน้าจอโฮม':instEvt?'กดปุ่ม ติดตั้งเกมลงเครื่อง ที่หน้าแรก':'Android: เปิดด้วย Chrome กดเมนูจุดสามจุด แล้วเลือก ติดตั้งแอป หรือ เพิ่มลงในหน้าจอหลัก')+'</div>'}
-/* ============ บัญชี Google + บันทึกความคืบหน้าลง Google Sheet ============
-   ใส่ 2 ค่านี้แล้วปุ่มเข้าสู่ระบบจะขึ้นเอง (ว่างไว้ = ปิดระบบนี้ เกมเก็บในเครื่องอย่างเดียว)
-   clientId = OAuth Client ID (ต้องอนุญาต origin ของหน้าเกม) · gas = URL /exec ของ gas/Code.gs */
-const CLOUD={clientId:'',gas:''};
-const G={token:null,email:'',exp:0,synced:false,mute:false,timer:null,saved:'',pending:null,lt:0};
-try{G.lt=+localStorage.getItem('fnf_t')||0}catch(e){}
-const cloudOn=()=>!!(CLOUD.clientId&&CLOUD.gas);
+/* ============ ผู้เล่นตามชื่อ + บันทึกความคืบหน้าลง Google Sheet (ไม่มีล็อกอิน) ============
+   ผู้เล่นพิมพ์ชื่อหรือเลือกชื่อที่มีอยู่ เกมบันทึกตามชื่อนั้นผ่าน gas/Code.gs
+   gas ว่าง = ปิดระบบนี้ เกมเก็บในเครื่องอย่างเดียว */
+const CLOUD={gas:'https://script.google.com/macros/s/AKfycbxx_WQHGCYh07Ym-T_SCLxWYw8PhzpiIB5mCSJBmU9syK9ihAH_XUOHLy9d2UfiGSQ6Fg/exec'};
+const G={who:'',synced:false,mute:false,timer:null,saved:'',lt:0};
+try{G.lt=+localStorage.getItem('fnf_t')||0;G.who=localStorage.getItem('fnf_who')||''}catch(e){}
+const cloudOn=()=>!!CLOUD.gas;
+const cleanName=n=>String(n||'').replace(/\s+/g,' ').trim().slice(0,12);
+const setLt=t=>{G.lt=t;try{localStorage.setItem('fnf_t',t)}catch(e){}};
 const snap=()=>({v:1,t:G.lt||Date.now(),total:S.total,lv:S.auto?'a':S.lv,A,P});
-const snapInfo=d=>`${d.total||0} แต้ม ด่านที่ ${Math.min(((d.A&&d.A.adv)||0)+1,NS)} เหรียญ ${(d.A&&d.A.medals)||0}`;
-function applySnap(d){G.mute=true;S.total=+d.total||0;A=Object.assign({adv:0,medals:0,stars:[],w:[]},d.A||{});P=Object.assign(P,d.P||{});
- if(d.lv==='a')S.auto=true;else if(d.lv!==undefined){S.auto=false;S.lv=clamp(+d.lv||0,0,2)}
- saveLv();saveA();saveP();saveT();if(S.auto)S.lv=autoLv();wear();drawModes();drawLv();drawHome();G.mute=false;G.lt=d.t||Date.now();try{localStorage.setItem('fnf_t',G.lt)}catch(e){}}
-async function cloud(action,data){const r=await fetch(CLOUD.gas,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({action,idToken:G.token,data}),redirect:'follow',keepalive:action==='save'});return r.json()}
+/* แทนที่ข้อมูลในเครื่องด้วยชุดที่ให้มา (ใช้ตอนโหลดจากชีต และตอนเริ่มผู้เล่นใหม่) */
+function applySnap(d){G.mute=true;S.total=+d.total||0;A=Object.assign({adv:0,medals:0,stars:[],w:[]},d.A||{});P=Object.assign(P_DEF(),d.P||{});P.wv=2;
+ if(d.lv==='a'||d.lv===undefined)S.auto=true;else{S.auto=false;S.lv=clamp(+d.lv||0,0,2)}
+ saveLv();saveA();saveP();saveT();if(S.auto)S.lv=autoLv();wear();drawModes();drawLv();drawHome();G.mute=false;setLt(d.t||Date.now())}
+async function cloud(action,extra){const r=await fetch(CLOUD.gas,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,name:G.who},extra)),redirect:'follow',keepalive:action==='save'});return r.json()}
 /* เรียกทุกครั้งที่มีการบันทึกลงเครื่อง: จำเวลาแก้ล่าสุด แล้วรอ 4 วิค่อยส่งขึ้นชีต (รวมหลายการเปลี่ยนเป็นครั้งเดียว) */
-function cloudDirty(){if(G.mute)return;G.lt=Date.now();try{localStorage.setItem('fnf_t',G.lt)}catch(e){}if(!G.token||!G.synced)return;clearTimeout(G.timer);G.timer=setTimeout(flush,4000)}
-function flush(){clearTimeout(G.timer);if(!cloudOn()||!G.token||!G.synced)return;
- if(Date.now()>G.exp-60000){G.token=null;try{google.accounts.id.prompt()}catch(e){}return}
- cloud('save',snap()).then(r=>{if(r.ok)G.saved=r.updated;else if(/token|expired/.test(r.error||'')){G.token=null;try{google.accounts.id.prompt()}catch(e){}}}).catch(()=>{G.timer=setTimeout(flush,30000)})}
-function gLoad(){return new Promise((res,rej)=>{if(window.google&&google.accounts)return res();const t=document.createElement('script');t.src='https://accounts.google.com/gsi/client';t.async=true;t.onload=res;t.onerror=rej;document.head.appendChild(t)})}
-async function gInit(){if(!cloudOn())return;try{await gLoad()}catch(e){return}
- google.accounts.id.initialize({client_id:CLOUD.clientId,callback:onCred,auto_select:true,cancel_on_tap_outside:true});
- let was=false;try{was=localStorage.getItem('fnf_g')==='1'}catch(e){}
- if(was)google.accounts.id.prompt();else $('glog').hidden=false;drawGBtn()}
-function onCred(resp){G.token=resp.credential;try{const p=JSON.parse(decodeURIComponent(escape(atob(G.token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')))));G.email=p.email||'';G.exp=(p.exp||0)*1000}catch(e){G.exp=Date.now()+3000000}
- try{localStorage.setItem('fnf_g','1')}catch(e){}$('glog').hidden=true;afterLogin()}
-/* หลังล็อกอิน: เครื่องว่าง -> ใช้ของบัญชี · บัญชีว่างหรือเครื่องใหม่กว่า -> ส่งของเครื่องขึ้น · บัญชีใหม่กว่า -> ถามผู้ปกครอง */
-async function afterLogin(){if(G.synced){flush();return}
- try{const r=await cloud('load');if(!r.ok)throw new Error(r.error);
-  const empty=!S.total&&!A.adv&&!A.medals&&!Object.keys(P.stat).length;
-  if(r.found&&empty){applySnap(r.data);G.synced=true;G.saved=r.updated;toast('<span>โหลดความคืบหน้าจากบัญชีแล้ว</span>')}
-  else if(r.found&&(r.data.t||0)>G.lt){G.pending=r;openParent()}
-  else{G.synced=true;flush();toast('<span>เข้าสู่ระบบแล้ว ความคืบหน้าจะบันทึกให้เอง</span>')}
- }catch(e){toast('<span>เชื่อมบัญชีไม่สำเร็จ ลองใหม่อีกครั้ง</span>')}
- if(!$('sheet').hidden&&$('sht').textContent==='สำหรับผู้ปกครอง')openParent()}
-function useCloud(){const r=G.pending;G.pending=null;if(r){applySnap(r.data);G.saved=r.updated}G.synced=true;openParent()}
-function useLocal(){G.pending=null;G.synced=true;G.lt=Date.now();flush();openParent()}
-function gLogout(){try{google.accounts.id.disableAutoSelect()}catch(e){}flush();G.token=null;G.synced=false;G.email='';G.pending=null;try{localStorage.removeItem('fnf_g')}catch(e){}$('glog').hidden=false;openParent()}
-function acctHTML(){if(!cloudOn())return '';
- if(G.pending)return `<h3>พบความคืบหน้าในบัญชีที่ใหม่กว่า เลือกว่าจะใช้อันไหน</h3><div class="note">ในเครื่องนี้: ${snapInfo(snap())}<br>ในบัญชี: ${snapInfo(G.pending.data)} (บันทึก ${esc(G.pending.updated||'')})</div><div class="nm" style="margin-top:8px"><button data-g="cloud" style="flex:1;padding:10px">ใช้ของบัญชี</button><button data-g="local" style="flex:1;padding:10px;background:#ff8a3d">ใช้ของเครื่องนี้</button></div>`;
- if(G.token)return `<h3>บัญชี Google</h3><div class="note">เข้าสู่ระบบแล้ว: ${esc(G.email)}${G.saved?'<br>บันทึกล่าสุด '+esc(G.saved):''}<br>ความคืบหน้าบันทึกขึ้นบัญชีให้เอง เล่นต่อเครื่องอื่นได้</div><div class="nm" style="margin-top:8px"><button data-g="out" style="padding:10px 18px;background:#8f7bd6">ออกจากระบบ</button></div>`;
- return '<h3>บัญชี Google</h3><div class="note">เข้าสู่ระบบด้วยบัญชีของผู้ปกครอง เพื่อเก็บความคืบหน้าและเล่นต่อเครื่องอื่นได้<br>ที่บันทึก: อีเมล ชื่อบัญชี ชื่อน้อง และความคืบหน้าในเกม</div><div id="gbtn" style="margin-top:8px;min-height:44px"></div>'}
-function drawGBtn(){const b=$('gbtn');if(b&&window.google&&google.accounts)google.accounts.id.renderButton(b,{theme:'filled_blue',size:'large',shape:'pill',text:'signin_with',locale:'th'})}
-$('glog').onclick=()=>{sfx.tap();openParent()};
+function cloudDirty(){if(G.mute)return;setLt(Date.now());if(!cloudOn()||!G.who||!G.synced)return;clearTimeout(G.timer);G.timer=setTimeout(flush,4000)}
+function flush(){clearTimeout(G.timer);if(!cloudOn()||!G.who||!G.synced)return;
+ cloud('save',{data:snap()}).then(r=>{if(r.ok)G.saved=r.updated}).catch(()=>{G.timer=setTimeout(flush,30000)})}
+function setWho(n){G.who=n;try{localStorage.setItem('fnf_who',n)}catch(e){}P.name=n;G.mute=true;saveP();G.mute=false;drawWho();drawHome()}
+function drawWho(){const b=$('glog');b.hidden=!cloudOn();b.textContent=G.who?`ผู้เล่น: ${G.who} (เปลี่ยน)`:'เลือกผู้เล่น'}
+function whoHTML(){if(!cloudOn())return '';
+ return `<h3>ผู้เล่น</h3><div class="note">${G.who?'กำลังเล่นเป็น '+esc(G.who)+(G.saved?' บันทึกล่าสุด '+esc(G.saved):''):'ยังไม่ได้เลือกผู้เล่น ความคืบหน้าเก็บในเครื่องนี้เท่านั้น'}</div><div class="nm" style="margin-top:8px"><button data-g="who" style="padding:10px 18px">${G.who?'เปลี่ยนผู้เล่น':'เลือกผู้เล่น'}</button></div>`}
+async function openWho(){flush();sheet('เลือกผู้เล่น','<div class="note">กำลังโหลดรายชื่อ</div>');let list=null;try{const r=await cloud('list');if(r.ok)list=r.players}catch(e){}
+ const cur=G.who?`<div class="note">กำลังเล่นเป็น ${esc(G.who)}</div>`:'';
+ const rows=list?(list.length?`<h3>เลือกชื่อที่เคยเล่น</h3><div class="wl">${list.map(p=>`<button data-who="${esc(p.name)}"><b>${esc(p.name)}</b><small>${esc(p.points)} แต้ม ด่านที่ ${esc(p.stage)}</small></button>`).join('')}</div>`:'<div class="note">ยังไม่มีผู้เล่น พิมพ์ชื่อเพื่อเริ่มเป็นคนแรก</div>')
+  :'<div class="note">ต่อชีตไม่ได้ตอนนี้ ปิดหน้านี้แล้วเล่นต่อได้ ความคืบหน้าจะเก็บในเครื่องก่อน</div>';
+ sheet('เลือกผู้เล่น',cur+rows+`<h3>หรือพิมพ์ชื่อใหม่</h3><div class="nm"><input id="wname" maxlength="12" placeholder="พิมพ์ชื่อเล่น"><button data-new="1">เริ่มเล่น</button></div><div class="note">ความคืบหน้าบันทึกตามชื่อ ใครพิมพ์ชื่อเดียวกันจะเล่นต่อจากเดิมได้</div>`)}
+/* เลือกชื่อ: มีในชีต -> โหลดมาเล่นต่อ · ชื่อใหม่ -> เริ่มจากศูนย์ (ยกเว้นเครื่องที่เล่นมาก่อนมีระบบชื่อ จะยกความคืบหน้าเดิมให้ชื่อแรก) */
+async function pickWho(raw){const n=cleanName(raw);if(!n){toast('<span>พิมพ์ชื่อก่อนนะ</span>');return}
+ if(G.who&&G.who.toLowerCase()===n.toLowerCase()){$('sheet').hidden=true;return}
+ let r=null;try{r=await cloud('load',{name:n})}catch(e){}
+ if(!r||!r.ok){toast('<span>ต่อชีตไม่ได้ ลองใหม่อีกครั้ง</span>');return}
+ clearTimeout(G.timer);const hadWho=!!G.who;
+ if(r.found){applySnap(r.data);G.saved=r.updated;setWho(r.name||n);G.synced=true;toast(`<span>เล่นต่อเป็น ${esc(G.who)}</span>`)}
+ else{const keep=!hadWho&&(S.total||A.adv||A.medals||Object.keys(P.stat).length);
+  if(!keep)applySnap({total:0,A:{},P:{},lv:'a',t:Date.now()});
+  setWho(n);G.synced=true;setLt(Date.now());flush();toast(`<span>เริ่มเล่นเป็น ${esc(n)}</span>`)}
+ $('sheet').hidden=true;show('home')}
+/* เปิดเกม: ยังไม่เลือกชื่อ -> เปิดหน้าเลือก · เลือกแล้ว -> เทียบกับชีต ถ้าชีตใหม่กว่า (เล่นจากเครื่องอื่น) ใช้ของชีต */
+async function cloudBoot(){drawWho();if(!cloudOn())return;if(!G.who){setTimeout(openWho,700);return}
+ try{const r=await cloud('load');if(r.ok){const ct=r.found?(r.data.t||0):0;if(r.found&&ct>G.lt){applySnap(r.data);G.saved=r.updated}G.synced=true;if(ct<G.lt)flush()}}
+ catch(e){G.synced=true}}
+$('glog').onclick=()=>{sfx.tap();openWho()};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
-gInit();
+cloudBoot();
 if('serviceWorker'in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 if(S.auto)S.lv=autoLv();
 </script>

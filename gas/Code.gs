@@ -1,18 +1,17 @@
 /**
- * เจ้าคุณผจญภัย: หลังบ้านเก็บความคืบหน้าของผู้เล่นลง Google Sheet
+ * เจ้าคุณผจญภัย: หลังบ้านเก็บความคืบหน้าของผู้เล่นลง Google Sheet (ผูกกับชีตนี้)
  *
- * Script Properties ที่ต้องตั้ง:
- *   CLIENT_ID = OAuth Client ID ของปุ่ม "เข้าสู่ระบบด้วย Google" (ต้องตรงกับค่าในเกม)
- *   SHEET_ID  = ID ของ Google Sheet ที่ใช้เก็บข้อมูล
+ * ไม่มีการล็อกอิน: ผู้เล่นพิมพ์ชื่อหรือเลือกชื่อที่มีอยู่ แล้วเกมบันทึกตามชื่อนั้น
+ * ใครรู้ชื่อก็เปิดเล่นต่อและบันทึกทับได้ จึงเหมาะกับกลุ่มที่ไว้ใจกัน (ครอบครัว เพื่อน)
  *
  * Deploy เป็น Web app: Execute as = Me, Who has access = Anyone
- * เกมส่ง POST {action:'load'|'save', idToken, data} มา
- * ทุกคำขอต้องมี idToken ของ Google และถูกตรวจกับ Google ก่อนเสมอ ไม่เชื่ออีเมลที่ฝั่งเกมส่งมาเอง
+ * เกมส่ง POST {action:'list'|'load'|'save', name, data}
  */
 const TAB = 'players';
-const HEAD = ['sub', 'email', 'google_name', 'kid_name', 'points', 'medals', 'stage', 'updated_at', 'data'];
-const MAX_ROWS = 10000;   // เพดานจำนวนบัญชี กันชีตโตไม่จำกัด
+const HEAD = ['key', 'name', 'points', 'medals', 'stage', 'updated_at', 'data'];
+const MAX_ROWS = 10000;   // เพดานจำนวนผู้เล่น กันชีตโตไม่จำกัด
 const MAX_DATA = 45000;   // ช่องหนึ่งของชีตเก็บได้ 50,000 ตัวอักษร
+const MAX_NAME = 12;
 
 function doGet() { return json_({ ok: true, app: 'chaokhun' }); }
 
@@ -20,8 +19,9 @@ function doPost(e) {
   let out;
   try {
     const req = JSON.parse(e.postData.contents);
-    const user = verify_(req.idToken);
-    out = req.action === 'save' ? save_(user, req.data) : load_(user);
+    if (req.action === 'list') out = list_();
+    else if (req.action === 'save') out = save_(req.name, req.data);
+    else out = load_(req.name);
   } catch (err) {
     out = { ok: false, error: String(err && err.message || err) };
   }
@@ -29,23 +29,17 @@ function doPost(e) {
 }
 
 function json_(o) { return ContentService.createTextOutput(JSON.stringify(o)).setMimeType(ContentService.MimeType.JSON); }
-function prop_(k) { return PropertiesService.getScriptProperties().getProperty(k); }
 
-/** ตรวจ ID token กับ Google: ต้องออกให้แอปนี้ (aud) ออกโดย Google (iss) และยังไม่หมดอายุ */
-function verify_(token) {
-  if (!token) throw new Error('no_token');
-  const r = UrlFetchApp.fetch('https://oauth2.googleapis.com/tokeninfo?id_token=' + encodeURIComponent(token), { muteHttpExceptions: true });
-  if (r.getResponseCode() !== 200) throw new Error('bad_token');
-  const p = JSON.parse(r.getContentText());
-  if (p.aud !== prop_('CLIENT_ID')) throw new Error('bad_audience');
-  if (['accounts.google.com', 'https://accounts.google.com'].indexOf(p.iss) < 0) throw new Error('bad_issuer');
-  if (Number(p.exp) * 1000 < Date.now()) throw new Error('expired');
-  if (!p.sub) throw new Error('bad_token');
-  return { sub: String(p.sub), email: p.email || '', name: p.name || '' };
+/** ชื่อที่แสดง: ตัดช่องว่างหัวท้าย ยุบช่องว่างซ้ำ ยาวไม่เกิน MAX_NAME · key = ชื่อตัวพิมพ์เล็ก ใช้เทียบว่าเป็นคนเดียวกัน */
+function cleanName_(n) {
+  const s = String(n == null ? '' : n).replace(/\s+/g, ' ').trim().slice(0, MAX_NAME);
+  if (!s) throw new Error('no_name');
+  return s;
 }
+function key_(n) { return cleanName_(n).toLowerCase(); }
 
 function sheet_() {
-  const ss = SpreadsheetApp.openById(prop_('SHEET_ID'));
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
   let sh = ss.getSheetByName(TAB);
   if (!sh) {
     sh = ss.insertSheet(TAB);
@@ -55,39 +49,51 @@ function sheet_() {
   return sh;
 }
 
-function findRow_(sh, sub) {
+function findRow_(sh, key) {
   const n = sh.getLastRow();
   if (n < 2) return 0;
   const v = sh.getRange(2, 1, n - 1, 1).getDisplayValues();
-  for (let i = 0; i < v.length; i++) if (v[i][0] === sub) return i + 2;
+  for (let i = 0; i < v.length; i++) if (v[i][0] === key) return i + 2;
   return 0;
 }
 
-function load_(user) {
-  const sh = sheet_(), r = findRow_(sh, user.sub);
-  if (!r) return { ok: true, found: false, email: user.email };
-  const row = sh.getRange(r, 1, 1, HEAD.length).getDisplayValues()[0];
-  let data = null;
-  try { data = JSON.parse(row[8]); } catch (e) {}
-  return { ok: true, found: !!data, email: user.email, updated: row[7], data: data };
+/** รายชื่อผู้เล่น 60 คนที่เล่นล่าสุด (ไม่ส่งข้อมูลเกมเต็ม) */
+function list_() {
+  const sh = sheet_(), n = sh.getLastRow();
+  if (n < 2) return { ok: true, players: [] };
+  const rows = sh.getRange(2, 1, n - 1, 6).getDisplayValues()
+    .filter(function (r) { return r[0]; })
+    .map(function (r) { return { name: r[1], points: r[2], medals: r[3], stage: r[4], updated: r[5] }; });
+  rows.sort(function (a, b) { return a.updated < b.updated ? 1 : -1; });
+  return { ok: true, players: rows.slice(0, 60) };
 }
 
-function save_(user, data) {
+function load_(name) {
+  const sh = sheet_(), r = findRow_(sh, key_(name));
+  if (!r) return { ok: true, found: false };
+  const row = sh.getRange(r, 1, 1, HEAD.length).getDisplayValues()[0];
+  let data = null;
+  try { data = JSON.parse(row[6]); } catch (e) {}
+  return { ok: true, found: !!data, name: row[1], updated: row[5], data: data };
+}
+
+function save_(name, data) {
   if (!data || typeof data !== 'object') throw new Error('no_data');
   const js = JSON.stringify(data);
   if (js.length > MAX_DATA) throw new Error('too_big');
+  const nm = cleanName_(name), key = nm.toLowerCase();
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     const sh = sheet_();
-    let r = findRow_(sh, user.sub);
+    let r = findRow_(sh, key);
     if (!r) {
       if (sh.getLastRow() - 1 >= MAX_ROWS) throw new Error('full');
       r = sh.getLastRow() + 1;
     }
     const now = Utilities.formatDate(new Date(), 'Asia/Bangkok', 'yyyy-MM-dd HH:mm:ss');
-    const P = data.P || {}, A = data.A || {};
-    const row = [user.sub, user.email, user.name, String(P.name || ''), String(data.total || 0), String(A.medals || 0), String(A.adv || 0), now, js];
+    const A = data.A || {};
+    const row = [key, nm, String(data.total || 0), String(A.medals || 0), String((A.adv || 0) + 1), now, js];
     const rg = sh.getRange(r, 1, 1, HEAD.length);
     rg.setNumberFormat('@');   // เก็บเป็นข้อความทุกคอลัมน์
     rg.setValues([row]);
@@ -96,3 +102,6 @@ function save_(user, data) {
     lock.releaseLock();
   }
 }
+
+/** รันครั้งเดียวจากตัวแก้ไขสคริปต์ เพื่ออนุญาตสิทธิ์และสร้างแท็บ players */
+function setup() { sheet_(); return 'ok'; }
