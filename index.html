@@ -343,6 +343,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .wl button{border:2px solid #efd6ae;border-radius:16px;background:#fff;padding:10px 12px;font:inherit;color:var(--ink);text-align:left}
 .wl b{display:block;font-size:17px;font-weight:900}
 .wl small{font-size:12px;font-weight:700;color:#7a5a3a}
+.og{display:grid;gap:8px}
+.og a{display:grid;grid-template-columns:64px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;background:#fff;border:2px solid #efd6ae;border-radius:18px;padding:10px 12px;text-decoration:none;color:var(--ink)}
+.og a span{grid-row:1/3;width:64px;height:64px;border-radius:16px;background:linear-gradient(#b9a8ff,#5b3fa0);color:#fff;display:grid;place-items:center;font-weight:900;font-size:17px}
+.og a b{font-size:18px;font-weight:900;align-self:end}
+.og a small{font-size:13px;font-weight:700;color:#7a5a3a;align-self:start}
+html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 </style>
 </head>
 <body>
@@ -377,7 +383,8 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="wrap modes" id="modes"></div>
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
     <button class="inst" id="glog" hidden>เลือกผู้เล่น</button>
-    <div class="ver">v1.15</div>
+    <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
+    <div class="ver">v1.16</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -1087,6 +1094,22 @@ async function cloudBoot(){drawWho();if(!cloudOn())return;if(!G.who){setTimeout(
  try{const r=await cloud('load');if(r.ok){const ct=r.found?(r.data.t||0):0;if(r.found&&ct>G.lt){applySnap(r.data);G.saved=r.updated}G.synced=true;if(ct<G.lt)flush()}}
  catch(e){G.synced=true}}
 $('glog').onclick=()=>{sfx.tap();openWho()};
+/* เกมชุดเดิมของเจ้าคุณ (อยู่ที่ suratpoom.github.io ระดับบนสุด) เปิดเป็นหน้าแยก มีปุ่มกลับมาเกมนี้ในหน้ารวมของชุดนั้น */
+const OTHER=[['/jaokun.html','7+3','คิดเลขจับมือ','โจทย์เด้งขึ้นมา โบกมือตอบผ่านกล้อง หรือแตะจอ'],['/jaokun-word.html','ABC','ซาฟารีคำศัพท์','ดูรูป จับศัพท์อังกฤษ'],
+ ['/jaokun-memory.html','1 2 3','สวนสัตว์ความจำ','จำลำดับสัตว์ แล้วเลือกตาม'],['/jaokun-writer.html','ก A','นักเขียนตัวน้อย','ลากตามรอย ก-ฮ A-Z และ 0-9']];
+$('more').onclick=()=>{sfx.tap();sheet('เกมอื่นของเจ้าคุณ',`<div class="og">${OTHER.map(g=>`<a href="${g[0]}"><span>${g[1]}</span><b>${g[2]}</b><small>${g[3]}</small></a>`).join('')}</div><div class="note">เกมชุดนี้เก็บคะแนนแยกจากเกมผจญภัย</div>`)};
+/* ============ กดปุ่มให้ติดแม้นิ้วขยับ ============
+   จอสัมผัส: เบราว์เซอร์จะไม่ส่ง click ถ้านิ้วเลื่อนไปนิดเดียวระหว่างแตะ เด็กเล็กแตะแล้วนิ้วไถลบ่อย ปุ่มเลยดูเหมือนกดไม่ติด
+   แก้: จับจุดที่นิ้วลงและยก ถ้ายกภายในปุ่มเดิม (เผื่อขอบ 16px) และไถลไม่เกิน 30px ให้นับเป็นการกด แล้วกลืน click จริงที่ตามมาเพื่อไม่ให้กดซ้ำสองครั้ง
+   เกิน 30px = ตั้งใจเลื่อนหน้าจอ ไม่นับ */
+const TAPS=new Map();let ghostAt=0;
+document.addEventListener('pointerdown',e=>{if(e.pointerType==='mouse')return;const b=e.target.closest&&e.target.closest('button,a');if(b)TAPS.set(e.pointerId,{b,x:e.clientX,y:e.clientY});},true);
+document.addEventListener('pointercancel',e=>TAPS.delete(e.pointerId),true);
+document.addEventListener('pointerup',e=>{const t=TAPS.get(e.pointerId);if(!t)return;TAPS.delete(e.pointerId);const b=t.b;if(b.disabled||!b.isConnected)return;
+ const r=b.getBoundingClientRect(),m=16;
+ if(Math.hypot(e.clientX-t.x,e.clientY-t.y)>30||e.clientX<r.left-m||e.clientX>r.right+m||e.clientY<r.top-m||e.clientY>r.bottom+m)return;
+ ghostAt=Date.now();b.click()},true);
+document.addEventListener('click',e=>{if(e.isTrusted&&Date.now()-ghostAt<600){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
 cloudBoot();
 if('serviceWorker'in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
