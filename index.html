@@ -327,6 +327,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 #win .fox{animation:cheer .9s ease-in-out infinite}
 @keyframes cheer{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-16px) rotate(5deg)}}
 .inst{border:0;border-radius:18px;padding:9px 18px;background:rgba(255,255,255,.92);color:var(--ink);font-weight:900;font-size:15px;box-shadow:0 4px 0 rgba(20,10,60,.35);flex:none}
+.pico{width:62px;height:62px;flex:none;border-radius:18px;overflow:hidden;box-shadow:0 4px 0 rgba(0,0,0,.22)}
+.pico svg,.av svg{display:block;width:100%;height:100%}
+.av{padding:0;border-radius:12px}
+.lvhint{color:#ffe9b8;font-weight:700;font-size:12.5px;line-height:1.3;margin-top:-6px;text-shadow:0 1px 3px rgba(20,10,60,.7)}
+.lv button{font-size:14px}
 </style>
 </head>
 <body>
@@ -355,11 +360,12 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="hero"><div class="fox" id="heroFox"></div></div>
     <div class="wrap seclab">ระดับความยาก</div>
     <div class="wrap lv" id="lv"></div>
-    <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
+    <div class="wrap lvhint" id="lvhint"></div>
+    <button class="wrap mode advbtn" id="adv"><span class="pico" id="advic"></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
-    <div class="ver">v1.11</div>
+    <div class="ver">v1.12</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -538,9 +544,10 @@ S.lv=0;S.auto=true;try{const v=localStorage.getItem('fnf_lv');if(v!==null&&v!=='
 const L=()=>LEVELS[S.lv];
 function saveLv(){try{localStorage.setItem('fnf_lv',S.auto?'a':S.lv)}catch(e){}}
 /* ปรับเอง = เกมเลือกระดับของแต่ละเรื่องจากผลการตอบของเด็ก (ดู track / autoLv) */
-function drawLv(){$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}">ปรับเอง</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('')}
+function drawLv(){$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}">อัตโนมัติ</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('');
+ $('lvhint').textContent=S.auto?'อัตโนมัติ: เกมปรับความยากให้เอง ตอบถูกบ่อยจะยากขึ้น ตอบผิดบ่อยจะง่ายลง':`ล็อกไว้ที่ระดับ${LEVELS[S.lv].name} ทุกเรื่อง`}
 drawLv();
-$('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'ปรับระดับให้เอง':'ระดับ'+L().name)};
+$('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'เกมปรับความยากให้เอง':'ระดับ'+L().name)};
 function setStars(){document.querySelectorAll('.scv').forEach(e=>e.textContent=S.total);try{updDot()}catch(e){}}
 function saveT(){try{localStorage.setItem('fnf_stars',S.total)}catch(e){}setStars()}
 setStars();
@@ -718,7 +725,7 @@ function drawHearts(){$('hearts').innerHTML=Array.from({length:F.maxh},(_,i)=>HE
 /* ฉากสู้ 2 แบบใช้เครื่องยนต์เดียวกัน: d3=false ยืนสู้ (กระโดดหลบ) · d3=true เดินได้ทั้งซ้ายขวาและลึกตื้น มีต่อยระยะประชิด
    ตำแหน่งเก็บเป็น x (0-1 ซ้ายไปขวา) และ z (0 ใกล้จอ - 1 ไกล) แล้วแปลงเป็นจุดบนจอด้วย proj() */
 function fight(d3){const k=S.stage,m=MON[k],w=bestW(),ar=$('arena');show('fight');
- $('mname').textContent=m.n;$('avme').innerHTML=FOX;$('avmon').innerHTML=monSVG(m);$('fm').className='fm';$('fm').innerHTML=`<div>${monSVG(m)}</div>`;
+ $('mname').textContent=m.n;$('avme').innerHTML=iconSVG(P.icon);$('avmon').innerHTML=monSVG(m);$('fm').className='fm';$('fm').innerHTML=`<div>${monSVG(m)}</div>`;
  $('fb').className='fb';$('fb').innerHTML=FOX+`<span class="hand">${WPN[w].svg}</span>`;
  ar.querySelectorAll('.shot,.pshot,.dmg,.ring').forEach(e=>e.remove());
  ar.classList.toggle('d3',d3);$('floor3').toggleAttribute('hidden',!d3);$('ground').hidden=d3;$('fbtn').hidden=d3;$('fpad').hidden=!d3;$('knob').style.transform='';
@@ -832,7 +839,7 @@ drawHome();
 
 /* ============ โปรไฟล์ผู้เล่น: ปรับระดับเอง · ข้อที่เคยผิด · ของสะสม · หมวก · สถิติ ============ */
 const MN={add:'บวก',sub:'ลบ',mul:'คูณ',div:'หาร',write:'เขียนเลข'},SYM={add:'+',sub:'−',mul:'×',div:'÷'};
-let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],shoe:0,ownSh:[0],fx:0,ownF:[0],mon:[]};
+let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],shoe:0,ownSh:[0],fx:0,ownF:[0],icon:0,ownI:[0],mon:[]};
 try{const v=JSON.parse(localStorage.getItem('fnf_p'));if(v&&v.skill)P=Object.assign(P,v)}catch(e){}
 function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
 /* skill 0-2 ต่อเรื่อง: ถูกครั้งแรก +0.12 · ผิด -0.25 แล้วปัดเป็นระดับ ง่าย/กลาง/ยาก */
@@ -911,7 +918,7 @@ function dress(h,sh,pa,so,fx){const t=SHIRTS[sh]||SHIRTS[0],p=PANTS[pa]||PANTS[0
 if(!P.wv){const mp={1:4,2:9,3:11,4:13};P.owned=[...new Set((P.owned||[0]).map(i=>mp[i]||0))];P.hat=mp[P.hat]||0;P.wv=2;saveP()}
 function wear(){FOX=dress(P.hat,P.shirt,P.pants,P.shoe,P.fx);['heroFox','loseFox'].forEach(id=>$(id).innerHTML=FOX);
  /* หน้าชนะ: ชูแขนสองข้างโชว์ชุดที่ใส่อยู่ */
- $('winFox').innerHTML=FOX.replace(ARMS,ARMS_UP);try{updDot()}catch(e){}}
+ $('winFox').innerHTML=FOX.replace(ARMS,ARMS_UP);$('advic').innerHTML=iconSVG(P.icon);try{updDot()}catch(e){}}
 function sheet(title,html){$('sht').textContent=title;$('shb').innerHTML=html;$('sheet').hidden=false}
 $('shx').onclick=()=>{sfx.tap();$('sheet').hidden=true};
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true};
@@ -919,14 +926,38 @@ function openBook(){const card=(pic,name,has)=>`<div class="cc ${has?'':'no'}"><
  sheet('สมุดสะสม',`<h3>สัตว์ประหลาดที่ชนะแล้ว ${P.mon.filter(Boolean).length}/${MON.length}</h3><div class="cg">${MON.map((m,k)=>card(monSVG(m),m.n,P.mon[k])).join('')}</div>
  <h3>อาวุธ ${A.w.filter(Boolean).length}/${WPN.length}</h3><div class="cg">${WPN.map((w,k)=>card(w.svg,w.n+' พลัง '+atkOf(k),A.w[k])).join('')}</div>
  <h3>อัญมณีหายาก ตอบถูกครั้งแรกมีลุ้นเจอ</h3><div class="cg">${GEMS.map((g,i)=>card(gemSVG(g.c),g.n+' x'+P.gems[i],P.gems[i]>0)).join('')}</div>`)}
+/* ไอคอนโปรไฟล์: รูปหน้าตัวละคร (ใส่ชุดปัจจุบัน) บนพื้นหลังต่างๆ · c = สีไล่บนลงล่าง · d = ลายประดับ · fr = สีกรอบ */
+const ICD={
+ stars:'<g fill="#fff"><circle cx="20" cy="30" r="1.500"/><circle cx="70" cy="9" r="1.500"/><circle cx="90" cy="40" r="1.500"/><circle cx="9" cy="52" r="1.500"/><circle cx="36" cy="8" r="1.200"/></g><path d="M16 9l2 5 5.300.400-4.100 3.400 1.300 5.200-4.500-2.900-4.500 2.900 1.300-5.200-4.100-3.400 5.300-.400z" fill="#ffd34d"/><path d="M85 8l1.600 4 4.200.300-3.300 2.700 1 4.100-3.500-2.300-3.500 2.300 1-4.100-3.300-2.700 4.200-.300z" fill="#ffd34d"/>',
+ math:'<g fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"><path d="M10 18h14M17 11v14M78 11l12 12M90 11 78 23M7 60h13M81 60h13"/></g><circle cx="87.500" cy="52" r="2.600" fill="#fff"/><circle cx="87.500" cy="68" r="2.600" fill="#fff"/>',
+ swords:'<g stroke-linecap="round"><path d="M52 78 90 6M48 78 10 6" stroke="#eef3f8" stroke-width="5"/><path d="M57 60l12 7M43 60l-12 7" stroke="#e9a91c" stroke-width="4"/></g>',
+ hearts:'<g fill="#fff" opacity=".9"><path d="M16 22c-9-6-5-12 0-7 5-5 9 1 0 7zM85 20c-9-6-5-12 0-7 5-5 9 1 0 7zM10 62c-7-5-4-9 0-5.500 4-3.500 7 .500 0 5.500zM90 60c-7-5-4-9 0-5.500 4-3.500 7 .500 0 5.500z"/></g>',
+ dots:'<g fill="rgba(255,255,255,.45)" stroke="#fff" stroke-width="1.200"><circle cx="15" cy="18" r="7"/><circle cx="86" cy="14" r="5"/><circle cx="90" cy="48" r="4"/><circle cx="9" cy="54" r="5"/><circle cx="30" cy="8" r="3"/></g>',
+ rays:'<g fill="#fff" opacity=".28"><path d="M50 50 38 -4h24zM50 50 104 38v24zM50 50-4 38v24zM50 50 88 -2l12 14zM50 50 12 -2 0 12z"/></g>',
+ bolt:'<g fill="#ffd34d" stroke="#fff" stroke-width="1"><path d="M19 6 9 24h7l-4 14 13-20h-7zM86 6 76 24h7l-4 14 13-20h-7z"/></g>',
+ planet:'<circle cx="83" cy="18" r="9" fill="#ffb41f"/><ellipse cx="83" cy="18" rx="15" ry="4" fill="none" stroke="#fff3a8" stroke-width="2" transform="rotate(-20 83 18)"/><g fill="#fff"><circle cx="14" cy="14" r="1.500"/><circle cx="28" cy="30" r="1.200"/><circle cx="8" cy="46" r="1.500"/><circle cx="60" cy="7" r="1.200"/></g>',
+ crown:'<g fill="#fff3a8" stroke="#c98f0a" stroke-width="1.200"><path d="M6 24 5 10l6 5 6-8 6 8 6-5-1 14zM71 24l-1-14 6 5 6-8 6 8 6-5-1 14z"/></g>',
+ none:''};
+const ICONS=[{n:'ฟ้ากลางคืน',p:0,c:['#262460','#c85f9a'],d:'stars'},{n:'ทุ่งตัวเลข',p:50,c:['#35b97c','#1a785c'],d:'math'},{n:'ทองนักรบ',p:60,c:['#ffe37a','#ffb41f'],d:'swords'},
+ {n:'ทะเลฟองสบู่',p:60,c:['#6fd0ff','#2a74c9'],d:'dots'},{n:'ชมพูหัวใจ',p:60,c:['#ffc2d4','#ff6f91'],d:'hearts'},{n:'อาทิตย์ส้ม',p:80,c:['#ffd08a','#ff8a3d'],d:'rays'},
+ {n:'ม่วงเวทมนตร์',p:80,c:['#b9a8ff','#5b3fa0'],d:'stars'},{n:'แดงเพลิง',p:80,c:['#ff9a6b','#e8384f'],d:'rays'},{n:'เขียวสายฟ้า',p:100,c:['#9fe870','#218a58'],d:'bolt'},
+ {n:'เหล็กกล้า',p:100,c:['#dfe6ee','#8fa3b8'],d:'swords'},{n:'ฟ้าตัวเลข',p:100,c:['#9fdcff','#4aa3ff'],d:'math'},{n:'ลูกกวาด',p:120,c:['#ffd6e7','#b9a8ff'],d:'hearts'},
+ {n:'ขั้วโลก',p:120,c:['#ffffff','#9fdcff'],d:'dots'},{n:'ป่าลึก',p:120,c:['#6b8f4a','#231b52'],d:'stars'},{n:'นินจามืด',p:150,c:['#4a4458','#1c1717'],d:'bolt',fr:'#e8384f'},
+ {n:'อวกาศ',p:200,c:['#231b52','#06051a'],d:'planet',fr:'#8f7bd6'},{n:'พายุสายฟ้า',p:200,c:['#fff3a8','#4aa3ff'],d:'bolt',fr:'#fff'},{n:'สายรุ้ง',p:300,c:['#e8384f','#ffc21a','#35b97c','#4aa3ff','#8f7bd6'],d:'stars',fr:'#fff'},
+ {n:'ราชาทองคำ',p:500,c:['#fff3a8','#e9a91c'],d:'crown',fr:'#c98f0a'},
+ {n:'เพชรดารา',g:[4,1],c:['#f2fdff','#6fd0ff'],d:'stars',fr:'#fff'},{n:'อัญมณีสามสี',g:[1,2],c:['#35b97c','#2f6fd6','#e8384f'],d:'dots',fr:'#ffd34d'},
+ {n:'ผู้พิชิตมังกร',a:{t:'ชนะราชามังกรดารา',ok:()=>!!P.mon[5]},c:['#3d6bd6','#231b52'],d:'bolt',fr:'#ffd34d'},{n:'นักผจญภัยตัวจริง',a:{t:'เปิดหีบสมบัติ 2 ครั้ง',ok:()=>A.medals>=2},c:['#ffd34d','#ff8a3d','#e8384f'],d:'crown',fr:'#fff'}];
+function iconSVG(i){const ic=ICONS[i]||ICONS[0],n=ic.c.length,inner=dress(P.hat,P.shirt,P.pants,P.shoe,0).replace(/^<svg[^>]*>/,'').replace('</svg>','');
+ return `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="ig${i}" x1="0" y1="0" x2="0" y2="1">${ic.c.map((c,k)=>`<stop offset="${n>1?k/(n-1):0}" stop-color="${c}"/>`).join('')}</linearGradient><clipPath id="ik${i}"><rect width="100" height="100" rx="22"/></clipPath></defs>
+ <g clip-path="url(#ik${i})"><rect width="100" height="100" fill="url(#ig${i})"/>${ICD[ic.d]||''}<g transform="translate(-7 12) scale(.95)">${inner}</g></g>${ic.fr?`<rect x="2.500" y="2.500" width="95" height="95" rx="20" fill="none" stroke="${ic.fr}" stroke-width="5"/>`:''}</svg>`}
 const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
- o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'}};
+ o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'},i:{list:ICONS,own:'ownI',cur:'icon',t:'ไอคอน'}};
 let shopTab='h';
 const ARMS='<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088"',ARMS_UP='<path d="M45 72 32 55M75 72l13-17" stroke="#e3b088"';
 /* ของที่ปลดล็อกจากความสำเร็จ: แจ้งครั้งเดียวต่อชิ้น (P.seen) · เข้าร้านแล้วนับเป็นของเราเลย */
 function eachUnlock(fn){Object.keys(SHOP).forEach(k=>{const d=SHOP[k];d.list.forEach((it,i)=>{if(it.a&&it.a.ok())fn(k,d,i,it)})})}
 function checkUnlocks(){if(!P.seen)P.seen=[];let n=0;eachUnlock((k,d,i,it)=>{const key=k+i;if(P.seen.includes(key))return;P.seen.push(key);
-  setTimeout(()=>{toast(`<span class="tpic">${dress(k==='h'?i:0,k==='s'?i:0,k==='p'?i:0,k==='o'?i:0,k==='f'?i:0)}</span><span>ปลดล็อก${it.n}แล้ว</span>`);sfx.win()},n++*2200)});
+  setTimeout(()=>{toast(`<span class="tpic">${k==='i'?iconSVG(i):dress(k==='h'?i:0,k==='s'?i:0,k==='p'?i:0,k==='o'?i:0,k==='f'?i:0)}</span><span>ปลดล็อก${it.n}แล้ว</span>`);sfx.win()},n++*2200)});
  if(n){saveP();updDot()}}
 function claimUnlocks(){let ch=false;eachUnlock((k,d,i)=>{if(!P[d.own].includes(i)){P[d.own].push(i);ch=true}});if(ch){saveP();updDot()}}
 /* จุดแดงที่ปุ่มร้าน: มีของที่ซื้อได้ แลกได้ หรือปลดล็อกแล้วยังไม่ได้รับ */
@@ -940,7 +971,7 @@ function openShop(keep){claimUnlocks();const k=shopTab,d=SHOP[k],now={h:P.hat,s:
   else if(it.a){txt='ยังล็อก';dis=true;note='ปลดล็อก: '+it.a.t}
   else if(it.g){const have=P.gems[it.g[0]],nm=GEMS[it.g[0]].n;dis=have<it.g[1];txt=dis?`${nm} ${have}/${it.g[1]}`:'แลกเลย';note=`ใช้${nm} ${it.g[1]} เม็ด`}
   else{const c=cost(it);dis=S.total<c;txt=dis?`ขาดอีก ${c-S.total}`:`${c} แต้ม`;if(dis)note=`ราคา ${c} แต้ม`}
-  return `<div class="cc"><span class="pic">${dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}${note?`<small>${note}</small>`:''}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${dis?'disabled':''}>${txt}</button></div>`}).join('');
+  return `<div class="cc"><span class="pic">${k==='i'?iconSVG(i):dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}${note?`<small>${note}</small>`:''}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${dis?'disabled':''}>${txt}</button></div>`}).join('');
  const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0,n=d.list.filter((_,i)=>owns(d,i)).length;
  sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${d.t} มีแล้ว ${n}/${d.list.length}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
 $('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
@@ -961,7 +992,7 @@ function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const
  sheet('สำหรับผู้ปกครอง',instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
  <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
 $('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
-if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();
+if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();
 /* ============ ติดตั้งลงเครื่อง + เล่นไม่ใช้เน็ต ============ */
 const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
 let instEvt=null;
