@@ -332,6 +332,13 @@ button{font:inherit;color:inherit;cursor:pointer}
 .av{padding:0;border-radius:12px}
 .lvhint{color:#ffe9b8;font-weight:700;font-size:12.5px;line-height:1.3;margin-top:-6px;text-shadow:0 1px 3px rgba(20,10,60,.7)}
 .lv button{font-size:14px}
+.nm{display:flex;gap:8px}
+.nm input{flex:1;min-width:0;border:2px solid #efd6ae;border-radius:14px;padding:10px 12px;font:inherit;font-weight:800;font-size:16px;color:var(--ink);background:#fff;user-select:text;-webkit-user-select:text}
+.nm button{border:0;border-radius:14px;padding:0 18px;font-weight:900;font-size:15px;background:#35b97c;color:#fff}
+.mtg{justify-content:center;align-items:center;gap:6px}
+.mtg span{flex-basis:100%;text-align:center;color:#ffe9b8;font-weight:800;font-size:12.5px;text-shadow:0 1px 3px rgba(20,10,60,.7)}
+.mtg button{padding:7px 12px;font-size:13px;border-radius:14px}
+.mtg button:not(.on){background:rgba(30,20,70,.6);color:rgba(255,255,255,.6)}
 </style>
 </head>
 <body>
@@ -365,7 +372,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
-    <div class="ver">v1.12</div>
+    <div class="ver">v1.13</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -376,6 +383,7 @@ button{font:inherit;color:inherit;cursor:pointer}
       <div class="starc"><i class="st"></i><span class="scv">0</span></div>
     </div>
     <div class="wrap wbar" id="wbar"></div>
+    <div class="wrap tg mtg" id="mtg"></div>
     <div class="map" id="mapsc"><div class="mapin" id="mapin"></div></div>
     <div class="mhint" id="mhint" hidden><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>เลื่อนขึ้นดูด่านต่อไป</div>
   </section>
@@ -567,10 +575,15 @@ const bestW=()=>{let b=-1;WPN.forEach((_,k)=>{if(A.w[k]&&(b<0||atkOf(k)>atkOf(b)
 const monHP=k=>Math.round(MON[k].hits*WPN[k].a*(1+.5*A.medals)*[.75,1,1.3][S.lv]);
 try{const v=JSON.parse(localStorage.getItem('fnf_adv'));if(v&&typeof v.adv==='number')A=Object.assign(A,v)}catch(e){}
 function saveA(){try{localStorage.setItem('fnf_adv',JSON.stringify(A))}catch(e){}}
-function drawHome(){$('advsub').textContent=(A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`)+(A.medals?` ได้เหรียญแล้ว ${A.medals}`:'');
+/* ชื่อน้อง (ผู้ปกครองตั้งในหน้าผู้ปกครอง เก็บในเครื่องเท่านั้น) · try เพราะ drawHome ถูกเรียกครั้งแรกก่อน P ถูกสร้าง */
+const kidName=()=>{try{return P.name||''}catch(e){return ''}};
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function praise(){const p=PRAISE[r(0,PRAISE.length-1)],n=kidName();return n&&Math.random()<.5?n+' '+p:p}
+function drawHome(){$('advsub').textContent=(kidName()?kidName()+' ':'')+(A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`)+(A.medals?` ได้เหรียญแล้ว ${A.medals}`:'');
+ try{$('advic').innerHTML=iconSVG(P.icon)}catch(e){}
  $('advdots').innerHTML=STAGES.map((_,k)=>`<i class="${k<A.adv?'on':k===A.adv?'cur':''}"></i>`).join('')}
 function goHome(){drawHome();show('home')}
-function openMap(g){show('map');
+function openMap(g){show('map');$('mtg').innerHTML='<span>เรื่องที่จะเจอ แตะเพื่อปิดหรือเปิด</span>'+topicChips();
  /* ระยะห่างด่าน: บีบให้เห็นครบทั้งแผนที่ในจอเดียวถ้าจอสูงพอ (ต่ำสุด 78 กันด่านซ้อนกัน) ไม่พอจึงให้เลื่อน */
  const XS=[30,70,30,70,30,70,36],GAP=typeof g==='number'?clamp(g,70,122):clamp(Math.floor(($('mapsc').clientHeight-26-64)/(NS+1)),78,122),H=(NS+1)*GAP+60,y=k=>H-80-k*GAP;
  const pts=k=>XS.slice(0,k+1).map((x,i)=>`${x},${y(i)}`).join(' ');
@@ -586,6 +599,7 @@ function openMap(g){show('map');
  sc.scrollTop=Math.max(0,y(Math.min(A.adv,NS))-sc.clientHeight/2);
  $('mhint').hidden=sc.scrollTop<30}
 $('adv').onclick=()=>{sfx.tap();openMap()};
+$('mtg').onclick=e=>{const o=e.target.closest('button[data-off]');if(o&&toggleTopic(o.dataset.off))openMap()};
 $('mapback').onclick=()=>{sfx.tap();goHome()};
 /* ลากด้วยเมาส์เพื่อเลื่อนแผนที่ (จอสัมผัสเลื่อนได้เองอยู่แล้ว) ถ้าลากเกิน 6px ไม่นับเป็นการกดด่าน */
 $('mapsc').addEventListener('scroll',()=>{$('mhint').hidden=true},{passive:true});
@@ -675,7 +689,7 @@ function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){cons
 function good(el){S.lock=true;sfx.ok();burst(el);const p=PT.q[Math.min(S.miss,2)]*(S.lv+1);if(S.first)S.earn++;S.pts+=p;S.total+=p;saveT();
  S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q}`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p});track(S.first);
  const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
- const run=S.run;say(PRAISE[r(0,PRAISE.length-1)]);S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
+ const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
 function answer(n,btn){if(S.lock)return;
  if(n===S.q.ans){btn.classList.add('ok');const qm=$('qm');qm.textContent=n;qm.classList.add('ans');if(S.cur==='div')drawVis(S.q,true);good(btn)}
  else{S.first=false;S.miss++;S.wr.push(n);noteMiss();btn.classList.add('no');sfx.no();const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');say('ลองนับดูอีกทีนะ');countUp()}}
@@ -795,7 +809,7 @@ function openQ(){if(!F||F.over||F.paused||F.en<1)return;F.paused=true;F.qlock=fa
  qc.innerHTML=q.ch.map((n,k)=>`<button class="ch" data-n="${n}" style="--c:${col[k][0]};--d:${col[k][1]}">${n}</button>`).join('');$('qov').hidden=false;say(q.q)}
 $('qch').onclick=e=>{const b=e.target.closest('.ch');if(!b||!F||!F.paused||F.qlock)return;F.qlock=true;const me=F,ok=+b.dataset.n===F.q.ans;
  [...$('qch').children].forEach(c=>{if(+c.dataset.n===me.q.ans)c.classList.add('ok');else if(c===b)c.classList.add('no')});
- if(ok){const p=PT.q[0]*(S.lv+1);S.pts+=p;S.total+=p;saveT();say(PRAISE[r(0,PRAISE.length-1)])}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
+ if(ok){const p=PT.q[0]*(S.lv+1);S.pts+=p;S.total+=p;saveT();say(praise())}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
  setTimeout(()=>{if(F!==me)return;$('qov').hidden=true;me.qlock=false;me.paused=false;me.last=performance.now();me.en=0;setEn();if(ok&&!me.over)shoot(true)},ok?500:1200)};
 function jump(){if(!F||F.over||F.paused||F.j>0)return;F.j=JUMP;tone(420,0,.12,'triangle',.1);tone(620,.07,.12,'triangle',.1)}
 function hitMon(dmg,big){F.hp-=dmg;$('hpf').style.width=Math.max(0,F.hp/F.max*100)+'%';const fm=$('fm'),ar=$('arena');fm.classList.add('hit');setTimeout(()=>fm.classList.remove('hit'),120);
@@ -830,7 +844,7 @@ $('lmap').onclick=()=>{sfx.tap();openMap()};
 function showWin(adv){
  show('win');sfx.win();say(adv?'ชนะแล้ว เก่งมากเลย':'ถึงบ้านแล้ว เก่งมากเลย');
  $('wins').hidden=adv;if(!adv)$('wins').innerHTML=sumHTML();
- $('winh').textContent=adv?'ชนะแล้ว เก่งมาก':'ถึงบ้านแล้ว เก่งมาก';$('winp').textContent=`ได้ ${S.pts} แต้ม`;$('gohome').textContent=adv?'ไปต่อ':'เลือกเกมอื่น';
+ $('winh').textContent=adv?(kidName()?kidName()+' ชนะแล้ว':'ชนะแล้ว เก่งมาก'):(kidName()?kidName()+' เก่งมาก':'ถึงบ้านแล้ว เก่งมาก');$('winp').textContent=`ได้ ${S.pts} แต้ม`;$('gohome').textContent=adv?'ไปต่อ':'เลือกเกมอื่น';
  let h='';for(let k=0;k<ROUNDS;k++)h+=`<i class="st ${k<S.earn?'':'off'}" style="animation-delay:${k*160}ms"></i>`;$('row5').innerHTML=h;
  confetti($('win'))}
 $('again').onclick=()=>start(S.mode);
@@ -847,6 +861,9 @@ function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
 const OPS=['add','sub','mul','div'];
 function pickOp(){const o=OPS.filter(m=>!P.off[m]);return o.length?o[r(0,o.length-1)]:'add'}
 function stageMode(k){const m=STAGES[k].m;return P.off[m]?'mix':m}
+function toggleTopic(m){if(!P.off[m]&&OPS.includes(m)&&OPS.filter(x=>!P.off[x]).length<=1){toast('<span>ต้องเปิดไว้อย่างน้อย 1 เรื่อง</span>');return false}
+ if(P.off[m])delete P.off[m];else P.off[m]=1;saveP();sfx.tap();drawModes();return true}
+const topicChips=()=>['add','sub','mul','div','write'].map(m=>`<button data-off="${m}" class="${P.off[m]?'':'on'}">${MN[m]}</button>`).join('');
 function drawModes(){const ms=MODES.filter(m=>!P.off[m.id]);$('modes').style.setProperty('--n',ms.length);
  $('modes').innerHTML=ms.map(m=>`<button class="mode" data-m="${m.id}"><span class="mi" style="--c:${m.c}">${m.sym}</span><span><b>${m.name}</b><small>${m.sub}</small></span></button>`).join('')}
 function autoLv(m){const k=P.skill,s=m&&k[m]!==undefined?k[m]:(k.add+k.sub+k.mul+k.div)/4;return clamp(Math.round(s),0,2)}
@@ -947,9 +964,15 @@ const ICONS=[{n:'ฟ้ากลางคืน',p:0,c:['#262460','#c85f9a'],d:'
  {n:'ราชาทองคำ',p:500,c:['#fff3a8','#e9a91c'],d:'crown',fr:'#c98f0a'},
  {n:'เพชรดารา',g:[4,1],c:['#f2fdff','#6fd0ff'],d:'stars',fr:'#fff'},{n:'อัญมณีสามสี',g:[1,2],c:['#35b97c','#2f6fd6','#e8384f'],d:'dots',fr:'#ffd34d'},
  {n:'ผู้พิชิตมังกร',a:{t:'ชนะราชามังกรดารา',ok:()=>!!P.mon[5]},c:['#3d6bd6','#231b52'],d:'bolt',fr:'#ffd34d'},{n:'นักผจญภัยตัวจริง',a:{t:'เปิดหีบสมบัติ 2 ครั้ง',ok:()=>A.medals>=2},c:['#ffd34d','#ff8a3d','#e8384f'],d:'crown',fr:'#fff'}];
-function iconSVG(i){const ic=ICONS[i]||ICONS[0],n=ic.c.length,inner=dress(P.hat,P.shirt,P.pants,P.shoe,0).replace(/^<svg[^>]*>/,'').replace('</svg>','');
+/* plain=1 ใช้ในร้าน (รูปต้นแบบ) · ไม่ plain = ไอคอนของเรา มีกรอบตามจำนวนเหรียญนักผจญภัย: 1 ทองแดง · 2 เงิน · 3 ขึ้นไป ทอง + ดาวเท่าจำนวนเหรียญ (สูงสุด 5) */
+const TIER=['','#c98a4a','#dfe6ee','#ffd34d'];
+function iconSVG(i,plain){const ic=ICONS[i]||ICONS[0],n=ic.c.length,inner=dress(P.hat,P.shirt,P.pants,P.shoe,0).replace(/^<svg[^>]*>/,'').replace('</svg>',''),
+  m=plain?0:Math.min(A.medals,5),tf=TIER[Math.min(m,3)];
+ let fr='';if(tf)fr+=`<rect x="3" y="3" width="94" height="94" rx="20" fill="none" stroke="${tf}" stroke-width="6"/>`;
+ if(ic.fr)fr+=tf?`<rect x="8" y="8" width="84" height="84" rx="16" fill="none" stroke="${ic.fr}" stroke-width="3"/>`:`<rect x="2.500" y="2.500" width="95" height="95" rx="20" fill="none" stroke="${ic.fr}" stroke-width="5"/>`;
+ for(let j=0;j<m;j++)fr+=`<path transform="translate(${50+(j-(m-1)/2)*12} 89) scale(.6)" d="M0-9l2.600 5.800 6.300.600-4.800 4.200 1.400 6.200L0 5.500l-5.500 3.300 1.400-6.200-4.800-4.200 6.300-.600z" fill="#ffd34d" stroke="#8a5a12" stroke-width="1.500"/>`;
  return `<svg viewBox="0 0 100 100" width="100%" height="100%"><defs><linearGradient id="ig${i}" x1="0" y1="0" x2="0" y2="1">${ic.c.map((c,k)=>`<stop offset="${n>1?k/(n-1):0}" stop-color="${c}"/>`).join('')}</linearGradient><clipPath id="ik${i}"><rect width="100" height="100" rx="22"/></clipPath></defs>
- <g clip-path="url(#ik${i})"><rect width="100" height="100" fill="url(#ig${i})"/>${ICD[ic.d]||''}<g transform="translate(-7 12) scale(.95)">${inner}</g></g>${ic.fr?`<rect x="2.500" y="2.500" width="95" height="95" rx="20" fill="none" stroke="${ic.fr}" stroke-width="5"/>`:''}</svg>`}
+ <g clip-path="url(#ik${i})"><rect width="100" height="100" fill="url(#ig${i})"/>${ICD[ic.d]||''}<g transform="translate(-7 12) scale(.95)">${inner}</g></g>${fr}</svg>`}
 const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
  o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'},i:{list:ICONS,own:'ownI',cur:'icon',t:'ไอคอน'}};
 let shopTab='h';
@@ -957,27 +980,35 @@ const ARMS='<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088"',ARMS_UP='<path 
 /* ของที่ปลดล็อกจากความสำเร็จ: แจ้งครั้งเดียวต่อชิ้น (P.seen) · เข้าร้านแล้วนับเป็นของเราเลย */
 function eachUnlock(fn){Object.keys(SHOP).forEach(k=>{const d=SHOP[k];d.list.forEach((it,i)=>{if(it.a&&it.a.ok())fn(k,d,i,it)})})}
 function checkUnlocks(){if(!P.seen)P.seen=[];let n=0;eachUnlock((k,d,i,it)=>{const key=k+i;if(P.seen.includes(key))return;P.seen.push(key);
-  setTimeout(()=>{toast(`<span class="tpic">${k==='i'?iconSVG(i):dress(k==='h'?i:0,k==='s'?i:0,k==='p'?i:0,k==='o'?i:0,k==='f'?i:0)}</span><span>ปลดล็อก${it.n}แล้ว</span>`);sfx.win()},n++*2200)});
+  setTimeout(()=>{toast(`<span class="tpic">${k==='i'?iconSVG(i,1):dress(k==='h'?i:0,k==='s'?i:0,k==='p'?i:0,k==='o'?i:0,k==='f'?i:0)}</span><span>ปลดล็อก${it.n}แล้ว</span>`);sfx.win()},n++*2200)});
  if(n){saveP();updDot()}}
 function claimUnlocks(){let ch=false;eachUnlock((k,d,i)=>{if(!P[d.own].includes(i)){P[d.own].push(i);ch=true}});if(ch){saveP();updDot()}}
 /* จุดแดงที่ปุ่มร้าน: มีของที่ซื้อได้ แลกได้ หรือปลดล็อกแล้วยังไม่ได้รับ */
 function updDot(){let on=false;Object.values(SHOP).forEach(d=>d.list.forEach((it,i)=>{if(on||P[d.own].includes(i))return;
   on=it.a?it.a.ok():it.g?P.gems[it.g[0]]>=it.g[1]:S.total>=cost(it)}));$('bshop').classList.toggle('dot',on)}
 const owns=(d,i)=>P[d.own].includes(i)||!!(d.list[i].a&&d.list[i].a.ok());
-function openShop(keep){claimUnlocks();const k=shopTab,d=SHOP[k],now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
- const tabs=`<div class="tabs">${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
- const cards=d.list.map((it,i)=>{const own=owns(d,i),on=P[d.cur]===i,v=Object.assign({},now,{[k]:i});let txt,dis=false,note='';
-  if(on)txt='ใส่อยู่';else if(own)txt='ใส่';
-  else if(it.a){txt='ยังล็อก';dis=true;note='ปลดล็อก: '+it.a.t}
-  else if(it.g){const have=P.gems[it.g[0]],nm=GEMS[it.g[0]].n;dis=have<it.g[1];txt=dis?`${nm} ${have}/${it.g[1]}`:'แลกเลย';note=`ใช้${nm} ${it.g[1]} เม็ด`}
-  else{const c=cost(it);dis=S.total<c;txt=dis?`ขาดอีก ${c-S.total}`:`${c} แต้ม`;if(dis)note=`ราคา ${c} แต้ม`}
-  return `<div class="cc"><span class="pic">${k==='i'?iconSVG(i):dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}${note?`<small>${note}</small>`:''}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${dis?'disabled':''}>${txt}</button></div>`}).join('');
- const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0,n=d.list.filter((_,i)=>owns(d,i)).length;
- sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${d.t} มีแล้ว ${n}/${d.list.length}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
-$('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
+function shopCard(k,i,now){const d=SHOP[k],it=d.list[i],own=owns(d,i),on=P[d.cur]===i,v=Object.assign({},now,{[k]:i});let txt,dis=false,note='';
+ if(on)txt='ใส่อยู่';else if(own)txt='ใส่';
+ else if(it.a){txt='ยังล็อก';dis=true;note='ปลดล็อก: '+it.a.t}
+ else if(it.g){const have=P.gems[it.g[0]],nm=GEMS[it.g[0]].n;dis=have<it.g[1];txt=dis?`${nm} ${have}/${it.g[1]}`:'แลกเลย';note=`ใช้${nm} ${it.g[1]} เม็ด`}
+ else{const c=cost(it);dis=S.total<c;txt=dis?`ขาดอีก ${c-S.total}`:`${c} แต้ม`;if(dis)note=`ราคา ${c} แต้ม`}
+ return `<div class="cc"><span class="pic">${k==='i'?iconSVG(i,1):dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}${note?`<small>${note}</small>`:''}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${dis?'disabled':''}>${txt}</button></div>`}
+const canBuy=(d,i)=>{const it=d.list[i];return !owns(d,i)&&!it.a&&(it.g?P.gems[it.g[0]]>=it.g[1]:S.total>=cost(it))};
+function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
+ const tabs=`<div class="tabs"><button data-tab="now" class="${k==='now'?'on':''}">ซื้อได้ตอนนี้</button>${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
+ let head,cards='';
+ if(k==='now'){const list=[];Object.keys(SHOP).forEach(x=>SHOP[x].list.forEach((_,i)=>{if(canBuy(SHOP[x],i))list.push([x,i])}));
+  if(list.length){head=`ซื้อได้ตอนนี้ ${list.length} ชิ้น`;cards=list.map(([x,i])=>shopCard(x,i,now)).join('')}
+  else{let min=Infinity;Object.values(SHOP).forEach(d=>d.list.forEach((it,i)=>{if(!owns(d,i)&&it.p)min=Math.min(min,cost(it))}));
+   head=min<Infinity?`ยังไม่มีของที่ซื้อได้ ของถูกสุด ${min} แต้ม ขาดอีก ${min-S.total} แต้ม`:'มีครบทุกชิ้นแล้ว'}}
+ else{const d=SHOP[k];head=`${d.t} มีแล้ว ${d.list.filter((_,i)=>owns(d,i)).length}/${d.list.length}`;cards=d.list.map((_,i)=>shopCard(k,i,now)).join('')}
+ const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
+ sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${head}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
+$('shb').onclick=e=>{const nb=e.target.closest('button[data-name]');
+ if(nb){P.name=$('pname').value.trim().slice(0,12);saveP();drawHome();sfx.tap();toast('<span>บันทึกชื่อแล้ว</span>');return}
+ const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
  const o=e.target.closest('button[data-off]');
- if(o){const m=o.dataset.off;if(!P.off[m]&&OPS.includes(m)&&OPS.filter(x=>!P.off[x]).length<=1){toast('<span>ต้องเปิดไว้อย่างน้อย 1 เรื่อง</span>');return}
-  if(P.off[m])delete P.off[m];else P.off[m]=1;saveP();sfx.tap();drawModes();openParent();return}
+ if(o){if(toggleTopic(o.dataset.off))openParent();return}
  const b=e.target.closest('button[data-t]');if(!b)return;const d=SHOP[b.dataset.t],i=+b.dataset.i,it=d.list[i];
  if(!owns(d,i)){
   if(it.a)return;
@@ -989,10 +1020,11 @@ $('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTa
 function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
  const tg=`<h3>เลือกเรื่องที่ให้ฝึก แตะเพื่อเปิดหรือปิด</h3><div class="tg">${['add','sub','mul','div','write'].map(m=>`<button data-off="${m}" class="${P.off[m]?'':'on'}">${MN[m]}</button>`).join('')}</div><div class="note">เรื่องที่ปิด ปุ่มฝึกจะหายไป และด่านผจญภัยของเรื่องนั้นจะเป็นโจทย์รวมจากเรื่องที่เปิดอยู่</div><h3>ผลการฝึก</h3>`;
- sheet('สำหรับผู้ปกครอง',instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
+ const nmh=`<h3>ชื่อน้องในเกม</h3><div class="nm"><input id="pname" maxlength="12" placeholder="พิมพ์ชื่อเล่น" value="${esc(P.name||'')}"><button data-name="1">บันทึก</button></div><div class="note">ชื่อเก็บในเครื่องนี้เท่านั้น ไม่ถูกส่งไปที่ไหน</div>`;
+ sheet('สำหรับผู้ปกครอง',nmh+instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
  <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
-$('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
-if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();
+$('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();shopTab=$('bshop').classList.contains('dot')?'now':shopTab==='now'?'h':shopTab;openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
+if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();drawHome();
 /* ============ ติดตั้งลงเครื่อง + เล่นไม่ใช้เน็ต ============ */
 const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
 let instEvt=null;
