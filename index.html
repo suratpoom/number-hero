@@ -349,6 +349,12 @@ button{font:inherit;color:inherit;cursor:pointer}
 .og a b{font-size:18px;font-weight:900;align-self:end}
 .og a small{font-size:13px;font-weight:700;color:#7a5a3a;align-self:start}
 html,body{overscroll-behavior:none;-webkit-touch-callout:none}
+#cam{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1);opacity:.45;pointer-events:none}
+#hcur{position:fixed;left:0;top:0;width:50px;height:50px;margin:-25px 0 0 -25px;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffd34d 42%,rgba(255,211,77,0) 72%);box-shadow:0 0 20px 8px rgba(255,211,77,.65);z-index:300;pointer-events:none}
+.ch{position:relative}
+.ch.hdw{outline:5px solid #ffd34d;outline-offset:3px}
+.ch.hdw::after{content:"";position:absolute;left:8%;bottom:8px;height:9px;width:calc(84% * var(--dw,0));background:#ffd34d;border-radius:5px;box-shadow:0 0 0 2px rgba(59,42,74,.35)}
+.tg button:not([data-off]){text-decoration:none}
 </style>
 </head>
 <body>
@@ -361,6 +367,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <path d="M0 335 Q300 265 600 325 T1200 315 V400 H0Z" fill="#231b52"/>
   </svg>
 
+  <video id="cam" playsinline muted hidden></video>
   <!-- หน้าแรก -->
   <section id="home" class="screen on">
     <div class="wrap top">
@@ -383,8 +390,9 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <div class="wrap modes" id="modes"></div>
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
     <button class="inst" id="glog" hidden>เลือกผู้เล่น</button>
+    <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
-    <div class="ver">v1.16</div>
+    <div class="ver">v1.17</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -495,6 +503,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 
 <div class="sheet" id="sheet" hidden><div class="shc"><div class="shh"><span id="sht"></span><button class="ic" id="shx" aria-label="ปิด"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div><div class="shb" id="shb"></div></div></div>
 
+<i id="hcur" hidden></i>
 <script>
 /* ============ ตัวละคร ============ */
 let FOX=`<svg viewBox="0 0 120 120" width="100%" height="100%">
@@ -631,7 +640,7 @@ function reward(){show('reward');const c=$('chest');c.classList.remove('open');c
  $('rwgo').textContent=!S.auto&&S.lv<2?'ผจญภัยรอบใหม่ ยากขึ้นอีกนิด':'ผจญภัยรอบใหม่';
  setTimeout(()=>{c.classList.add('open');sfx.win();confetti($('reward'));say('เจอสมบัติแล้ว เก่งที่สุดเลย')},500)}
 $('rwgo').onclick=()=>{sfx.tap();if(!S.auto&&S.lv<2){S.lv++;saveLv();drawLv()}openMap()};
-function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id))}
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id));try{hSync(id)}catch(e){}}
 
 /* ============ เสียง ============ */
 let AC;
@@ -1020,7 +1029,11 @@ function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:
 $('shb').onclick=e=>{const ga=e.target.closest('button[data-g]');
  if(ga){sfx.tap();openWho();return}
  const wb=e.target.closest('button[data-who]');if(wb){sfx.tap();pickWho(wb.dataset.who);return}
- const wn=e.target.closest('button[data-new]');if(wn){sfx.tap();pickWho($('wname').value);return}
+ const wn=e.target.closest('button[data-new]');if(wn){sfx.tap();pickWho($('wname').value,undefined,$('wnewpin').value.trim());return}
+ const wp=e.target.closest('button[data-pinfor]');if(wp){sfx.tap();pickWho(wp.dataset.pinfor,$('wpin').value);return}
+ const sp=e.target.closest('button[data-setpin]');if(sp){sfx.tap();savePin();return}
+ const hb=e.target.closest('button[data-hand]');if(hb){sfx.tap();hSet(hb.dataset.hand==='1');openHand();return}
+ const hs=e.target.closest('button[data-hsp]');if(hs){sfx.tap();H.speed=+hs.dataset.hsp;try{localStorage.setItem('fnf_hsp',H.speed)}catch(e){}openHand();return}
  const nb=e.target.closest('button[data-name]');
  if(nb){P.name=$('pname').value.trim().slice(0,12);saveP();drawHome();sfx.tap();toast('<span>บันทึกชื่อแล้ว</span>');return}
  const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
@@ -1054,8 +1067,10 @@ function instHTML(){if(STANDALONE)return '<h3>ติดตั้งลงเค�
    ผู้เล่นพิมพ์ชื่อหรือเลือกชื่อที่มีอยู่ เกมบันทึกตามชื่อนั้นผ่าน gas/Code.gs
    gas ว่าง = ปิดระบบนี้ เกมเก็บในเครื่องอย่างเดียว */
 const CLOUD={gas:'https://script.google.com/macros/s/AKfycbxx_WQHGCYh07Ym-T_SCLxWYw8PhzpiIB5mCSJBmU9syK9ihAH_XUOHLy9d2UfiGSQ6Fg/exec'};
-const G={who:'',synced:false,mute:false,timer:null,saved:'',lt:0};
-try{G.lt=+localStorage.getItem('fnf_t')||0;G.who=localStorage.getItem('fnf_who')||''}catch(e){}
+const G={who:'',pin:'',synced:false,mute:false,timer:null,saved:'',lt:0};
+try{G.lt=+localStorage.getItem('fnf_t')||0;G.who=localStorage.getItem('fnf_who')||'';G.pin=localStorage.getItem('fnf_pin')||''}catch(e){}
+const cleanPin=p=>/^\d{4}$/.test(String(p||'').trim())?String(p).trim():'';
+const setPin=p=>{G.pin=p;try{localStorage.setItem('fnf_pin',p)}catch(e){}};
 const cloudOn=()=>!!CLOUD.gas;
 const cleanName=n=>String(n||'').replace(/\s+/g,' ').trim().slice(0,12);
 const setLt=t=>{G.lt=t;try{localStorage.setItem('fnf_t',t)}catch(e){}};
@@ -1064,36 +1079,109 @@ const snap=()=>({v:1,t:G.lt||Date.now(),total:S.total,lv:S.auto?'a':S.lv,A,P});
 function applySnap(d){G.mute=true;S.total=+d.total||0;A=Object.assign({adv:0,medals:0,stars:[],w:[]},d.A||{});P=Object.assign(P_DEF(),d.P||{});P.wv=2;
  if(d.lv==='a'||d.lv===undefined)S.auto=true;else{S.auto=false;S.lv=clamp(+d.lv||0,0,2)}
  saveLv();saveA();saveP();saveT();if(S.auto)S.lv=autoLv();wear();drawModes();drawLv();drawHome();G.mute=false;setLt(d.t||Date.now())}
-async function cloud(action,extra){const r=await fetch(CLOUD.gas,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,name:G.who},extra)),redirect:'follow',keepalive:action==='save'});return r.json()}
+async function cloud(action,extra){const r=await fetch(CLOUD.gas,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,name:G.who,pin:G.pin},extra)),redirect:'follow',keepalive:action==='save'});return r.json()}
 /* เรียกทุกครั้งที่มีการบันทึกลงเครื่อง: จำเวลาแก้ล่าสุด แล้วรอ 4 วิค่อยส่งขึ้นชีต (รวมหลายการเปลี่ยนเป็นครั้งเดียว) */
 function cloudDirty(){if(G.mute)return;setLt(Date.now());if(!cloudOn()||!G.who||!G.synced)return;clearTimeout(G.timer);G.timer=setTimeout(flush,4000)}
 function flush(){clearTimeout(G.timer);if(!cloudOn()||!G.who||!G.synced)return;
- cloud('save',{data:snap()}).then(r=>{if(r.ok)G.saved=r.updated}).catch(()=>{G.timer=setTimeout(flush,30000)})}
+ cloud('save',{data:snap()}).then(r=>{if(r.ok)G.saved=r.updated;else if(r.error==='bad_pin'){G.synced=false;toast('<span>รหัสของชื่อนี้เปลี่ยนไป เลือกผู้เล่นใหม่อีกครั้ง</span>')}}).catch(()=>{G.timer=setTimeout(flush,30000)})}
 function setWho(n){G.who=n;try{localStorage.setItem('fnf_who',n)}catch(e){}P.name=n;G.mute=true;saveP();G.mute=false;drawWho();drawHome()}
 function drawWho(){const b=$('glog');b.hidden=!cloudOn();b.textContent=G.who?`ผู้เล่น: ${G.who} (เปลี่ยน)`:'เลือกผู้เล่น'}
 function whoHTML(){if(!cloudOn())return '';
- return `<h3>ผู้เล่น</h3><div class="note">${G.who?'กำลังเล่นเป็น '+esc(G.who)+(G.saved?' บันทึกล่าสุด '+esc(G.saved):''):'ยังไม่ได้เลือกผู้เล่น ความคืบหน้าเก็บในเครื่องนี้เท่านั้น'}</div><div class="nm" style="margin-top:8px"><button data-g="who" style="padding:10px 18px">${G.who?'เปลี่ยนผู้เล่น':'เลือกผู้เล่น'}</button></div>`}
+ return `<h3>ผู้เล่น</h3><div class="note">${G.who?'กำลังเล่นเป็น '+esc(G.who)+(G.saved?' บันทึกล่าสุด '+esc(G.saved):''):'ยังไม่ได้เลือกผู้เล่น ความคืบหน้าเก็บในเครื่องนี้เท่านั้น'}</div><div class="nm" style="margin-top:8px"><button data-g="who" style="padding:10px 18px">${G.who?'เปลี่ยนผู้เล่น':'เลือกผู้เล่น'}</button></div>`
+ +(G.who?`<h3>รหัส 4 หลักของ ${esc(G.who)}</h3><div class="note">${G.pin?'ตั้งรหัสไว้แล้ว คนอื่นต้องใส่รหัสก่อนถึงจะเล่นชื่อนี้ได้':'ยังไม่มีรหัส ใครก็เลือกชื่อนี้เล่นได้'}</div><div class="nm" style="margin-top:8px"><input id="npin" inputmode="numeric" maxlength="4" placeholder="เลข 4 หลัก (ว่าง = ไม่ใช้รหัส)"><button data-setpin="1">${G.pin?'เปลี่ยนรหัส':'ตั้งรหัส'}</button></div>`:'')}
+async function savePin(){const v=$('npin').value.trim();if(v&&!cleanPin(v)){toast('<span>รหัสต้องเป็นเลข 4 หลัก</span>');return}
+ let r=null;try{r=await cloud('setpin',{newPin:v})}catch(e){}
+ if(r&&r.error==='not_found'){flush();toast('<span>กำลังบันทึกชื่อนี้ขึ้นชีต ลองกดอีกครั้ง</span>');return}
+ if(!r||!r.ok){toast('<span>ตั้งรหัสไม่สำเร็จ ลองใหม่อีกครั้ง</span>');return}
+ setPin(v);toast(`<span>${v?'ตั้งรหัสแล้ว จำไว้ให้ดีนะ':'เลิกใช้รหัสแล้ว'}</span>`);openParent()}
 async function openWho(){flush();sheet('เลือกผู้เล่น','<div class="note">กำลังโหลดรายชื่อ</div>');let list=null;try{const r=await cloud('list');if(r.ok)list=r.players}catch(e){}
  const cur=G.who?`<div class="note">กำลังเล่นเป็น ${esc(G.who)}</div>`:'';
- const rows=list?(list.length?`<h3>เลือกชื่อที่เคยเล่น</h3><div class="wl">${list.map(p=>`<button data-who="${esc(p.name)}"><b>${esc(p.name)}</b><small>${esc(p.points)} แต้ม ด่านที่ ${esc(p.stage)}</small></button>`).join('')}</div>`:'<div class="note">ยังไม่มีผู้เล่น พิมพ์ชื่อเพื่อเริ่มเป็นคนแรก</div>')
+ const rows=list?(list.length?`<h3>เลือกชื่อที่เคยเล่น</h3><div class="wl">${list.map(p=>`<button data-who="${esc(p.name)}"><b>${esc(p.name)}</b><small>${esc(p.points)} แต้ม ด่านที่ ${esc(p.stage)}${p.hasPin?' มีรหัส':''}</small></button>`).join('')}</div>`:'<div class="note">ยังไม่มีผู้เล่น พิมพ์ชื่อเพื่อเริ่มเป็นคนแรก</div>')
   :'<div class="note">ต่อชีตไม่ได้ตอนนี้ ปิดหน้านี้แล้วเล่นต่อได้ ความคืบหน้าจะเก็บในเครื่องก่อน</div>';
- sheet('เลือกผู้เล่น',cur+rows+`<h3>หรือพิมพ์ชื่อใหม่</h3><div class="nm"><input id="wname" maxlength="12" placeholder="พิมพ์ชื่อเล่น"><button data-new="1">เริ่มเล่น</button></div><div class="note">ความคืบหน้าบันทึกตามชื่อ ใครพิมพ์ชื่อเดียวกันจะเล่นต่อจากเดิมได้</div>`)}
+ sheet('เลือกผู้เล่น',cur+rows+`<h3>หรือพิมพ์ชื่อใหม่</h3><div class="nm"><input id="wname" maxlength="12" placeholder="พิมพ์ชื่อเล่น"><button data-new="1">เริ่มเล่น</button></div><div class="nm" style="margin-top:8px"><input id="wnewpin" inputmode="numeric" maxlength="4" placeholder="ตั้งรหัส 4 หลัก (ไม่ใส่ก็ได้)"></div><div class="note">ความคืบหน้าบันทึกตามชื่อ ชื่อที่ไม่มีรหัส ใครพิมพ์ชื่อเดียวกันก็เล่นต่อได้</div>`)}
+function askPin(n){sheet('ใส่รหัสของ '+n,`<div class="note">ชื่อนี้ตั้งรหัสไว้ ใส่เลข 4 หลักเพื่อเล่นต่อ</div><div class="nm" style="margin-top:8px"><input id="wpin" inputmode="numeric" maxlength="4" placeholder="เลข 4 หลัก"><button data-pinfor="${esc(n)}">เข้าเล่น</button></div><div class="nm" style="margin-top:8px"><button data-g="who" style="padding:10px 18px;background:#8f7bd6">กลับไปเลือกชื่อ</button></div>`)}
 /* เลือกชื่อ: มีในชีต -> โหลดมาเล่นต่อ · ชื่อใหม่ -> เริ่มจากศูนย์ (ยกเว้นเครื่องที่เล่นมาก่อนมีระบบชื่อ จะยกความคืบหน้าเดิมให้ชื่อแรก) */
-async function pickWho(raw){const n=cleanName(raw);if(!n){toast('<span>พิมพ์ชื่อก่อนนะ</span>');return}
+async function pickWho(raw,pin,newPin){const n=cleanName(raw);if(!n){toast('<span>พิมพ์ชื่อก่อนนะ</span>');return}
+ if(newPin&&!cleanPin(newPin)){toast('<span>รหัสต้องเป็นเลข 4 หลัก</span>');return}
  if(G.who&&G.who.toLowerCase()===n.toLowerCase()){$('sheet').hidden=true;return}
- let r=null;try{r=await cloud('load',{name:n})}catch(e){}
+ const tryPin=cleanPin(pin);let r=null;try{r=await cloud('load',{name:n,pin:tryPin})}catch(e){}
+ if(r&&r.error==='bad_pin'){if(pin!==undefined)toast('<span>รหัสไม่ถูก ลองใหม่อีกครั้ง</span>');askPin(n);return}
  if(!r||!r.ok){toast('<span>ต่อชีตไม่ได้ ลองใหม่อีกครั้ง</span>');return}
  clearTimeout(G.timer);const hadWho=!!G.who;
- if(r.found){applySnap(r.data);G.saved=r.updated;setWho(r.name||n);G.synced=true;toast(`<span>เล่นต่อเป็น ${esc(G.who)}</span>`)}
+ if(r.found){setPin(r.hasPin?tryPin:'');applySnap(r.data);G.saved=r.updated;setWho(r.name||n);G.synced=true;toast(`<span>เล่นต่อเป็น ${esc(G.who)}</span>`)}
  else{const keep=!hadWho&&(S.total||A.adv||A.medals||Object.keys(P.stat).length);
   if(!keep)applySnap({total:0,A:{},P:{},lv:'a',t:Date.now()});
-  setWho(n);G.synced=true;setLt(Date.now());flush();toast(`<span>เริ่มเล่นเป็น ${esc(n)}</span>`)}
+  setPin(cleanPin(newPin));setWho(n);G.synced=true;setLt(Date.now());flush();toast(`<span>เริ่มเล่นเป็น ${esc(n)}</span>`)}
  $('sheet').hidden=true;show('home')}
 /* เปิดเกม: ยังไม่เลือกชื่อ -> เปิดหน้าเลือก · เลือกแล้ว -> เทียบกับชีต ถ้าชีตใหม่กว่า (เล่นจากเครื่องอื่น) ใช้ของชีต */
 async function cloudBoot(){drawWho();if(!cloudOn())return;if(!G.who){setTimeout(openWho,700);return}
- try{const r=await cloud('load');if(r.ok){const ct=r.found?(r.data.t||0):0;if(r.found&&ct>G.lt){applySnap(r.data);G.saved=r.updated}G.synced=true;if(ct<G.lt)flush()}}
+ try{const r=await cloud('load');if(r.error==='bad_pin'){G.who='';setPin('');try{localStorage.removeItem('fnf_who')}catch(e){}drawWho();openWho();return}
+  if(r.ok){const ct=r.found?(r.data.t||0):0;if(r.found&&ct>G.lt){applySnap(r.data);G.saved=r.updated}G.synced=true;if(ct<G.lt)flush()}}
  catch(e){G.synced=true}}
 $('glog').onclick=()=>{sfx.tap();openWho()};
+/* ============ พลังมือ: ตอบด้วยมือผ่านกล้อง ============
+   ยกตัวจับมือมาจากเกม "คิดเลขจับมือ" v1.10 (D:\Calude\Jaokun-game) ค่าปรับจูนชุดเดียวกัน ห้ามลด confidence ลงอีก (เคยจับปาก/หน้าเป็นมือ)
+   ในเกมนี้: มือเป็นลูกแก้วทอง ชี้ปุ่มคำตอบค้างไว้จนแถบทองเต็ม = กดปุ่มนั้น ใช้กับปุ่มคำตอบและปุ่มไปต่อ ส่วนฉากสู้ยังใช้นิ้วกด
+   กล้องเปิดเฉพาะตอนอยู่ในด่าน กลับหน้าแรกหรือแผนที่แล้วปิดเอง · ตัวจับมือ (MediaPipe) โหลดจากเน็ตตอนเปิดใช้ครั้งแรกเท่านั้น */
+const MP_V='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14',MP_MODEL='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
+const HCFG={DWELL:[900,1400,2000],IN_PAD:14,KEEP_PAD:44,ARM_MOVE:60,FRESH:400,STREAK:2,SMOOTH:.9,GRACE:700};
+const H={want:false,on:false,busy:false,speed:1,stream:null,lm:null,ptr:null,ptrAt:0,last:0,gap:0,streak:0,lastNorm:null,vt:-1,t:0,raf:0,sig:'',grace:0,armFrom:null,armed:new WeakSet(),dwell:new Map()};
+try{H.want=localStorage.getItem('fnf_hand')==='1';const v=localStorage.getItem('fnf_hsp');if(v!==null)H.speed=clamp(+v||0,0,2)}catch(e){}
+function handOK(lm){if(!lm||lm.length<21)return false;const d=(a,b)=>Math.hypot(lm[a].x-lm[b].x,lm[a].y-lm[b].y),pw=d(5,17),pl=d(0,9);
+ if(pw<1e-4||pl<1e-4)return false;const ra=pl/pw;if(ra<.55||ra>2.8)return false;const mid=d(9,12);
+ if(mid<pl*.15||mid>pl*2.4)return false;return Math.max(pl,mid)>=.04}
+function hApply(lm,now){const v=$('cam'),CW=innerWidth,CH=innerHeight,vw=v.videoWidth||4,vh=v.videoHeight||3,sc=Math.max(CW/vw,CH/vh),w=vw*sc,h=vh*sc,bx=(CW-w)/2,by=(CH-h)/2;
+ const px=l=>CW-(bx+l.x*w),py=l=>by+l.y*h;let cx=0,cy=0;[8,12,16,20].forEach(i=>{cx+=px(lm[i]);cy+=py(lm[i])});cx/=4;cy/=4;
+ const nx=px(lm[8])*.8+cx*.2,ny=py(lm[8])*.8+cy*.2,prev=H.ptr,gap=now-(H.ptrAt||now);H.gap=H.gap?H.gap*.8+gap*.2:gap;
+ const re=!prev||gap>clamp(H.gap*3.5,180,700)||Math.hypot(nx-prev.x,ny-prev.y)>Math.min(CW,CH)*.55;
+ H.ptr=re?{x:nx,y:ny}:{x:prev.x+(nx-prev.x)*HCFG.SMOOTH,y:prev.y+(ny-prev.y)*HCFG.SMOOTH};H.ptrAt=now;H.last=now}
+function hTake(list,now){let best=null,bs=-1;for(const lm of list||[]){if(!handOK(lm))continue;const cx=(lm[0].x+lm[9].x)/2,cy=(lm[0].y+lm[9].y)/2;let sc=1;
+  if(H.lastNorm)sc+=1.6/(1+Math.hypot(cx-H.lastNorm.x,cy-H.lastNorm.y)*5);if(lm[8].y<lm[0].y)sc+=.3;if(sc>bs){bs=sc;best={lm,cx,cy}}}
+ if(!best){H.streak=0;if(now-H.last>900){H.ptr=null;H.lastNorm=null}return}
+ H.streak++;H.lastNorm={x:best.cx,y:best.cy};if(H.streak<HCFG.STREAK&&!H.ptr)return;hApply(best.lm,now)}
+/* ปุ่มที่มือกดได้ ณ ตอนนี้ */
+function hTargets(){const scr=document.querySelector('.screen.on');if(!scr||!$('sheet').hidden)return[];
+ if(scr.id==='fight')return F&&F.paused&&!F.qlock?[...$('qch').querySelectorAll('.ch:not(.no)')]:[];
+ if(scr.id==='play')return S.lock?[]:S.cur==='write'?[$('wcheck')]:[...$('choices').querySelectorAll('.ch:not(.no)')];
+ return['win','weapon','lose','reward'].includes(scr.id)?[...scr.querySelectorAll('.wact .ch')]:[]}
+function hClear(){H.dwell=new Map();document.querySelectorAll('.hdw').forEach(e=>{e.classList.remove('hdw');e.style.removeProperty('--dw')})}
+function hStep(now,dt){const cur=$('hcur');if(!H.ptr){cur.hidden=true;return}cur.hidden=false;cur.style.transform=`translate(${H.ptr.x}px,${H.ptr.y}px)`;
+ const ts=hTargets(),sig=((document.querySelector('.screen.on')||{}).id||'')+'|'+S.i+'|'+ts.map(t=>t.textContent).join(',');
+ /* ปุ่มชุดใหม่ (ข้อใหม่/หน้าใหม่): พัก 0.7 วิ และต้องขยับมือก่อน มือที่ค้างจากข้อก่อนจะไม่กลายเป็นคำตอบข้อใหม่ */
+ if(sig!==H.sig){H.sig=sig;H.grace=now+HCFG.GRACE;H.armFrom=null;H.armed=new WeakSet();hClear()}
+ if(now<H.grace||!ts.length)return;
+ if(!H.armFrom)H.armFrom={x:H.ptr.x,y:H.ptr.y};const moved=Math.hypot(H.ptr.x-H.armFrom.x,H.ptr.y-H.armFrom.y)>HCFG.ARM_MOVE;
+ const need=HCFG.DWELL[H.speed],fresh=now-H.last<Math.max(HCFG.FRESH,Math.min(1200,H.gap*3.5));
+ const inR=(r,p)=>H.ptr.x>r.left-p&&H.ptr.x<r.right+p&&H.ptr.y>r.top-p&&H.ptr.y<r.bottom+p;
+ let hit=null,hd=1e9;const rs=new Map();
+ for(const b of ts){const r=b.getBoundingClientRect();rs.set(b,r);if(!H.armed.has(b)){if(moved||!inR(r,26))H.armed.add(b);else continue}
+  if(inR(r,(H.dwell.get(b)||0)>0?HCFG.KEEP_PAD:HCFG.IN_PAD)){const d=Math.hypot(H.ptr.x-(r.left+r.width/2),H.ptr.y-(r.top+r.height/2));if(d<hd){hd=d;hit=b}}}
+ for(const b of ts){let d=H.dwell.get(b)||0;
+  if(b===hit){if(fresh){if(!d)tone(620,0,.06,'square',.05);d+=dt}}else d=Math.max(0,d-dt*.9);
+  H.dwell.set(b,d);b.classList.toggle('hdw',d>0);b.style.setProperty('--dw',Math.min(1,d/need));
+  if(d>=need){hClear();H.sig='';b.click();return}}}
+function hLoop(){if(!H.on)return;H.raf=requestAnimationFrame(hLoop);const v=$('cam'),now=performance.now(),dt=Math.min(100,now-(H.t||now));H.t=now;
+ if(H.lm&&v.videoWidth&&v.readyState>=2&&v.currentTime!==H.vt){H.vt=v.currentTime;try{hTake(H.lm.detectForVideo(v,now).landmarks,now)}catch(e){}}
+ if(now-H.last>900)H.ptr=null;hStep(now,dt)}
+async function hStart(){if(H.on||H.busy)return;H.busy=true;toast('<span>กำลังเปิดกล้อง รอสักครู่</span>');
+ try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('no_camera');
+  H.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480},frameRate:{ideal:60}},audio:false});
+  const v=$('cam');v.muted=true;v.playsInline=true;v.srcObject=H.stream;v.hidden=false;try{await v.play()}catch(e){}
+  if(!H.lm){const {HandLandmarker,FilesetResolver}=await import(MP_V),fs=await FilesetResolver.forVisionTasks(MP_V+'/wasm');
+   const opt={baseOptions:{modelAssetPath:MP_MODEL,delegate:'GPU'},runningMode:'VIDEO',numHands:2,minHandDetectionConfidence:.55,minHandPresenceConfidence:.5,minTrackingConfidence:.4};
+   try{H.lm=await HandLandmarker.createFromOptions(fs,opt)}catch(e){opt.baseOptions.delegate='CPU';H.lm=await HandLandmarker.createFromOptions(fs,opt)}}
+  if(!H.want||!H.stream){hStop()}else{H.on=true;H.sig='';H.raf=requestAnimationFrame(hLoop);toast('<span>พลังมือพร้อม ยกมือชี้คำตอบค้างไว้</span>')}}
+ catch(e){hStop();hSet(false);toast('<span>เปิดกล้องไม่ได้ ใช้แตะจอแทนนะ</span>')}
+ H.busy=false}
+function hStop(){H.on=false;cancelAnimationFrame(H.raf);try{H.stream&&H.stream.getTracks().forEach(t=>t.stop())}catch(e){}H.stream=null;const v=$('cam');try{v.pause()}catch(e){}v.srcObject=null;v.hidden=true;$('hcur').hidden=true;H.ptr=null;hClear()}
+function hSync(id){id=id||(document.querySelector('.screen.on')||{}).id;if(H.want&&id!=='home'&&id!=='map')hStart();else hStop()}
+function hSet(on){H.want=on;try{localStorage.setItem('fnf_hand',on?'1':'0')}catch(e){}drawHand();hSync()}
+function drawHand(){$('hbtn').textContent='พลังมือ: '+(H.want?'เปิด':'ปิด')}
+function openHand(){sheet('พลังมือวิเศษ',`<div class="note">เจ้าคุณมีพลังมือวิเศษ ยกมือขึ้นหน้ากล้อง มือจะกลายเป็นลูกแก้วทอง ชี้คำตอบค้างไว้จนแถบทองเต็ม คำตอบนั้นจะถูกเลือก</div>
+ <h3>เปิดใช้พลังมือ</h3><div class="tg"><button data-hand="1" class="${H.want?'on':''}">เปิด</button><button data-hand="0" class="${H.want?'':'on'}">ปิด</button></div>
+ <h3>ต้องชี้ค้างนานแค่ไหน</h3><div class="tabs">${['ไว','กลาง','ช้า'].map((t,i)=>`<button data-hsp="${i}" class="${H.speed===i?'on':''}">${t}</button>`).join('')}</div>
+ <div class="note">กล้องเปิดเฉพาะตอนอยู่ในด่าน ภาพจากกล้องไม่ถูกบันทึกหรือส่งไปที่ไหน ใช้ได้กับปุ่มคำตอบและปุ่มไปต่อ ฉากสู้และด่านเขียนเลขยังใช้นิ้ว แตะจอได้ตลอดแม้เปิดพลังมือ</div>`)}
+$('hbtn').onclick=()=>{sfx.tap();openHand()};drawHand();
 /* เกมชุดเดิมของเจ้าคุณ (อยู่ที่ suratpoom.github.io ระดับบนสุด) เปิดเป็นหน้าแยก มีปุ่มกลับมาเกมนี้ในหน้ารวมของชุดนั้น */
 const OTHER=[['/jaokun.html','7+3','คิดเลขจับมือ','โจทย์เด้งขึ้นมา โบกมือตอบผ่านกล้อง หรือแตะจอ'],['/jaokun-word.html','ABC','ซาฟารีคำศัพท์','ดูรูป จับศัพท์อังกฤษ'],
  ['/jaokun-memory.html','1 2 3','สวนสัตว์ความจำ','จำลำดับสัตว์ แล้วเลือกตาม'],['/jaokun-writer.html','ก A','นักเขียนตัวน้อย','ลากตามรอย ก-ฮ A-Z และ 0-9']];
