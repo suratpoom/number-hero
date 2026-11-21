@@ -298,6 +298,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .tg button.on{background:#35b97c;color:#fff;text-decoration:none}
 .note{font-size:13px;color:#7a5a3a;margin-top:6px}
 .toast:not(:has(svg)){padding:10px 18px}
+.tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.tabs button{border:0;border-radius:16px;padding:9px 14px;font-weight:900;font-size:15px;background:#e9dcc6;color:var(--ink);white-space:nowrap;flex:none}
+.tabs button.on{background:var(--ink);color:#fff}
+.fxt{transform-box:fill-box;transform-origin:center;animation:fxtw 1.4s ease-in-out infinite}
+@keyframes fxtw{0%,100%{transform:scale(.25);opacity:.15}50%{transform:scale(1.2);opacity:1}}
+.fxu{animation:fxup 2.4s linear infinite}
+@keyframes fxup{0%{transform:translateY(10px);opacity:0}30%{opacity:1}100%{transform:translateY(-24px);opacity:0}}
+.fxg{transform-box:fill-box;transform-origin:center;animation:fxgl 1.8s ease-in-out infinite}
+@keyframes fxgl{50%{transform:scale(1.1);opacity:.55}}
+.fxr{transform-box:fill-box;transform-origin:center;animation:spin 6s linear infinite}
 </style>
 </head>
 <body>
@@ -329,7 +339,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
-    <div class="ver">v1.6</div>
+    <div class="ver">v1.7</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -802,7 +812,7 @@ drawHome();
 
 /* ============ โปรไฟล์ผู้เล่น: ปรับระดับเอง · ข้อที่เคยผิด · ของสะสม · หมวก · สถิติ ============ */
 const MN={add:'บวก',sub:'ลบ',mul:'คูณ',div:'หาร',write:'เขียนเลข'},SYM={add:'+',sub:'−',mul:'×',div:'÷'};
-let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],mon:[]};
+let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],off:{},hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],shoe:0,ownSh:[0],fx:0,ownF:[0],mon:[]};
 try{const v=JSON.parse(localStorage.getItem('fnf_p'));if(v&&v.skill)P=Object.assign(P,v)}catch(e){}
 function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
 /* skill 0-2 ต่อเรื่อง: ถูกครั้งแรก +0.12 · ผิด -0.25 แล้วปัดเป็นระดับ ง่าย/กลาง/ยาก */
@@ -848,14 +858,32 @@ const PANTS=[{n:'กางเกงครีม',p:0,c:'#e6d8c3',s:'#d3c2a8'},{n
  {n:'กางเกงน้ำตาล',p:100,c:'#8a5a2b',s:'#6b4226'},{n:'กางเกงเขียวทหาร',p:100,c:'#6b8f4a',s:'#4f6e33'},{n:'กางเกงแดง',p:100,c:'#e8384f',s:'#b81f3a'},
  {n:'กางเกงขาว',p:120,c:'#fbfbfb',s:'#d5dae2'},{n:'กางเกงม่วง',p:120,c:'#8f7bd6',s:'#5d49a8'},{n:'กางเกงฟ้า',p:120,c:'#4aa3ff',s:'#2a74c9'},
  {n:'เกราะขาเงิน',p:300,c:'#cfd8e3',s:'#8fa3b8'},{n:'เกราะขาทอง',p:500,c:'#ffd34d',s:'#c98f0a'}];
+const SHOES=[{n:'รองเท้าดำ',p:0,c:'#3b2a4a'},{n:'ผ้าใบขาว',p:60,c:'#fbfbfb'},{n:'รองเท้าแดง',p:80,c:'#e8384f'},{n:'รองเท้าฟ้า',p:80,c:'#4aa3ff'},
+ {n:'รองเท้าเขียว',p:80,c:'#35b97c'},{n:'รองเท้าเหลือง',p:100,c:'#ffc21a'},{n:'รองเท้าส้ม',p:100,c:'#ff8a3d'},{n:'รองเท้าชมพู',p:100,c:'#ff8fb0'},
+ {n:'บูตน้ำตาล',p:150,c:'#8a5a2b'},{n:'รองเท้าเงิน',p:300,c:'#cfd8e3'},{n:'รองเท้าทอง',p:500,c:'#ffd34d'}];
+/* เอฟเฟกต์รอบตัว: b = ชิ้นที่อยู่หลังตัวละคร · f = ชิ้นที่ลอยอยู่หน้าตัวละคร (ขยับด้วย CSS .fxt .fxu .fxg .fxr) */
+const FXP=[[14,30],[105,24],[101,66],[15,74],[60,7],[108,102],[11,104],[88,9]];
+const fxSpark=cs=>FXP.map(([x,y],i)=>`<path class="fxt" style="animation-delay:${(-i*.23).toFixed(2)}s" d="M${x} ${y-6}l1.800 4.200 4.200 1.800-4.200 1.800-1.800 4.200-1.800-4.200-4.200-1.800 4.200-1.800z" fill="${cs[i%cs.length]}"/>`).join('');
+const fxBub=c=>FXP.map(([x,y],i)=>`<circle class="fxu" style="animation-delay:${(-i*.31).toFixed(2)}s" cx="${x}" cy="${y}" r="${3+i%3}" fill="rgba(255,255,255,.25)" stroke="${c}" stroke-width="1.500"/>`).join('');
+const fxHeart=c=>FXP.map(([x,y],i)=>`<path class="fxu" style="animation-delay:${(-i*.31).toFixed(2)}s" d="M${x} ${y+4}c-8-5-4-10 0-6 4-4 8 1 0 6z" fill="${c}"/>`).join('');
+const fxGlow=c=>`<g class="fxg"><circle cx="60" cy="64" r="57" fill="${c}" opacity=".18"/><circle cx="60" cy="64" r="47" fill="${c}" opacity=".22"/><circle cx="60" cy="64" r="37" fill="${c}" opacity=".26"/></g>`;
+const RB=['#e8384f','#ff8a3d','#ffc21a','#35b97c','#4aa3ff','#8f7bd6'];
+const fxRing=`<g class="fxr">${RB.map((c,i)=>`<circle cx="60" cy="64" r="54" fill="none" stroke="${c}" stroke-width="5" stroke-dasharray="56.550 282.740" stroke-dashoffset="${(-i*56.550).toFixed(2)}"/>`).join('')}</g>`;
+const FX=[{n:'ไม่มีเอฟเฟกต์',p:0,b:'',f:''},{n:'ดาววิบวับ',p:150,b:'',f:fxSpark(['#ffd34d','#fff3a8'])},{n:'ประกายเงิน',p:150,b:'',f:fxSpark(['#ffffff','#cfe9ff'])},
+ {n:'ฟองสบู่',p:200,b:'',f:fxBub('#9fdcff')},{n:'หัวใจลอย',p:200,b:'',f:fxHeart('#ff6f91')},{n:'ประกายรุ้ง',p:300,b:'',f:fxSpark(RB)},
+ {n:'ออร่าทอง',p:400,b:fxGlow('#ffd34d'),f:fxSpark(['#ffd34d'])},{n:'ออร่าไฟ',p:400,b:fxGlow('#ff5a2e'),f:fxSpark(['#ff8a3d','#ffd34d'])},
+ {n:'ออร่าน้ำแข็ง',p:400,b:fxGlow('#6fd0ff'),f:fxSpark(['#ffffff','#9fdcff'])},{n:'ออร่าสายรุ้ง',p:600,b:fxRing,f:fxSpark(RB)}];
+const PRICE_X=3; /* ตัวคูณราคาทั้งร้าน (Surat ขอให้ซื้อยากขึ้น 3 เท่า 2026-11-21) */
+const cost=it=>it.p*PRICE_X;
+const SHOE='rx="9" ry="5" fill="#3b2a4a"';
 const EMB='76.570z" fill="#e8384f"';
 /* ประกอบตัวละครจากหมวก เสื้อ กางเกง (แทนสีในรูปต้นแบบก่อน แล้วค่อยวางหมวก เพื่อไม่ให้สีหมวกถูกแทนไปด้วย) */
-function dress(h,sh,pa){const t=SHIRTS[sh]||SHIRTS[0],p=PANTS[pa]||PANTS[0];
+function dress(h,sh,pa,so,fx){const t=SHIRTS[sh]||SHIRTS[0],p=PANTS[pa]||PANTS[0],o=SHOES[so]||SHOES[0],e=FX[fx]||FX[0];
  return BOY.split('#e6d8c3').join('@PC').split('#d3c2a8').join('@PS').split('#fbfbfb').join(t.c).split('#d5dae2').join(t.s).split('@PC').join(p.c).split('@PS').join(p.s)
-  .replace(EMB,EMB.replace('#e8384f',t.e)).replace('</svg>',(HATS[h]||HATS[0]).s+'</svg>')}
+  .split(SHOE).join(SHOE.replace('#3b2a4a',o.c)).replace(EMB,EMB.replace('#e8384f',t.e)).replace('height="100%">','height="100%">'+e.b).replace('</svg>',(HATS[h]||HATS[0]).s+e.f+'</svg>')}
 /* หมวกชุดเก่า (v1.1-1.3) เก็บเป็นเลขลำดับ 1-4: ย้ายเป็นลำดับใหม่ครั้งเดียว */
 if(!P.wv){const mp={1:4,2:9,3:11,4:13};P.owned=[...new Set((P.owned||[0]).map(i=>mp[i]||0))];P.hat=mp[P.hat]||0;P.wv=2;saveP()}
-function wear(){FOX=dress(P.hat,P.shirt,P.pants);['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
+function wear(){FOX=dress(P.hat,P.shirt,P.pants,P.shoe,P.fx);['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
 function sheet(title,html){$('sht').textContent=title;$('shb').innerHTML=html;$('sheet').hidden=false}
 $('shx').onclick=()=>{sfx.tap();$('sheet').hidden=true};
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true};
@@ -863,16 +891,21 @@ function openBook(){const card=(pic,name,has)=>`<div class="cc ${has?'':'no'}"><
  sheet('สมุดสะสม',`<h3>สัตว์ประหลาดที่ชนะแล้ว ${P.mon.filter(Boolean).length}/${MON.length}</h3><div class="cg">${MON.map((m,k)=>card(monSVG(m),m.n,P.mon[k])).join('')}</div>
  <h3>อาวุธ ${A.w.filter(Boolean).length}/${WPN.length}</h3><div class="cg">${WPN.map((w,k)=>card(w.svg,w.n+' พลัง '+atkOf(k),A.w[k])).join('')}</div>
  <h3>อัญมณีหายาก ตอบถูกครั้งแรกมีลุ้นเจอ</h3><div class="cg">${GEMS.map((g,i)=>card(gemSVG(g.c),g.n+' x'+P.gems[i],P.gems[i]>0)).join('')}</div>`)}
-const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'}};
-function openShop(keep){const sec=k=>{const d=SHOP[k];return `<h3>${d.t} มีแล้ว ${P[d.own].length}/${d.list.length}</h3><div class="cg">${d.list.map((it,i)=>{const own=P[d.own].includes(i),on=P[d.cur]===i;
-  return `<div class="cc"><span class="pic">${dress(k==='h'?i:P.hat,k==='s'?i:P.shirt,k==='p'?i:P.pants)}</span>${it.n}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${!own&&S.total<it.p?'disabled':''}>${on?'ใส่อยู่':own?'ใส่':it.p+' แต้ม'}</button></div>`}).join('')}</div>`};
+const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
+ o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'}};
+let shopTab='h';
+function openShop(keep){const k=shopTab,d=SHOP[k],now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
+ const tabs=`<div class="tabs">${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
+ const cards=d.list.map((it,i)=>{const own=P[d.own].includes(i),on=P[d.cur]===i,v=Object.assign({},now,{[k]:i});
+  return `<div class="cc"><span class="pic">${dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${!own&&S.total<cost(it)?'disabled':''}>${on?'ใส่อยู่':own?'ใส่':cost(it)+' แต้ม'}</button></div>`}).join('');
  const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
- sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม ใช้แต้มแลกชุดได้</h3>`+sec('h')+sec('s')+sec('p'));sc.scrollTop=y}
-$('shb').onclick=e=>{const o=e.target.closest('button[data-off]');
+ sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${d.t} มีแล้ว ${P[d.own].length}/${d.list.length}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
+$('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
+ const o=e.target.closest('button[data-off]');
  if(o){const m=o.dataset.off;if(!P.off[m]&&OPS.includes(m)&&OPS.filter(x=>!P.off[x]).length<=1){toast('<span>ต้องเปิดไว้อย่างน้อย 1 เรื่อง</span>');return}
   if(P.off[m])delete P.off[m];else P.off[m]=1;saveP();sfx.tap();drawModes();openParent();return}
  const b=e.target.closest('button[data-t]');if(!b)return;const d=SHOP[b.dataset.t],i=+b.dataset.i,it=d.list[i];
- if(!P[d.own].includes(i)){if(S.total<it.p)return;S.total-=it.p;saveT();P[d.own].push(i);sfx.win()}else sfx.tap();
+ if(!P[d.own].includes(i)){if(S.total<cost(it))return;S.total-=cost(it);saveT();P[d.own].push(i);sfx.win()}else sfx.tap();
  P[d.cur]=i;saveP();wear();openShop(true)};
 function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
@@ -880,7 +913,7 @@ function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const
  sheet('สำหรับผู้ปกครอง',tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
  <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
 $('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
-if(!P.off)P.off={};wear();drawModes();if(S.auto)S.lv=autoLv();
+if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();if(S.auto)S.lv=autoLv();
 </script>
 </body>
 </html>
