@@ -72,7 +72,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 .medc{margin-left:auto;display:flex;align-items:center;gap:5px;font-weight:900;font-size:20px;color:#fff;background:rgba(40,26,90,.85);padding:6px 14px 6px 9px;border-radius:20px}
 /* ---------- แผนที่ผจญภัย ---------- */
 .maph{color:#fff;font-weight:900;font-size:20px;text-shadow:0 2px 0 rgba(0,0,0,.3)}
-.map{flex:1;min-height:0;overflow-y:auto;width:100%;max-width:520px;scrollbar-width:none}
+.map{flex:1;min-height:0;overflow-y:auto;width:100%;max-width:520px;scrollbar-width:none;touch-action:pan-y;cursor:grab;-webkit-mask-image:linear-gradient(transparent,#000 34px,#000 calc(100% - 24px),transparent);mask-image:linear-gradient(transparent,#000 34px,#000 calc(100% - 24px),transparent)}
+.map::-webkit-scrollbar{display:none}
+.map.drag{cursor:grabbing}
+.mapin{margin-top:26px}
 .mapin{position:relative;width:100%}
 .mapin>svg{position:absolute;inset:0;width:100%;height:100%}
 .mn{position:absolute;transform:translate(-50%,-50%);width:130px;border:0;background:none;display:flex;flex-direction:column;align-items:center;padding:0}
@@ -318,7 +321,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
-    <div class="ver">v1.4</div>
+    <div class="ver">v1.5</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -532,7 +535,13 @@ function openMap(){show('map');const XS=[30,70,30,70,30,70,50],GAP=122,H=(NS+1)*
  const sc=$('mapsc');sc.scrollTop=Math.max(0,y(Math.min(A.adv,NS))-sc.clientHeight/2)}
 $('adv').onclick=()=>{sfx.tap();openMap()};
 $('mapback').onclick=()=>{sfx.tap();goHome()};
-$('mapin').onclick=e=>{const b=e.target.closest('.mn');if(!b)return;const k=+b.dataset.k;
+/* ลากด้วยเมาส์เพื่อเลื่อนแผนที่ (จอสัมผัสเลื่อนได้เองอยู่แล้ว) ถ้าลากเกิน 6px ไม่นับเป็นการกดด่าน */
+let mdrag=null,mmoved=false;
+{const sc=$('mapsc');
+ sc.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse')return;mdrag={y:e.clientY,t:sc.scrollTop};mmoved=false});
+ window.addEventListener('pointermove',e=>{if(!mdrag)return;const d=e.clientY-mdrag.y;if(Math.abs(d)>6){mmoved=true;sc.classList.add('drag')}sc.scrollTop=mdrag.t-d});
+ window.addEventListener('pointerup',()=>{if(mdrag){mdrag=null;sc.classList.remove('drag');setTimeout(()=>mmoved=false,0)}})}
+$('mapin').onclick=e=>{const b=e.target.closest('.mn');if(!b||mmoved)return;const k=+b.dataset.k;
  if(k>A.adv){sfx.no();say('ต้องผ่านด่านก่อนหน้าก่อนนะ');return}
  if(k===NS)return reward();S.stage=k;start(STAGES[k].m)};
 function confetti(box){const col=['#ffc83d','#ff6f91','#4aa3ff','#35b97c','#fff'];
