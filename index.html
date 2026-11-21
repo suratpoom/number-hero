@@ -310,6 +310,11 @@ button{font:inherit;color:inherit;cursor:pointer}
 .fxr{transform-box:fill-box;transform-origin:center;animation:spin 6s linear infinite}
 .cc small{font-size:11px;line-height:1.2;color:#7a5a3a;font-weight:700}
 .cc button:disabled{font-size:12px}
+.ic{position:relative}
+.ic.dot::after{content:"";position:absolute;top:3px;right:3px;width:13px;height:13px;border-radius:50%;background:#ff4d6d;border:2px solid #fff;animation:glow 1.2s ease-in-out infinite}
+.tpic{width:44px;height:44px;flex:none}.tpic svg{width:100%;height:100%}
+#win .fox{animation:cheer .9s ease-in-out infinite}
+@keyframes cheer{0%,100%{transform:translateY(0) rotate(-5deg)}50%{transform:translateY(-16px) rotate(5deg)}}
 </style>
 </head>
 <body>
@@ -341,7 +346,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
-    <div class="ver">v1.8</div>
+    <div class="ver">v1.9</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -523,7 +528,7 @@ function saveLv(){try{localStorage.setItem('fnf_lv',S.auto?'a':S.lv)}catch(e){}}
 function drawLv(){$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}">ปรับเอง</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('')}
 drawLv();
 $('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'ปรับระดับให้เอง':'ระดับ'+L().name)};
-function setStars(){document.querySelectorAll('.scv').forEach(e=>e.textContent=S.total)}
+function setStars(){document.querySelectorAll('.scv').forEach(e=>e.textContent=S.total);try{updDot()}catch(e){}}
 function saveT(){try{localStorage.setItem('fnf_stars',S.total)}catch(e){}setStars()}
 setStars();
 $('modes').innerHTML=MODES.map(m=>`<button class="mode" data-m="${m.id}"><span class="mi" style="--c:${m.c}">${m.sym}</span><span><b>${m.name}</b><small>${m.sub}</small></span></button>`).join('');
@@ -575,7 +580,7 @@ $('mapin').onclick=e=>{const b=e.target.closest('.mn');if(!b||mmoved)return;cons
 function confetti(box){const col=['#ffc83d','#ff6f91','#4aa3ff','#35b97c','#fff'];
  for(let k=0;k<46;k++){const c=document.createElement('i');c.className='cf';c.style.cssText=`left:${r(0,100)}%;background:${col[k%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*1.2}s`;box.appendChild(c);setTimeout(()=>c.remove(),6000)}}
 function reward(){show('reward');const c=$('chest');c.classList.remove('open');c.innerHTML=CHEST+'<i class="medal"></i>';
- A.adv=0;A.stars=[];A.medals++;saveA();S.total+=PT.chest;saveT();
+ A.adv=0;A.stars=[];A.medals++;saveA();setTimeout(checkUnlocks,2600);S.total+=PT.chest;saveT();
  $('rwp').innerHTML=`เหรียญนักผจญภัย เหรียญที่ ${A.medals}<br>ได้เพิ่ม ${PT.chest} แต้ม`;
  $('rwgo').textContent=!S.auto&&S.lv<2?'ผจญภัยรอบใหม่ ยากขึ้นอีกนิด':'ผจญภัยรอบใหม่';
  setTimeout(()=>{c.classList.add('open');sfx.win();confetti($('reward'));say('เจอสมบัติแล้ว เก่งที่สุดเลย')},500)}
@@ -782,7 +787,7 @@ function hitMon(dmg,big){F.hp-=dmg;$('hpf').style.width=Math.max(0,F.hp/F.max*10
 function hurt(){F.h--;F.inv=1;drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
  if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
 function finishStage(){if(!$('fight').classList.contains('on'))return;P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
- const b=PT.stage*(S.lv+1);S.pts+=b;S.total+=b;saveT();showWin(true)}
+ const b=PT.stage*(S.lv+1);S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
 const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
 tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
 /* จอยมือซ้าย: ลากจากกลางวงเพื่อเดิน (ขึ้น = เดินลึกเข้าไป) */
@@ -828,13 +833,13 @@ function autoLv(m){const k=P.skill,s=m&&k[m]!==undefined?k[m]:(k.add+k.sub+k.mul
 function track(first){const m=S.cur,st=P.stat[m]||(P.stat[m]={n:0,ok:0});st.n++;if(first)st.ok++;
  if(P.skill[m]!==undefined)P.skill[m]=clamp(P.skill[m]+(first?.12:-.25),0,2);
  if(first&&S.q&&S.q.rv)P.miss=P.miss.filter(x=>!(x.m===m&&x.a===S.q.a&&x.b===S.q.b));
- saveP();if(first&&Math.random()<.12)dropGem()}
+ saveP();checkUnlocks();if(first&&Math.random()<.12)dropGem()}
 function noteMiss(){const m=S.cur,q=S.q;if(S.miss!==1||m==='write'||P.miss.some(x=>x.m===m&&x.a===q.a&&x.b===q.b))return;P.miss.push({m,a:q.a,b:q.b});if(P.miss.length>12)P.miss.shift();saveP()}
 /* อัญมณีหายาก: ตอบถูกครั้งแรกมีโอกาส 12% ได้ 1 เม็ด (w = น้ำหนักการสุ่ม) */
 const GEMS=[{n:'ทับทิม',c:'#e8384f',w:35},{n:'มรกต',c:'#35b97c',w:30},{n:'ไพลิน',c:'#4aa3ff',w:20},{n:'บุษราคัม',c:'#ffc21a',w:12},{n:'เพชรดารา',c:'#c9f1ff',w:3}];
 const gemSVG=c=>`<svg viewBox="0 0 40 40"><path d="M10 6h20l8 10-18 20L2 16z" fill="${c}" stroke="rgba(0,0,0,.25)" stroke-width="1.500"/><path d="M10 6l4 10h12l4-10M2 16h36M14 16l6 20 6-20" fill="none" stroke="rgba(255,255,255,.65)" stroke-width="1.500"/></svg>`;
 function toast(html){const t=document.createElement('div');t.className='toast';t.innerHTML=html;document.body.appendChild(t);setTimeout(()=>t.remove(),2000)}
-function dropGem(){let x=Math.random()*100,i=0;for(;i<GEMS.length-1;i++){x-=GEMS[i].w;if(x<0)break}P.gems[i]++;saveP();toast(gemSVG(GEMS[i].c)+`<span>เจอ${GEMS[i].n}</span>`);tone(1200,0,.15,'triangle',.1);tone(1600,.1,.2,'triangle',.1)}
+function dropGem(){let x=Math.random()*100,i=0;for(;i<GEMS.length-1;i++){x-=GEMS[i].w;if(x<0)break}P.gems[i]++;saveP();updDot();toast(gemSVG(GEMS[i].c)+`<span>เจอ${GEMS[i].n}</span>`);tone(1200,0,.15,'triangle',.1);tone(1600,.1,.2,'triangle',.1)}
 /* หมวก: ใช้แต้มแลก แล้วตัวละครใส่ทุกหน้า */
 const BOY=FOX;
 /* ร้านแต่งตัว: หมวก (s = ชิ้น SVG วางบนหัว) · เสื้อ (c สีเสื้อ, s สีขอบ, e สีดาว) · กางเกง (c สี, s สีกระเป๋า) · p = ราคาเป็นแต้ม */
@@ -891,7 +896,9 @@ function dress(h,sh,pa,so,fx){const t=SHIRTS[sh]||SHIRTS[0],p=PANTS[pa]||PANTS[0
   .split(SHOE).join(SHOE.replace('#3b2a4a',o.c)).replace(EMB,EMB.replace('#e8384f',t.e)).replace('height="100%">','height="100%">'+e.b).replace('</svg>',(HATS[h]||HATS[0]).s+e.f+'</svg>')}
 /* หมวกชุดเก่า (v1.1-1.3) เก็บเป็นเลขลำดับ 1-4: ย้ายเป็นลำดับใหม่ครั้งเดียว */
 if(!P.wv){const mp={1:4,2:9,3:11,4:13};P.owned=[...new Set((P.owned||[0]).map(i=>mp[i]||0))];P.hat=mp[P.hat]||0;P.wv=2;saveP()}
-function wear(){FOX=dress(P.hat,P.shirt,P.pants,P.shoe,P.fx);['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
+function wear(){FOX=dress(P.hat,P.shirt,P.pants,P.shoe,P.fx);['heroFox','loseFox'].forEach(id=>$(id).innerHTML=FOX);
+ /* หน้าชนะ: ชูแขนสองข้างโชว์ชุดที่ใส่อยู่ */
+ $('winFox').innerHTML=FOX.replace(ARMS,ARMS_UP);try{updDot()}catch(e){}}
 function sheet(title,html){$('sht').textContent=title;$('shb').innerHTML=html;$('sheet').hidden=false}
 $('shx').onclick=()=>{sfx.tap();$('sheet').hidden=true};
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true};
@@ -902,8 +909,18 @@ function openBook(){const card=(pic,name,has)=>`<div class="cc ${has?'':'no'}"><
 const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
  o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'}};
 let shopTab='h';
+const ARMS='<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088"',ARMS_UP='<path d="M45 72 32 55M75 72l13-17" stroke="#e3b088"';
+/* ของที่ปลดล็อกจากความสำเร็จ: แจ้งครั้งเดียวต่อชิ้น (P.seen) · เข้าร้านแล้วนับเป็นของเราเลย */
+function eachUnlock(fn){Object.keys(SHOP).forEach(k=>{const d=SHOP[k];d.list.forEach((it,i)=>{if(it.a&&it.a.ok())fn(k,d,i,it)})})}
+function checkUnlocks(){if(!P.seen)P.seen=[];let n=0;eachUnlock((k,d,i,it)=>{const key=k+i;if(P.seen.includes(key))return;P.seen.push(key);
+  setTimeout(()=>{toast(`<span class="tpic">${dress(k==='h'?i:0,k==='s'?i:0,k==='p'?i:0,k==='o'?i:0,k==='f'?i:0)}</span><span>ปลดล็อก${it.n}แล้ว</span>`);sfx.win()},n++*2200)});
+ if(n){saveP();updDot()}}
+function claimUnlocks(){let ch=false;eachUnlock((k,d,i)=>{if(!P[d.own].includes(i)){P[d.own].push(i);ch=true}});if(ch){saveP();updDot()}}
+/* จุดแดงที่ปุ่มร้าน: มีของที่ซื้อได้ แลกได้ หรือปลดล็อกแล้วยังไม่ได้รับ */
+function updDot(){let on=false;Object.values(SHOP).forEach(d=>d.list.forEach((it,i)=>{if(on||P[d.own].includes(i))return;
+  on=it.a?it.a.ok():it.g?P.gems[it.g[0]]>=it.g[1]:S.total>=cost(it)}));$('bshop').classList.toggle('dot',on)}
 const owns=(d,i)=>P[d.own].includes(i)||!!(d.list[i].a&&d.list[i].a.ok());
-function openShop(keep){const k=shopTab,d=SHOP[k],now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
+function openShop(keep){claimUnlocks();const k=shopTab,d=SHOP[k],now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
  const tabs=`<div class="tabs">${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
  const cards=d.list.map((it,i)=>{const own=owns(d,i),on=P[d.cur]===i,v=Object.assign({},now,{[k]:i});let txt,dis=false,note='';
   if(on)txt='ใส่อยู่';else if(own)txt='ใส่';
@@ -924,7 +941,7 @@ $('shb').onclick=e=>{const tb=e.target.closest('button[data-tab]');if(tb){shopTa
   else{if(S.total<cost(it))return;S.total-=cost(it);saveT()}
   sfx.win()}else sfx.tap();
  if(!P[d.own].includes(i))P[d.own].push(i);
- P[d.cur]=i;saveP();wear();openShop(true)};
+ P[d.cur]=i;saveP();wear();openShop(true);updDot()};
 function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
  const tg=`<h3>เลือกเรื่องที่ให้ฝึก แตะเพื่อเปิดหรือปิด</h3><div class="tg">${['add','sub','mul','div','write'].map(m=>`<button data-off="${m}" class="${P.off[m]?'':'on'}">${MN[m]}</button>`).join('')}</div><div class="note">เรื่องที่ปิด ปุ่มฝึกจะหายไป และด่านผจญภัยของเรื่องนั้นจะเป็นโจทย์รวมจากเรื่องที่เปิดอยู่</div><h3>ผลการฝึก</h3>`;
