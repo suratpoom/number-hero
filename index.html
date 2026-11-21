@@ -43,8 +43,10 @@ button{font:inherit;color:inherit;cursor:pointer}
 /* ---------- หน้าแรก ---------- */
 .title{margin:2px 0 0;text-align:center;color:#fff;font-size:clamp(34px,9vw,60px);font-weight:900;line-height:1.1;text-shadow:0 4px 0 #6b3fa6,0 10px 24px rgba(0,0,0,.35);letter-spacing:.5px}
 .sub{color:#ffe9b8;font-weight:700;font-size:clamp(14px,3.6vw,18px);text-align:center;margin-top:4px}
-.hero{flex:1;min-height:0;display:grid;place-items:center;width:100%}
-.hero .fox{height:min(100%,300px);aspect-ratio:1;animation:bob 2.6s ease-in-out infinite;filter:drop-shadow(0 16px 14px rgba(20,10,60,.4))}
+.hero{flex:1 1 0;min-height:110px;position:relative;width:100%;pointer-events:none}
+.hero .fox{position:absolute;top:0;bottom:0;left:50%;height:100%;max-height:300px;margin:auto 0;aspect-ratio:1;transform:translateX(-50%);filter:drop-shadow(0 16px 14px rgba(20,10,60,.4))}
+.hero .fox>svg{animation:bob 2.6s ease-in-out infinite}
+#home{overflow-y:auto}
 @keyframes bob{50%{transform:translateY(-10px)}}
 .fox .eye{transform-box:fill-box;transform-origin:center;animation:blink 4s infinite}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
@@ -101,7 +103,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .lv button .st:first-of-type{margin-left:2px}
 .lv button.on{background:var(--cream);color:var(--ink);box-shadow:0 4px 0 #d9c2a0}
 .ver{color:rgba(255,255,255,.6);font-size:12px;font-weight:700}
-@media(min-width:720px){.modes{grid-template-columns:repeat(5,minmax(0,1fr))}.mode{flex-direction:column;text-align:center;padding:16px 8px}.mode:last-child{grid-column:auto}}
+
 
 /* ---------- ทางเดิน ---------- */
 .track{flex:1;height:52px;position:relative;margin:0 4px}
@@ -275,6 +277,16 @@ button{font:inherit;color:inherit;cursor:pointer}
 .lv{grid-template-columns:repeat(4,minmax(0,1fr))}
 .lv button{font-size:15px;gap:3px}
 .lv button .st{width:12px;height:12px;margin-left:-3px}
+.advbtn{padding:14px 16px}
+.advt{display:flex;flex-direction:column;gap:4px;min-width:0;text-align:left}
+.advt b{font-size:24px}
+.dots{display:flex;gap:6px;margin-top:2px}
+.dots i{width:15px;height:15px;border-radius:50%;background:rgba(59,42,74,.22)}
+.dots i.on{background:#218a58}
+.dots i.cur{background:#fff;box-shadow:0 0 0 3px #ff8a3d}
+.go{margin-left:auto;width:54px;height:54px;border-radius:50%;background:var(--ink);display:grid;place-items:center;flex:none;box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.go svg{width:26px;height:26px;fill:#fff;margin-left:3px}
+.seclab{color:#fff;font-weight:900;font-size:14px;text-shadow:0 2px 3px rgba(20,10,60,.7);margin-bottom:-6px}
 </style>
 </head>
 <body>
@@ -292,7 +304,7 @@ button{font:inherit;color:inherit;cursor:pointer}
     <div class="wrap top">
       <button class="ic" id="snd" aria-label="เสียง"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
       <button class="ic" id="bbook" aria-label="สมุดสะสม"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M9 8h6"/></svg></button>
-      <button class="ic" id="bshop" aria-label="ร้านหมวก"><svg viewBox="0 0 24 24"><path d="M2 18h20M6 18v-6a6 6 0 0 1 12 0v6"/></svg></button>
+      <button class="ic" id="bshop" aria-label="ร้านแต่งตัว"><svg viewBox="0 0 24 24"><path d="M2 18h20M6 18v-6a6 6 0 0 1 12 0v6"/></svg></button>
       <button class="ic" id="bpar" aria-label="สำหรับผู้ปกครอง"><svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-6M21 20H3"/></svg></button>
       <div class="starc"><i class="st"></i><span class="scv">0</span></div>
     </div>
@@ -301,10 +313,12 @@ button{font:inherit;color:inherit;cursor:pointer}
       <div class="sub">ตอบเลขเก็บอาวุธ แล้วไปสู้กับสัตว์ประหลาด</div>
     </div>
     <div class="hero"><div class="fox" id="heroFox"></div></div>
+    <div class="wrap seclab">ระดับความยาก</div>
     <div class="wrap lv" id="lv"></div>
-    <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span><b>ออกผจญภัย</b><small id="advsub"></small></span><span class="medc"><i class="st"></i><span id="medc">0</span></span></button>
+    <button class="wrap mode advbtn" id="adv"><span class="mi" style="--c:#ff8a3d"><svg viewBox="0 0 24 24"><path d="M6 21V4M6 4h12l-3 4 3 4H6"/></svg></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
+    <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
-    <div class="ver">v1.3</div>
+    <div class="ver">v1.4</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -503,7 +517,8 @@ const bestW=()=>{let b=-1;WPN.forEach((_,k)=>{if(A.w[k]&&(b<0||atkOf(k)>atkOf(b)
 const monHP=k=>Math.round(MON[k].hits*WPN[k].a*(1+.5*A.medals)*[.75,1,1.3][S.lv]);
 try{const v=JSON.parse(localStorage.getItem('fnf_adv'));if(v&&typeof v.adv==='number')A=Object.assign(A,v)}catch(e){}
 function saveA(){try{localStorage.setItem('fnf_adv',JSON.stringify(A))}catch(e){}}
-function drawHome(){$('advsub').textContent=A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`;$('medc').textContent=A.medals}
+function drawHome(){$('advsub').textContent=(A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`)+(A.medals?` ได้เหรียญแล้ว ${A.medals}`:'');
+ $('advdots').innerHTML=STAGES.map((_,k)=>`<i class="${k<A.adv?'on':k===A.adv?'cur':''}"></i>`).join('')}
 function goHome(){drawHome();show('home')}
 function openMap(){show('map');const XS=[30,70,30,70,30,70,50],GAP=122,H=(NS+1)*GAP+60,y=k=>H-80-k*GAP;
  const pts=k=>XS.slice(0,k+1).map((x,i)=>`${x},${y(i)}`).join(' ');
@@ -748,7 +763,7 @@ drawHome();
 
 /* ============ โปรไฟล์ผู้เล่น: ปรับระดับเอง · ข้อที่เคยผิด · ของสะสม · หมวก · สถิติ ============ */
 const MN={add:'บวก',sub:'ลบ',mul:'คูณ',div:'หาร',write:'เขียนเลข'},SYM={add:'+',sub:'−',mul:'×',div:'÷'};
-let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],hat:0,owned:[0],mon:[]};
+let P={skill:{add:.3,sub:.3,mul:.3,div:.3},stat:{},miss:[],gems:[0,0,0,0,0],hat:0,owned:[0],shirt:0,ownS:[0],pants:0,ownP:[0],mon:[]};
 try{const v=JSON.parse(localStorage.getItem('fnf_p'));if(v&&v.skill)P=Object.assign(P,v)}catch(e){}
 function saveP(){try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
 /* skill 0-2 ต่อเรื่อง: ถูกครั้งแรก +0.12 · ผิด -0.25 แล้วปัดเป็นระดับ ง่าย/กลาง/ยาก */
@@ -765,12 +780,37 @@ function toast(html){const t=document.createElement('div');t.className='toast';t
 function dropGem(){let x=Math.random()*100,i=0;for(;i<GEMS.length-1;i++){x-=GEMS[i].w;if(x<0)break}P.gems[i]++;saveP();toast(gemSVG(GEMS[i].c)+`<span>เจอ${GEMS[i].n}</span>`);tone(1200,0,.15,'triangle',.1);tone(1600,.1,.2,'triangle',.1)}
 /* หมวก: ใช้แต้มแลก แล้วตัวละครใส่ทุกหน้า */
 const BOY=FOX;
+/* ร้านแต่งตัว: หมวก (s = ชิ้น SVG วางบนหัว) · เสื้อ (c สีเสื้อ, s สีขอบ, e สีดาว) · กางเกง (c สี, s สีกระเป๋า) · p = ราคาเป็นแต้ม */
 const HATS=[{n:'ไม่ใส่หมวก',p:0,s:''},
+ {n:'หมวกแก๊ป',p:100,s:'<path d="M36 34Q34 10 60 10q26 0 24 24z" fill="#e8384f"/><path d="M60 29h34q4 7-6 7H60z" fill="#b81f3a"/><circle cx="60" cy="11" r="3" fill="#fff"/>'},
+ {n:'ผ้าคาดหัวนินจา',p:120,s:'<path d="M35 29q25 8 50 0v8q-25 8-50 0z" fill="#e8384f"/><path d="M84 32l15-5-3 9zM84 35l13 7-9 2z" fill="#e8384f"/>'},
+ {n:'หมวกปาร์ตี้',p:130,s:'<path d="M44 27 60 4l16 23z" fill="#ff6f91"/><path d="M52 16l14 3M48 22l22 3" stroke="#fff" stroke-width="2.500"/><circle cx="60" cy="5" r="4" fill="#ffd34d"/>'},
  {n:'หมวกบัณฑิต',p:150,s:'<path d="M42 16v9q18 7 36 0v-9z" fill="#1c1717"/><path d="M60 3 97 14 60 25 23 14z" fill="#2b2626"/><path d="M60 14h30v13" fill="none" stroke="#ffc21a" stroke-width="2.500"/><circle cx="90" cy="28" r="3" fill="#ffc21a"/>'},
+ {n:'หมวกเชฟ',p:180,s:'<circle cx="46" cy="14" r="10" fill="#fff" stroke="#d5dae2" stroke-width="1.500"/><circle cx="74" cy="14" r="10" fill="#fff" stroke="#d5dae2" stroke-width="1.500"/><circle cx="60" cy="11" r="10" fill="#fff" stroke="#d5dae2" stroke-width="1.500"/><rect x="42" y="16" width="36" height="16" fill="#fff" stroke="#d5dae2" stroke-width="1.500"/><rect x="44" y="12" width="32" height="10" fill="#fff"/>'},
+ {n:'หูกระต่าย',p:200,s:'<path d="M45 24Q36 0 46 3q8 5 7 21zM75 24q9-24-1-21-8 5-7 21z" fill="#fff" stroke="#d5dae2" stroke-width="1.500"/><path d="M47 20q-3-10 0-12 3 4 3 12zM73 20q3-10 0-12-3 4-3 12z" fill="#ffb3c7"/>'},
+ {n:'หมวกโจรสลัด',p:220,s:'<path d="M30 31Q40 3 60 9q20-6 30 22-30-8-60 0z" fill="#2b2626"/><path d="M53 26l14-11M53 15l14 11" stroke="#fff" stroke-width="2.500" stroke-linecap="round"/><circle cx="60" cy="20" r="5" fill="#fff"/>'},
+ {n:'หมวกคาวบอย',p:250,s:'<ellipse cx="60" cy="28" rx="38" ry="7" fill="#a5622a"/><path d="M42 28Q40 6 52 9q8 4 16 0 12-3 10 19z" fill="#bf7632"/><rect x="42" y="21" width="36" height="5" fill="#6b4226"/>'},
  {n:'หมวกอัศวิน',p:300,s:'<path d="M35 36Q33 6 60 6q27 0 25 30l-6-6H41z" fill="#cfd8e3" stroke="#8fa3b8" stroke-width="2"/><path d="M60 7q8-9 20-3-11 1-13 7z" fill="#e8384f"/>'},
+ {n:'หมวกไวกิ้ง',p:350,s:'<path d="M38 24Q22 21 24 4q8 11 19 11zM82 24q16-3 14-20-8 11-19 11z" fill="#fff3e0" stroke="#d3c2a8" stroke-width="1.500"/><path d="M36 34Q34 8 60 8q26 0 24 26z" fill="#8fa3b8" stroke="#6b7f95" stroke-width="2"/><rect x="36" y="28" width="48" height="6" fill="#e9a91c"/>'},
  {n:'หมวกพ่อมด',p:450,s:'<path d="M36 26 64 0l20 26z" fill="#5b3fa0"/><ellipse cx="60" cy="26" rx="31" ry="5.500" fill="#4a3290"/><circle cx="62" cy="15" r="3.500" fill="#ffd34d"/>'},
+ {n:'หมวกนักบินอวกาศ',p:550,s:'<circle cx="60" cy="42" r="31" fill="rgba(170,225,255,.3)" stroke="#fff" stroke-width="4"/><path d="M40 25q8-8 18-9" stroke="#fff" stroke-width="3" fill="none" stroke-linecap="round"/>'},
  {n:'มงกุฎทอง',p:700,s:'<path d="M38 24 36 6l12 9 12-13 12 13 12-9-2 18z" fill="#ffd34d" stroke="#c98f0a" stroke-width="2"/><circle cx="60" cy="17" r="3" fill="#e8384f"/><circle cx="46" cy="19" r="2.200" fill="#4aa3ff"/><circle cx="74" cy="19" r="2.200" fill="#4aa3ff"/>'}];
-function wear(){if(!HATS[P.hat])P.hat=0;FOX=BOY.replace('</svg>',HATS[P.hat].s+'</svg>');['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
+const SHIRTS=[{n:'เสื้อขาวดาวแดง',p:0,c:'#fbfbfb',s:'#d5dae2',e:'#e8384f'},{n:'เสื้อแดง',p:100,c:'#e8384f',s:'#b81f3a',e:'#ffd34d'},{n:'เสื้อฟ้า',p:100,c:'#4aa3ff',s:'#2a74c9',e:'#ffffff'},
+ {n:'เสื้อเขียว',p:120,c:'#35b97c',s:'#218a58',e:'#ffd34d'},{n:'เสื้อเหลือง',p:120,c:'#ffc21a',s:'#c98f0a',e:'#e8384f'},{n:'เสื้อส้ม',p:120,c:'#ff8a3d',s:'#c9611d',e:'#ffffff'},
+ {n:'เสื้อม่วง',p:150,c:'#8f7bd6',s:'#5d49a8',e:'#ffd34d'},{n:'เสื้อชมพู',p:150,c:'#ff8fb0',s:'#d9608a',e:'#ffffff'},{n:'ชุดนินจาดำ',p:250,c:'#2b2626',s:'#111111',e:'#e8384f'},
+ {n:'เกราะเงิน',p:400,c:'#cfd8e3',s:'#8fa3b8',e:'#4aa3ff'},{n:'เกราะทอง',p:600,c:'#ffd34d',s:'#c98f0a',e:'#ffffff'}];
+const PANTS=[{n:'กางเกงครีม',p:0,c:'#e6d8c3',s:'#d3c2a8'},{n:'ยีนส์น้ำเงิน',p:80,c:'#3b5a9a',s:'#2c4578'},{n:'กางเกงดำ',p:80,c:'#2b2626',s:'#111111'},
+ {n:'กางเกงน้ำตาล',p:100,c:'#8a5a2b',s:'#6b4226'},{n:'กางเกงเขียวทหาร',p:100,c:'#6b8f4a',s:'#4f6e33'},{n:'กางเกงแดง',p:100,c:'#e8384f',s:'#b81f3a'},
+ {n:'กางเกงขาว',p:120,c:'#fbfbfb',s:'#d5dae2'},{n:'กางเกงม่วง',p:120,c:'#8f7bd6',s:'#5d49a8'},{n:'กางเกงฟ้า',p:120,c:'#4aa3ff',s:'#2a74c9'},
+ {n:'เกราะขาเงิน',p:300,c:'#cfd8e3',s:'#8fa3b8'},{n:'เกราะขาทอง',p:500,c:'#ffd34d',s:'#c98f0a'}];
+const EMB='76.570z" fill="#e8384f"';
+/* ประกอบตัวละครจากหมวก เสื้อ กางเกง (แทนสีในรูปต้นแบบก่อน แล้วค่อยวางหมวก เพื่อไม่ให้สีหมวกถูกแทนไปด้วย) */
+function dress(h,sh,pa){const t=SHIRTS[sh]||SHIRTS[0],p=PANTS[pa]||PANTS[0];
+ return BOY.split('#e6d8c3').join('@PC').split('#d3c2a8').join('@PS').split('#fbfbfb').join(t.c).split('#d5dae2').join(t.s).split('@PC').join(p.c).split('@PS').join(p.s)
+  .replace(EMB,EMB.replace('#e8384f',t.e)).replace('</svg>',(HATS[h]||HATS[0]).s+'</svg>')}
+/* หมวกชุดเก่า (v1.1-1.3) เก็บเป็นเลขลำดับ 1-4: ย้ายเป็นลำดับใหม่ครั้งเดียว */
+if(!P.wv){const mp={1:4,2:9,3:11,4:13};P.owned=[...new Set((P.owned||[0]).map(i=>mp[i]||0))];P.hat=mp[P.hat]||0;P.wv=2;saveP()}
+function wear(){FOX=dress(P.hat,P.shirt,P.pants);['heroFox','winFox','loseFox'].forEach(id=>$(id).innerHTML=FOX)}
 function sheet(title,html){$('sht').textContent=title;$('shb').innerHTML=html;$('sheet').hidden=false}
 $('shx').onclick=()=>{sfx.tap();$('sheet').hidden=true};
 $('sheet').onclick=e=>{if(e.target.id==='sheet')$('sheet').hidden=true};
@@ -778,11 +818,14 @@ function openBook(){const card=(pic,name,has)=>`<div class="cc ${has?'':'no'}"><
  sheet('สมุดสะสม',`<h3>สัตว์ประหลาดที่ชนะแล้ว ${P.mon.filter(Boolean).length}/${MON.length}</h3><div class="cg">${MON.map((m,k)=>card(monSVG(m),m.n,P.mon[k])).join('')}</div>
  <h3>อาวุธ ${A.w.filter(Boolean).length}/${WPN.length}</h3><div class="cg">${WPN.map((w,k)=>card(w.svg,w.n+' พลัง '+atkOf(k),A.w[k])).join('')}</div>
  <h3>อัญมณีหายาก ตอบถูกครั้งแรกมีลุ้นเจอ</h3><div class="cg">${GEMS.map((g,i)=>card(gemSVG(g.c),g.n+' x'+P.gems[i],P.gems[i]>0)).join('')}</div>`)}
-function openShop(){sheet('ร้านหมวก',`<h3>มี ${S.total} แต้ม ใช้แต้มแลกหมวกได้</h3><div class="cg">${HATS.map((h,i)=>{const own=P.owned.includes(i);
- return `<div class="cc"><span class="pic">${BOY.replace('</svg>',h.s+'</svg>')}</span>${h.n}<button data-h="${i}" class="${P.hat===i?'on':''}" ${!own&&S.total<h.p?'disabled':''}>${P.hat===i?'ใส่อยู่':own?'ใส่':h.p+' แต้ม'}</button></div>`}).join('')}</div>`)}
-$('shb').onclick=e=>{const b=e.target.closest('button[data-h]');if(!b)return;const i=+b.dataset.h;
- if(!P.owned.includes(i)){if(S.total<HATS[i].p)return;S.total-=HATS[i].p;saveT();P.owned.push(i);sfx.win()}else sfx.tap();
- P.hat=i;saveP();wear();openShop()};
+const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'}};
+function openShop(keep){const sec=k=>{const d=SHOP[k];return `<h3>${d.t} มีแล้ว ${P[d.own].length}/${d.list.length}</h3><div class="cg">${d.list.map((it,i)=>{const own=P[d.own].includes(i),on=P[d.cur]===i;
+  return `<div class="cc"><span class="pic">${dress(k==='h'?i:P.hat,k==='s'?i:P.shirt,k==='p'?i:P.pants)}</span>${it.n}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${!own&&S.total<it.p?'disabled':''}>${on?'ใส่อยู่':own?'ใส่':it.p+' แต้ม'}</button></div>`}).join('')}</div>`};
+ const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
+ sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม ใช้แต้มแลกชุดได้</h3>`+sec('h')+sec('s')+sec('p'));sc.scrollTop=y}
+$('shb').onclick=e=>{const b=e.target.closest('button[data-t]');if(!b)return;const d=SHOP[b.dataset.t],i=+b.dataset.i,it=d.list[i];
+ if(!P[d.own].includes(i)){if(S.total<it.p)return;S.total-=it.p;saveT();P[d.own].push(i);sfx.win()}else sfx.tap();
+ P[d.cur]=i;saveP();wear();openShop(true)};
 function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const s=P.stat[m]||{n:0,ok:0};
  return `<tr><td>${MN[m]}</td><td>${s.n}</td><td>${s.n?Math.round(s.ok/s.n*100)+'%':'-'}</td><td>${P.skill[m]!==undefined?LEVELS[autoLv(m)].name:'-'}</td></tr>`}).join('');
  sheet('สำหรับผู้ปกครอง',`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
