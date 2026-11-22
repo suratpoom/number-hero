@@ -116,6 +116,8 @@ button{font:inherit;color:inherit;cursor:pointer}
 .lv button .st{width:16px;height:16px;margin-left:-3px}
 .lv button .st:first-of-type{margin-left:2px}
 .lv button.on{background:var(--cream);color:var(--ink);box-shadow:0 4px 0 #d9c2a0}
+.lv button.lk{opacity:.55}
+.lv button.lk svg{width:14px;height:14px;flex:none;fill:none;stroke:#fff;stroke-width:2.6;stroke-linecap:round}
 .ver{color:rgba(255,255,255,.6);font-size:12px;font-weight:700}
 
 
@@ -495,7 +497,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
     </div>
-    <div class="ver">v1.26</div>
+    <div class="ver">v1.27</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -705,10 +707,24 @@ S.lv=0;S.auto=true;try{const v=localStorage.getItem('fnf_lv');if(v!==null&&v!=='
 const L=()=>LEVELS[S.lv];
 function saveLv(){try{localStorage.setItem('fnf_lv',S.auto?'a':S.lv)}catch(e){}}
 /* ปรับเอง = เกมเลือกระดับของแต่ละเรื่องจากผลการตอบของเด็ก (ดู track / autoLv) */
-function drawLv(){$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}">อัตโนมัติ</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('');
- $('lvhint').textContent=S.auto?'อัตโนมัติ: เกมปรับความยากให้เอง ตอบถูกบ่อยจะยากขึ้น ตอบผิดบ่อยจะง่ายลง':`ล็อกไว้ที่ระดับ${LEVELS[S.lv].name} ทุกเรื่อง`}
+/* ผู้เล่นใหม่เริ่มระดับง่าย · โหมดอัตโนมัติเปิดเมื่อผ่านด่าน 1-3 แบบสบายๆ (ตอบถูกครั้งแรก 4 จาก 5 ข้อ และเหลือหัวใจ 2 ดวงขึ้นไป)
+   ให้เกมรู้จักน้องก่อนค่อยปรับเอง · ผู้เล่นเดิมที่ผ่านด่าน 3 ไปแล้วเปิดให้เลย (Surat ขอ 2026-11-22) */
+const RDY_EARN=4,RDY_HEART=2;
+function readyN(){let n=0;for(let k=0;k<3;k++)if(((P.ready||0)>>k)&1)n++;return n}
+function aOpen(){try{return !!P.autoOK||readyN()>=3}catch(e){return true}}
+function gateAuto(){if(P.autoOK===undefined){P.autoOK=A.adv>=3||A.medals>0;try{localStorage.setItem('fnf_p',JSON.stringify(P))}catch(e){}}
+ if(S.auto&&!aOpen()){S.auto=false;S.lv=0;saveLv()}}
+function noteReady(){if(S.stage===null||S.stage>2||S.earn<RDY_EARN||!F||F.h<RDY_HEART)return;const b=1<<S.stage;if((P.ready||0)&b)return;
+ const was=aOpen();P.ready=(P.ready||0)|b;
+ if(!was&&aOpen()){P.autoOK=true;const sw=!S.auto&&S.lv===0;if(sw){S.auto=true;S.lv=autoLv();saveLv();drawLv()}
+  setTimeout(()=>{toast('<span>เปิดโหมดอัตโนมัติแล้ว</span>');say(sw?'เก่งมาก ต่อไปเกมจะปรับความยากให้เอง':'เปิดโหมดอัตโนมัติแล้ว')},3600)}
+ else if(!was){const n=readyN();setTimeout(()=>toast(`<span>ผ่านแบบสบายๆ ${n}/3 ด่าน</span>`),3600)}drawLv();saveP()}
+function drawLv(){const op=aOpen();$('lv').innerHTML=`<button data-k="a" class="${S.auto?'on':''}${op?'':' lk'}">${op?'':LOCK}อัตโนมัติ</button>`+LEVELS.map((l,k)=>`<button data-k="${k}" class="${!S.auto&&k===S.lv?'on':''}">${l.name}${'<i class="st"></i>'.repeat(k+1)}</button>`).join('');
+ $('lvhint').textContent=S.auto?'อัตโนมัติ: เกมปรับความยากให้เอง ตอบถูกบ่อยจะยากขึ้น ตอบผิดบ่อยจะง่ายลง':`ล็อกไว้ที่ระดับ${LEVELS[S.lv].name} ทุกเรื่อง`+(op?'':` · ผ่านด่าน 1-3 แบบสบายๆ แล้วอัตโนมัติจะเปิด (${readyN()}/3)`)}
 drawLv();
-$('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'เกมปรับความยากให้เอง':'ระดับ'+L().name)};
+$('lv').onclick=e=>{const b=e.target.closest('button');if(!b)return;
+ if(b.dataset.k==='a'&&!aOpen()){sfx.tap();toast(`<span>ผ่านด่าน 1-3 แบบสบายๆ ก่อน (${readyN()}/3)</span>`);say('ผ่านด่านหนึ่งถึงสามแบบสบายๆ ก่อนนะ');return}
+ if(b.dataset.k==='a'){S.auto=true;S.lv=autoLv()}else{S.auto=false;S.lv=+b.dataset.k}saveLv();drawLv();sfx.tap();say(S.auto?'เกมปรับความยากให้เอง':'ระดับ'+L().name)};
 function setStars(){document.querySelectorAll('.scv').forEach(e=>e.textContent=S.total);try{updDot()}catch(e){}}
 function saveT(){try{localStorage.setItem('fnf_stars',S.total)}catch(e){}setStars();try{cloudDirty()}catch(e){}}
 setStars();
@@ -1128,7 +1144,7 @@ function hurt(){if(F.shield){F.shield=false;P.shields=Math.max(0,(P.shields||0)-
  if(F.h===1&&F.pet&&F.pet.pw==='heal'&&!F.pet.healed){F.pet.healed=true;setTimeout(()=>{if(!F||F.over)return;F.h++;drawHearts();tone(880,0,.15,'triangle',.08);toast(`<span class="tpic">${petSVG(activePet().i)}</span><span>กระต่ายใบไม้ฟื้นหัวใจให้ 1 ดวง</span>`)},600)}
  drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
  if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
-function finishStage(){if(!$('fight').classList.contains('on'))return;mission('win');dayRec().w=(dayRec().w||0)+1;if(F&&!F.lost){const pb=Math.round(5*LVX[S.lv]);S.total+=pb;saveT();P.perfect=(P.perfect||0)+1;setTimeout(()=>toast(`<span>ชนะแบบไม่โดนเลย +${pb} แต้ม</span>`),1500)}checkBadges();P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
+function finishStage(){if(!$('fight').classList.contains('on'))return;mission('win');dayRec().w=(dayRec().w||0)+1;if(F&&!F.lost){const pb=Math.round(5*LVX[S.lv]);S.total+=pb;saveT();P.perfect=(P.perfect||0)+1;setTimeout(()=>toast(`<span>ชนะแบบไม่โดนเลย +${pb} แต้ม</span>`),1500)}checkBadges();noteReady();P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
  const b=Math.round(PT.stage*LVX[S.lv]*(OPW[stageMode(S.stage)]||1));S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
 const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
 tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);$('bsp').onclick=$('psp').onclick=()=>openQ();tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
@@ -1496,7 +1512,7 @@ const snap=()=>({v:1,t:G.lt||Date.now(),total:S.total,lv:S.auto?'a':S.lv,A,P});
 /* แทนที่ข้อมูลในเครื่องด้วยชุดที่ให้มา (ใช้ตอนโหลดจากชีต และตอนเริ่มผู้เล่นใหม่) */
 function applySnap(d){G.mute=true;S.total=+d.total||0;A=Object.assign({adv:0,medals:0,stars:[],w:[]},d.A||{});P=Object.assign(P_DEF(),d.P||{});P.wv=2;
  if(d.lv==='a'||d.lv===undefined)S.auto=true;else{S.auto=false;S.lv=clamp(+d.lv||0,0,2)}
- saveLv();saveA();saveP();saveT();if(S.auto)S.lv=autoLv();wear();drawModes();drawLv();drawHome();G.mute=false;setLt(d.t||Date.now())}
+ gateAuto();saveLv();saveA();saveP();saveT();if(S.auto)S.lv=autoLv();wear();drawModes();drawLv();drawHome();G.mute=false;setLt(d.t||Date.now())}
 async function cloud(action,extra){const r=await fetch(CLOUD.gas,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify(Object.assign({action,name:G.who,pin:G.pin},extra)),redirect:'follow',keepalive:action==='save'});return r.json()}
 /* เรียกทุกครั้งที่มีการบันทึกลงเครื่อง: จำเวลาแก้ล่าสุด แล้วรอ 4 วิค่อยส่งขึ้นชีต (รวมหลายการเปลี่ยนเป็นครั้งเดียว) */
 function cloudDirty(){if(G.mute)return;setLt(Date.now());if(!cloudOn()||!G.who||!G.synced)return;clearTimeout(G.timer);G.timer=setTimeout(flush,4000)}
@@ -1634,6 +1650,7 @@ document.addEventListener('pointerup',e=>{const t=TAPS.get(e.pointerId);if(!t)re
  ghostAt=Date.now();b.click()},true);
 document.addEventListener('click',e=>{if(e.isTrusted&&Date.now()-ghostAt<600){e.stopPropagation();e.preventDefault()}},true);
 document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
+gateAuto();drawLv();
 cloudBoot();
 if('serviceWorker'in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 if(S.auto)S.lv=autoLv();
