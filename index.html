@@ -379,6 +379,12 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 .beam.warn.w2{background:repeating-linear-gradient(90deg,rgba(255,77,109,.75) 0 14px,rgba(255,211,77,.4) 14px 26px);animation:bpulse .18s infinite}
 .beam.on{background:linear-gradient(#fff3a8,#ff8a3d 40%,#e8384f);box-shadow:0 0 18px 6px rgba(255,140,40,.75)}
 .wmode .mm{width:48px;height:48px;flex:none}
+.tcard{text-align:center}
+.tpic2{width:84px;height:84px;display:block}.tpic2 svg{width:100%;height:100%}
+.tt{font-size:22px;font-weight:900;color:var(--ink)}
+.shi{display:inline-block;width:24px;height:24px;margin-left:2px}.shi svg{width:100%;height:100%}
+.fb.shielded::before{content:"";position:absolute;inset:-8%;border-radius:50%;border:4px solid rgba(74,163,255,.85);box-shadow:0 0 18px 4px rgba(74,163,255,.55),inset 0 0 14px rgba(74,163,255,.4);animation:glow 1.4s ease-in-out infinite}
+#hcur.fist{width:40px;height:40px;margin:-20px 0 0 -20px;background:radial-gradient(circle,#fff 0,#ff8a3d 45%,rgba(255,138,61,0) 72%);box-shadow:0 0 20px 8px rgba(255,138,61,.7)}
 </style>
 </head>
 <body>
@@ -416,7 +422,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <button class="inst" id="glog" hidden>เลือกผู้เล่น</button>
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
-    <div class="ver">v1.19</div>
+    <div class="ver">v1.20</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -452,6 +458,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     </div>
     <div class="arena" id="arena"><div class="tip" id="ftip"></div><div class="tq" id="tq" hidden></div><div class="ground" id="ground"></div>
       <svg class="floor3" id="floor3" hidden viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,100 100,100 100,94 85,44 15,44 0,94" fill="#33276e"/><polygon points="15,44 85,44 85,42 15,42" fill="#7a63c9"/><g stroke="rgba(255,255,255,.16)" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"><path d="M3.750 81.500h92.500M7.500 69h85M11.250 56.500h77.500M0 94 15 44M25 94l7.500-50M50 94V44M75 94l-7.500-50M100 94 85 44" vector-effect="non-scaling-stroke"/></g></svg><div class="fm" id="fm"></div><div class="fb" id="fb"></div>
+      <div class="qov" id="tov" hidden><div class="qcard tcard"><span class="tpic2" id="tpic"></span><div class="tt" id="ttl"></div><div class="cap" id="tbody"></div><button class="ch" id="tovok" style="--c:#35b97c;--d:#218a58;font-size:22px">เข้าใจแล้ว</button></div></div>
       <div class="qov" id="qov" hidden><div class="qcard"><div class="cap">ตอบถูก ปล่อยท่าไม้ตาย</div><div class="eq" id="qeq"></div><div class="choices" id="qch"></div></div></div>
     </div>
     <div class="wrap fbtn" id="fbtn">
@@ -766,7 +773,9 @@ function countUp(){let els;if(S.cur==='div'){drawVis(S.q,true);els=$('vis').quer
  els.forEach((el,k)=>{el.classList.remove('num');setTimeout(()=>{el.firstChild.textContent=k+1;el.classList.add('num');tone(500+k*30,0,.08,'triangle',.08)},350+k*230)})}
 function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){const s=document.createElement('i');s.className='sp';const g=Math.PI*2*k/12,d=70+Math.random()*70;
  s.style.cssText=`left:${c.left+c.width/2}px;top:${c.top+c.height/2}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),850)}}
-function good(el){S.lock=true;sfx.ok();burst(el);const p=pq(Math.min(S.miss,2));if(S.first)S.earn++;S.pts+=p;S.total+=p;saveT();
+function good(el){S.lock=true;sfx.ok();burst(el);const p=pq(Math.min(S.miss,2));if(S.first)S.earn++;
+ /* ตอบถูกครั้งแรกติดกันครบทุก 5 ข้อ ได้โล่ 1 อัน (เก็บได้ไม่เกิน 5) */
+ S.streak=S.first?(S.streak||0)+1:0;if(S.first&&S.streak%5===0&&(P.shields||0)<5){P.shields=(P.shields||0)+1;saveP();setTimeout(()=>toast(`<span class="tpic">${SHIELD}</span><span>ตอบถูกติดกัน 5 ข้อ ได้โล่ 1 อัน</span>`),700)}S.pts+=p;S.total+=p;saveT();
  S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q}`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,mx:pq(0)});track(S.first);
  const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
  const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
@@ -827,13 +836,13 @@ $('wpgo').onclick=()=>{sfx.tap();fight(S.fmode)};
 $('wpgo3').onclick=()=>{sfx.tap();rollMode()};
 let F=null;const JUMP=.9,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),zi=z=>Math.round(60-z*40);
 const HEART='<svg viewBox="0 0 24 24"><path d="M12 21C5 15 2 11.500 2 8a5 5 0 0 1 10-1.500A5 5 0 0 1 22 8c0 3.500-3 7-10 13z"/></svg>';
-function drawHearts(){$('hearts').innerHTML=Array.from({length:F.maxh},(_,i)=>HEART.replace('<svg',`<svg class="${i<F.h?'':'off'}"`)).join('')}
+function drawHearts(){$('hearts').innerHTML=Array.from({length:F.maxh},(_,i)=>HEART.replace('<svg',`<svg class="${i<F.h?'':'off'}"`)).join('')+(F.shield?`<span class="shi">${SHIELD}</span>`:'')}
 /* ฉากสู้ 2 แบบใช้เครื่องยนต์เดียวกัน: d3=false ยืนสู้ (กระโดดหลบ) · d3=true เดินได้ทั้งซ้ายขวาและลึกตื้น มีต่อยระยะประชิด
    ตำแหน่งเก็บเป็น x (0-1 ซ้ายไปขวา) และ z (0 ใกล้จอ - 1 ไกล) แล้วแปลงเป็นจุดบนจอด้วย proj() */
 function fight(mode){mode=FMD[mode]?mode:'stand';const k=S.stage,kk=k%NW,w2=k>=NW,w=(S.fw!=null&&A.w[S.fw])?S.fw:bestW(),ar=$('arena'),d3=mode==='walk',tapm=mode==='tap'||mode==='click',foes=S.foes&&S.foes.length?S.foes:makeFoes(k);show('fight');
  $('avme').innerHTML=iconSVG(P.icon);$('fm').className='fm';$('fm').style.cssText='';$('fb').style.cssText='';
  $('fb').className='fb';$('fb').innerHTML=FOX+`<span class="hand">${WPN[w].svg}</span>`;
- ar.querySelectorAll('.shot,.pshot,.dmg,.ring,.bomb,.boomfx,.beam').forEach(e=>e.remove());
+ ar.querySelectorAll('.shot,.pshot,.dmg,.ring,.bomb,.boomfx,.beam').forEach(e=>e.remove());$('tov').hidden=true;
  ar.classList.toggle('d3',d3);ar.classList.toggle('tapm',tapm);$('floor3').toggleAttribute('hidden',!d3);$('ground').hidden=d3||tapm;$('fbtn').hidden=d3;$('fpad').hidden=!d3;$('knob').style.transform='';
  $('fbtn').classList.toggle('sponly',tapm||mode==='swipe'||mode==='type');$('tq').hidden=mode!=='type';
  /* ยิ่งด่านไกล โลก 2 และระดับยาก: ลูกไฟเร็วขึ้น ถี่ขึ้น และมีลูกลอยสูง (ห้ามกระโดด) ปนมา */
@@ -841,7 +850,7 @@ function fight(mode){mode=FMD[mode]?mode:'stand';const k=S.stage,kk=k%NW,w2=k>=N
  F={mode,k,w,d3,foes,wave:0,swap:false,hp:1,max:1,h:S.hearts,maxh:S.hearts,atk:Math.max(atkOf(w),Math.round(atkOf(bestW())*.8)),act:null,kit:['fire'],j:0,jy:0,cd:0,pcd:0,tcd:0,inv:0,next:2.2,charge:null,shots:[],ps:[],bombs:[],over:false,last:performance.now(),
   v:Math.min(.75,(30+kk*3+(w2?8:0)+S.lv*5)/100),intv:Math.max(1.1,2.6-kk*.18-(w2?.3:0)-S.lv*.3),hi,en:0,paused:false,qlock:false,auto:false,dash:null,
   P:{x:.18,z:d3?.5:0},M:{x:tapm?.6:d3?.8:.72,y:.45,z:d3?.5:0},tgt:null,mv:{x:0,z:0},keys:{},slam:null,slamCd:2,mz:.12+kk*.03+(w2?.05:0)+S.lv*.04,typed:'',tqq:null,sw:null};
- setFoe(foes[0]);drawHearts();setEn();$('qov').hidden=true;ar.classList.remove('shake');
+ F.shield=(P.shields||0)>0;$('fb').classList.toggle('shielded',F.shield);setFoe(foes[0]);drawHearts();setEn();$('qov').hidden=true;ar.classList.remove('shake');
  $('ftip').textContent=FMD[mode].t[TOUCH?0:1];if(mode==='type')newTQ();
  say('สู้กับ'+(foes.length>1?'สัตว์ประหลาด '+foes.length+' ตัว':foes[0].n));tick(F.last);runLoop(F)}
 function setFoe(m){if(F.act){if(F.act.e)F.act.e.remove();F.M.x=F.act.hx;F.act=null}$('fm').classList.remove('wind');F.kit=m.kit||['fire'];F.hp=F.max=m.hp;$('mname').textContent=m.n+(F.foes.length>1?` (${F.wave+1}/${F.foes.length})`:'');$('avmon').innerHTML=monSVG(m);$('fm').innerHTML=`<div>${monSVG(m)}</div>`;$('hpf').style.width='100%'}
@@ -863,21 +872,38 @@ function tickTap(ts){if(F.paused){F.last=ts;return}const dt=Math.max(0,Math.min(
  fm.style.left=(M.x*W)+'px';fm.style.bottom=(M.y*H)+'px';fm.style.transform=`translate(-50%,50%) scale(${click?.62:.8})`;fm.style.zIndex=20;
  F.next-=dt*(F.hp<F.max*.4?1.3:1);
  if(F.next<=0&&!F.swap){F.next=F.intv*(.75+Math.random()*.4);const tr=F.kit.includes('tree')&&Math.random()<.45,e=document.createElement('i');e.className=tr?'bomb ttree':'bomb';if(tr)e.innerHTML=TREE;ar.appendChild(e);
-  F.bombs.push(tr?{e,tree:1,x0:M.x,y0:M.y,x1:.13,y1:.12,t:0,dur:Math.max(1.4,2.4-kk*.08-S.lv*.2)}:{e,x:.12+Math.random()*.76,y:.14+Math.random()*.6,t:0,dur:Math.max(1.3,2.5-kk*.1-(F.k>=NW?.3:0)-S.lv*.25)});tone(300,0,.1,'sawtooth',.04)}
+  showTut(tr?'ttree':'bomb');F.bombs.push(tr?{e,tree:1,x0:M.x,y0:M.y,x1:.13,y1:.12,t:0,dur:Math.max(1.4,2.4-kk*.08-S.lv*.2)}:{e,x:.12+Math.random()*.76,y:.14+Math.random()*.6,t:0,dur:Math.max(1.3,2.5-kk*.1-(F.k>=NW?.3:0)-S.lv*.25)});tone(300,0,.1,'sawtooth',.04)}
  for(const b of F.bombs){b.t+=dt;const u=Math.min(1,b.t/b.dur);let x=b.x,y=b.y,d;
   if(b.tree){x=b.x0+(b.x1-b.x0)*u;y=b.y0+(b.y1-b.y0)*u+Math.sin(Math.PI*u)*.18;d=62*(click?.85:1)}else d=(28+46*u)*(click?.85:1);
   b.e.style.cssText=`width:${d}px;height:${d}px;left:${x*W-d/2}px;bottom:${y*H-d/2}px;--u:${u}`;
   if(u>=1){b.dead=true;boomFx(x*W,y*H);if(F.inv<=0)hurt()}}
  F.bombs=F.bombs.filter(b=>{if(b.dead)b.e.remove();return!b.dead})}
 function boomFx(x,y){const e=document.createElement('i');e.className='boomfx';e.style.left=x+'px';e.style.bottom=y+'px';$('arena').appendChild(e);setTimeout(()=>e.remove(),450);tone(110,0,.2,'sawtooth',.08)}
-$('arena').addEventListener('pointerdown',e=>{if(!F||F.over||F.paused||e.target.closest('.qov'))return;
- if(F.mode==='tap'||F.mode==='click'){e.preventDefault();const x=e.clientX,y=e.clientY;
+/* แตะ/คลิก/กำมือ ที่จุด x,y ในโหมดแตะจับตัว: ทำลายระเบิดหรือต้นไม้ก่อน ไม่โดนค่อยตีสัตว์ประหลาด */
+function tapAt(x,y){
   for(const b of F.bombs){const q=b.e.getBoundingClientRect();if(Math.hypot(x-(q.left+q.width/2),y-(q.top+q.height/2))<q.width/2+16){b.dead=true;b.e.remove();F.bombs=F.bombs.filter(o=>!o.dead);F.en=Math.min(1,F.en+.08);setEn();tone(900,0,.07,'triangle',.07);return}}
   const fr=$('fm').getBoundingClientRect();
   if(F.tcd<=0&&!F.swap&&x>fr.left&&x<fr.right&&y>fr.top&&y<fr.bottom){F.tcd=.16;hitMon(Math.max(1,Math.round(F.atk*.5)),false);const fb=$('fb');fb.classList.remove('swing');void fb.offsetWidth;fb.classList.add('swing')}
-  else tone(200,0,.05,'sine',.04);return}
+  else tone(200,0,.05,'sine',.04)}
+$('arena').addEventListener('pointerdown',e=>{if(!F||F.over||F.paused||e.target.closest('.qov'))return;
+ if(F.mode==='tap'||F.mode==='click'){e.preventDefault();tapAt(e.clientX,e.clientY);return}
  if(F.mode==='swipe'){e.preventDefault();F.sw={x:e.clientX,y:e.clientY}}});
 window.addEventListener('pointerup',e=>{if(!F||!F.sw||F.mode!=='swipe')return;const dx=e.clientX-F.sw.x,dy=e.clientY-F.sw.y;F.sw=null;if(dy<-40&&-dy>Math.abs(dx))jump();else attack()});
+/* สอนท่าใหม่: ครั้งแรกที่ผู้เล่นเจอท่าไหน เกมหยุดชั่วคราวแล้วบอกวิธีหลบ (จำไว้ใน P.tut ไม่สอนซ้ำ) */
+const jumpHint=()=>(H.on?'ยกมือขึ้นเร็วๆ หรือ ':'')+(F.mode==='swipe'?'ปัดขึ้น':TOUCH?'กดปุ่มกระโดด':'กด Space');
+const DOT=c=>`<svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="22" fill="${c}"/></svg>`;
+function showTut(key){P.tut=P.tut||{};if(P.tut[key])return;P.tut[key]=1;saveP();
+ const jh=jumpHint(),walk=F.d3?' หรือเดินหลบออกจากแถวก็ได้':'',mon=monSVG(F.foes[F.wave]);
+ const T={fireLo:['ลูกไฟลอยต่ำ',`ลูกไฟสีส้มพุ่งมาตามพื้น ${jh} ข้ามไป${walk}`,DOT('#ff8a3d')],
+  fireHi:['ลูกไฟลอยสูง','ลูกไฟสีม่วงลอยสูงเหนือหัว อยู่นิ่งๆ อย่ากระโดด',DOT('#a56bff')],
+  tree:['ต้นไม้กลิ้ง',`ต้นไม้หมุนกลิ้งมาช้าๆ รอให้ใกล้แล้ว ${jh} ข้าม${walk}`,TREE],
+  charge:['พุ่งเข้ามาตี',`ตัวสั่นแดงแปลว่ากำลังจะวิ่งมาชน พอมันเริ่มวิ่ง ${jh}${walk}`,mon],
+  beamLo:['พ่นไฟเตี้ย',`แถบเตือนขึ้นบนพื้นก่อน พอแถบกระพริบเร็ว ${jh}${walk}`,mon],
+  beamHi:['พ่นไฟสูง','แถบเตือนอยู่สูงเหนือหัว อยู่นิ่งๆ ไฟจะผ่านไปเอง',mon],
+  bomb:['ระเบิด','ระเบิดค่อยๆ โตขึ้น แตะทิ้งก่อนมันโตเต็ม',DOT('#e8384f')],
+  ttree:['ต้นไม้ลอยมา','แตะต้นไม้ทิ้งก่อนมันลอยมาถึงตัวเรา',TREE]}[key];
+ if(!T)return;F.paused=true;F.tut=true;$('tpic').innerHTML=T[2];$('ttl').textContent='ท่าใหม่: '+T[0];$('tbody').textContent=T[1];$('tov').hidden=false;say(T[0]+' '+T[1])}
+$('tovok').onclick=()=>{sfx.tap();$('tov').hidden=true;if(F){F.paused=false;F.tut=false;F.last=performance.now()}};
 /* ท่าพิเศษของสัตว์ประหลาด: เตือนก่อนเสมอ (ตัวสั่นแดง / แถบเตือนบนพื้น) ให้เด็กมีเวลาเตรียมกระโดดหรือหลบ */
 function startAct(t){const M=F.M;F.act={t,time:0,hx:M.x,z:M.z,hit:false};$('fm').classList.add('wind');tone(180,0,.3,'sawtooth',.05);
  if(t==='beam'){const e=document.createElement('i'),hi=Math.random()<.4;e.className='beam warn';e.textContent=hi?'อยู่นิ่งๆ':'เตรียมกระโดด';$('arena').appendChild(e);Object.assign(F.act,{e,hi})}}
@@ -919,8 +945,8 @@ function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.pa
  /* ลูกไฟ: ชาร์จให้เห็นก่อน 0.6 วิ แล้วพุ่งตามแนวที่สัตว์ประหลาดยืนอยู่ตอนปล่อย */
  F.next-=dt*(F.hp<F.max*.4?1.3:1);
  if(!F.charge&&!F.act&&!F.swap&&F.next<=.6){const t=pick1(F.kit);
-  if(t==='fire'||t==='tree'){const tr=t==='tree',hi=!tr&&Math.random()<F.hi,e=document.createElement('i');e.className='shot '+(tr?'tree':hi?'hi':'lo');if(tr)e.innerHTML=TREE;ar.appendChild(e);F.charge={e,hi,tr,x:M.x,z:M.z,go:false}}
-  else startAct(t)}
+  if(t==='fire'||t==='tree'){const tr=t==='tree',hi=!tr&&Math.random()<F.hi,e=document.createElement('i');e.className='shot '+(tr?'tree':hi?'hi':'lo');if(tr)e.innerHTML=TREE;ar.appendChild(e);F.charge={e,hi,tr,x:M.x,z:M.z,go:false};showTut(tr?'tree':hi?'fireHi':'fireLo')}
+  else{startAct(t);showTut(t==='charge'?'charge':F.act.hi?'beamHi':'beamLo')}}
  if(F.act&&!F.swap)actTick(dt,bh);
  if(F.charge){F.charge.z=M.z;if(F.next<=0){F.charge.go=true;F.shots.push(F.charge);F.charge=null;F.next=F.intv*(.8+Math.random()*.4);tone(300,0,.12,'sawtooth',.05)}}
  const all=F.charge?F.shots.concat(F.charge):F.shots;
@@ -970,12 +996,14 @@ function hitMon(dmg,big){if(F.over||F.swap)return;F.hp-=dmg;$('hpf').style.width
   if(F.wave<F.foes.length-1){F.swap=true;setTimeout(()=>{if(F!==me||me.over)return;me.wave++;fm.className='fm';setFoe(me.foes[me.wave]);me.swap=false;me.tgt=null;
    toast(`<span>ตัวที่ ${me.wave+1} มาแล้ว</span>`);say(me.foes[me.wave].n+' มาแล้ว')},900);return}
   F.over=true;setTimeout(()=>{if(F===me)finishStage()},1100)}}
-function hurt(){F.h--;F.inv=1;drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
+function hurt(){if(F.shield){F.shield=false;P.shields=Math.max(0,(P.shields||0)-1);saveP();F.inv=1.2;drawHearts();$('fb').classList.remove('shielded');
+  tone(1000,0,.12,'triangle',.1);tone(600,.08,.15,'triangle',.08);toast(`<span class="tpic">${SHIELD}</span><span>โล่กันไว้ได้</span>`);return}
+ F.h--;F.inv=1;drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
  if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
 function finishStage(){if(!$('fight').classList.contains('on'))return;P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
  const b=Math.round(PT.stage*LVX[S.lv]);S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
 const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
-tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
+tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);$('bsp').onclick=$('psp').onclick=()=>openQ();tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
 /* จอยมือซ้าย: ลากจากกลางวงเพื่อเดิน (ขึ้น = เดินลึกเข้าไป) */
 const joy=$('joy');let jid=null;
 function joyMove(e){const c=joy.getBoundingClientRect(),R=c.width/2,lim=R*.6;let dx=e.clientX-(c.left+R),dy=e.clientY-(c.top+R);const m=Math.hypot(dx,dy);if(m>lim){dx*=lim/m;dy*=lim/m}
@@ -1131,6 +1159,10 @@ function iconSVG(i,plain){const ic=ICONS[i]||ICONS[0],n=ic.c.length,inner=dress(
 const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
  o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'},i:{list:ICONS,own:'ownI',cur:'icon',t:'ไอคอน'}};
 let shopTab='h';
+const SHIELD='<svg viewBox="0 0 60 60"><path d="M30 4 52 12v18c0 14-10 22-22 26C18 52 8 44 8 30V12z" fill="#4aa3ff" stroke="#fff" stroke-width="3"/><path d="M30 14l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#ffd34d"/></svg>';
+const SHIELD_P=40,SHIELD_MAX=5;
+function shieldCard(){const n=P.shields||0,c=SHIELD_P*PRICE_X,full=n>=SHIELD_MAX,dis=full||S.total<c;
+ return `<div class="cc"><span class="pic">${SHIELD}</span>โล่กันท่า<small>กันโดนตี 1 ครั้งต่อการสู้ ใช้ให้เองอัตโนมัติ</small><button data-buy="shield" ${dis?'disabled':''}>${full?'เต็มแล้ว':S.total<c?`ขาดอีก ${c-S.total}`:c+' แต้ม'}</button></div>`}
 const ARMS='<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088"',ARMS_UP='<path d="M45 72 32 55M75 72l13-17" stroke="#e3b088"';
 /* ของที่ปลดล็อกจากความสำเร็จ: แจ้งครั้งเดียวต่อชิ้น (P.seen) · เข้าร้านแล้วนับเป็นของเราเลย */
 function eachUnlock(fn){Object.keys(SHOP).forEach(k=>{const d=SHOP[k];d.list.forEach((it,i)=>{if(it.a&&it.a.ok())fn(k,d,i,it)})})}
@@ -1150,16 +1182,19 @@ function shopCard(k,i,now){const d=SHOP[k],it=d.list[i],own=owns(d,i),on=P[d.cur
  return `<div class="cc"><span class="pic">${k==='i'?iconSVG(i,1):dress(v.h,v.s,v.p,v.o,v.f)}</span>${it.n}${note?`<small>${note}</small>`:''}<button data-t="${k}" data-i="${i}" class="${on?'on':''}" ${dis?'disabled':''}>${txt}</button></div>`}
 const canBuy=(d,i)=>{const it=d.list[i];return !owns(d,i)&&!it.a&&(it.g?P.gems[it.g[0]]>=it.g[1]:S.total>=cost(it))};
 function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
- const tabs=`<div class="tabs"><button data-tab="now" class="${k==='now'?'on':''}">ซื้อได้ตอนนี้</button>${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
+ const tabs=`<div class="tabs"><button data-tab="now" class="${k==='now'?'on':''}">ซื้อได้ตอนนี้</button><button data-tab="item" class="${k==='item'?'on':''}">ไอเทม</button>${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
  let head,cards='';
- if(k==='now'){const list=[];Object.keys(SHOP).forEach(x=>SHOP[x].list.forEach((_,i)=>{if(canBuy(SHOP[x],i))list.push([x,i])}));
+ if(k==='item'){head=`ไอเทม · มีโล่ ${P.shields||0}/${SHIELD_MAX} อัน · ตอบเลขถูกครั้งแรกติดกัน 5 ข้อ ได้โล่ฟรี 1 อัน`;cards=shieldCard()}
+ else if(k==='now'){const list=[];Object.keys(SHOP).forEach(x=>SHOP[x].list.forEach((_,i)=>{if(canBuy(SHOP[x],i))list.push([x,i])}));
   if(list.length){head=`ซื้อได้ตอนนี้ ${list.length} ชิ้น`;cards=list.map(([x,i])=>shopCard(x,i,now)).join('')}
   else{let min=Infinity;Object.values(SHOP).forEach(d=>d.list.forEach((it,i)=>{if(!owns(d,i)&&it.p)min=Math.min(min,cost(it))}));
    head=min<Infinity?`ยังไม่มีของที่ซื้อได้ ของถูกสุด ${min} แต้ม ขาดอีก ${min-S.total} แต้ม`:'มีครบทุกชิ้นแล้ว'}}
  else{const d=SHOP[k];head=`${d.t} มีแล้ว ${d.list.filter((_,i)=>owns(d,i)).length}/${d.list.length}`;cards=d.list.map((_,i)=>shopCard(k,i,now)).join('')}
  const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
  sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${head}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
-$('shb').onclick=e=>{const ga=e.target.closest('button[data-g]');
+$('shb').onclick=e=>{const by=e.target.closest('button[data-buy]');
+ if(by){const c=SHIELD_P*PRICE_X;if((P.shields||0)>=SHIELD_MAX||S.total<c)return;S.total-=c;saveT();P.shields=(P.shields||0)+1;saveP();sfx.win();openShop(true);return}
+ const ga=e.target.closest('button[data-g]');
  if(ga){sfx.tap();openWho();return}
  const wb=e.target.closest('button[data-who]');if(wb){sfx.tap();pickWho(wb.dataset.who);return}
  const wn=e.target.closest('button[data-new]');if(wn){sfx.tap();pickWho($('wname').value,undefined,$('wnewpin').value.trim());return}
@@ -1271,10 +1306,13 @@ function hApply(lm,now){const v=$('cam'),CW=innerWidth,CH=innerHeight,vw=v.video
 function hTake(list,now){let best=null,bs=-1;for(const lm of list||[]){if(!handOK(lm))continue;const cx=(lm[0].x+lm[9].x)/2,cy=(lm[0].y+lm[9].y)/2;let sc=1;
   if(H.lastNorm)sc+=1.6/(1+Math.hypot(cx-H.lastNorm.x,cy-H.lastNorm.y)*5);if(lm[8].y<lm[0].y)sc+=.3;if(sc>bs){bs=sc;best={lm,cx,cy}}}
  if(!best){H.streak=0;if(now-H.last>900){H.ptr=null;H.lastNorm=null}return}
- H.streak++;H.lastNorm={x:best.cx,y:best.cy};if(H.streak<HCFG.STREAK&&!H.ptr)return;hApply(best.lm,now)}
+ H.streak++;H.lastNorm={x:best.cx,y:best.cy};if(H.streak<HCFG.STREAK&&!H.ptr)return;hApply(best.lm,now);
+ /* กำมือ = ปลายนิ้วกลาง นาง ก้อย อยู่ใกล้โคนนิ้วกลาง และนิ้วชี้งอด้วย (เทียบกับความยาวฝ่ามือ) · ต้องเห็นติดกัน 2 เฟรมถึงนับ */
+ const lm=best.lm,d=(a,b)=>Math.hypot(lm[a].x-lm[b].x,lm[a].y-lm[b].y),pl=d(0,9),avg=(d(12,9)+d(16,9)+d(20,9))/3,f=avg<pl*.62&&d(8,9)<pl*.75;   // ชี้นิ้วเดียว (นิ้วชี้เหยียด) ไม่นับเป็นกำมือ
+ H.fistN=f?(H.fistN||0)+1:0;H.fist=H.fistN>=2}
 /* ปุ่มที่มือกดได้ ณ ตอนนี้ */
 function hTargets(){const scr=document.querySelector('.screen.on');if(!scr||!$('sheet').hidden)return[];
- if(scr.id==='fight')return F&&F.paused&&!F.qlock?[...$('qch').querySelectorAll('.ch:not(.no)')]:[];
+ if(scr.id==='fight'){if(!F)return[];if(!$('tov').hidden)return[$('tovok')];if(F.paused)return F.qlock?[]:[...$('qch').querySelectorAll('.ch:not(.no)')];return F.en>=1?[F.d3?$('psp'):$('bsp')]:[]}
  if(scr.id==='play')return S.lock?[]:S.cur==='write'?[$('wcheck')]:[...$('choices').querySelectorAll('.ch:not(.no)')];
  return['win','weapon','lose','reward'].includes(scr.id)?[...scr.querySelectorAll('.wact .ch')]:[]}
 function hClear(){H.dwell=new Map();document.querySelectorAll('.hdw').forEach(e=>{e.classList.remove('hdw');e.style.removeProperty('--dw')})}
@@ -1295,7 +1333,15 @@ function hStep(now,dt){const cur=$('hcur');if(!H.ptr){cur.hidden=true;return}cur
   if(d>=need){hClear();H.sig='';b.click();return}}}
 function hLoop(){if(!H.on)return;H.raf=requestAnimationFrame(hLoop);const v=$('cam'),now=performance.now(),dt=Math.min(100,now-(H.t||now));H.t=now;
  if(H.lm&&v.videoWidth&&v.readyState>=2&&v.currentTime!==H.vt){H.vt=v.currentTime;try{hTake(H.lm.detectForVideo(v,now).landmarks,now)}catch(e){}}
- if(now-H.last>900)H.ptr=null;hStep(now,dt)}
+ if(now-H.last>900)H.ptr=null;hStep(now,dt);hFight(now)}
+/* ฉากสู้ด้วยมือ: ชี้ไปที่สัตว์ประหลาดแล้วกำมือ = ตี · ยกมือขึ้นเร็วๆ = กระโดด · โหมดแตะจับตัว กำมือตรงไหน = แตะตรงนั้น */
+function hFight(now){const on=$('fight').classList.contains('on')&&F&&!F.over&&!F.paused&&H.ptr;$('hcur').classList.toggle('fist',!!(on&&H.fist));
+ if(!on){H.wasFist=false;H.py=null;return}
+ if(H.fist&&!H.wasFist){const x=H.ptr.x,y=H.ptr.y;
+  if(F.mode==='tap'||F.mode==='click')tapAt(x,y);
+  else{const r=$('fm').getBoundingClientRect(),p=40;if(x>r.left-p&&x<r.right+p&&y>r.top-p&&y<r.bottom+p)attack();else tone(200,0,.05,'sine',.04)}}
+ H.wasFist=H.fist;
+ if(F.mode!=='tap'&&F.mode!=='click'&&!H.fist){if(H.py!=null){const vy=(H.ptr.y-H.py.y)/Math.max(1,now-H.py.t)*1000;if(vy<-innerHeight*1.4)jump()}H.py={y:H.ptr.y,t:now}}else H.py=null}
 async function hStart(){if(H.on||H.busy)return;H.busy=true;toast('<span>กำลังเปิดกล้อง รอสักครู่</span>');
  try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('no_camera');
   H.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480},frameRate:{ideal:60}},audio:false});
@@ -1313,7 +1359,8 @@ function drawHand(){$('hbtn').textContent='พลังมือ: '+(H.want?'เ
 function openHand(){sheet('พลังมือวิเศษ',`<div class="note">เจ้าคุณมีพลังมือวิเศษ ยกมือขึ้นหน้ากล้อง มือจะกลายเป็นลูกแก้วทอง ชี้คำตอบค้างไว้จนแถบทองเต็ม คำตอบนั้นจะถูกเลือก</div>
  <h3>เปิดใช้พลังมือ</h3><div class="tg"><button data-hand="1" class="${H.want?'on':''}">เปิด</button><button data-hand="0" class="${H.want?'':'on'}">ปิด</button></div>
  <h3>ต้องชี้ค้างนานแค่ไหน</h3><div class="tabs">${['ไว','กลาง','ช้า'].map((t,i)=>`<button data-hsp="${i}" class="${H.speed===i?'on':''}">${t}</button>`).join('')}</div>
- <div class="note">กล้องเปิดเฉพาะตอนอยู่ในด่าน ภาพจากกล้องไม่ถูกบันทึกหรือส่งไปที่ไหน ใช้ได้กับปุ่มคำตอบและปุ่มไปต่อ ฉากสู้และด่านเขียนเลขยังใช้นิ้ว แตะจอได้ตลอดแม้เปิดพลังมือ</div>`)}
+ <h3>ตอนสู้</h3><div class="note">ชี้ลูกแก้วไปที่สัตว์ประหลาดแล้วกำมือ = ตี · ยกมือขึ้นเร็วๆ = กระโดด · แถบไม้ตายเต็มแล้วชี้ค้างที่ปุ่มไม้ตาย<br>โหมดแตะจับตัว: กำมือตรงไหน = แตะตรงนั้น</div>
+ <div class="note">กล้องเปิดเฉพาะตอนอยู่ในด่าน ภาพจากกล้องไม่ถูกบันทึกหรือส่งไปที่ไหน ด่านเขียนเลขและการเดินในโหมด 3 มิติยังใช้นิ้ว แตะจอได้ตลอดแม้เปิดพลังมือ</div>`)}
 $('hbtn').onclick=()=>{sfx.tap();openHand()};drawHand();
 /* เกมชุดเดิมของเจ้าคุณ (อยู่ที่ suratpoom.github.io ระดับบนสุด) เปิดเป็นหน้าแยก มีปุ่มกลับมาเกมนี้ในหน้ารวมของชุดนั้น */
 const OTHER=[['/jaokun.html','7+3','คิดเลขจับมือ','โจทย์เด้งขึ้นมา โบกมือตอบผ่านกล้อง หรือแตะจอ'],['/jaokun-word.html','ABC','ซาฟารีคำศัพท์','ดูรูป จับศัพท์อังกฤษ'],
