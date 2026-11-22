@@ -494,7 +494,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
     </div>
-    <div class="ver">v1.24</div>
+    <div class="ver">v1.25</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -725,6 +725,8 @@ const OPW={write:.75,add:1,sub:1,mul:1.5,div:2,mix:1.5};
 const LVX=[1,2.5,5],pq=(i,m)=>Math.max(1,Math.round(PT.q[i]*LVX[S.lv]*(OPW[m||S.cur]||1)));
 /* เขียนเลข: จับเวลาตั้งแต่ขึ้นโจทย์ถึงเขียนผ่าน · ไม่เกิน 8 วิ ได้เต็ม · 15 วิ 70% · 25 วิ 50% · ช้ากว่านั้น 30% */
 const wFactor=s=>s<=8?1:s<=15?.7:s<=25?.5:.3;
+/* โบนัสตอบไว (ข้อเลข): ตอบถูกครั้งแรกภายในเวลานี้ (วินาที นับรวมเวลาที่เกมอ่านโจทย์) ได้เพิ่ม 25% อย่างน้อย 1 แต้ม · ช้าไม่โดนหัก และไม่มีนาฬิกาบนจอ */
+const FAST={add:6,sub:6,mul:8,div:9};
 const LOCK='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const CHEST=`<svg viewBox="0 0 200 180"><rect x="30" y="88" width="140" height="74" rx="10" fill="#a5622a"/><rect x="30" y="88" width="140" height="13" fill="#e9a91c"/><rect x="48" y="88" width="13" height="74" fill="#e9a91c"/><rect x="139" y="88" width="13" height="74" fill="#e9a91c"/>
 <g class="lid"><path d="M30 90V70q0-30 30-30h80q30 0 30 30v20z" fill="#bf7632"/><rect x="48" y="40" width="13" height="50" fill="#e9a91c"/><rect x="139" y="40" width="13" height="50" fill="#e9a91c"/><rect x="88" y="76" width="24" height="28" rx="5" fill="#ffd34d" stroke="#8a5a12" stroke-width="3"/></g></svg>`;
@@ -848,7 +850,7 @@ function drawVis(q,reveal){const m=S.cur,v=$('vis');let h='',T;
  else if(m==='mul'){T=q.a*q.b;for(let k=0;k<q.a;k++)h+=grp(q.b,k%2?'b':'')}
  else{T=q.a;if(reveal){for(let k=0;k<q.b;k++)h+=grp(q.ans,k%2?'b':'')}else h=grp(q.a,'',0,true)}
  v.style.setProperty('--s',(T<=10?'clamp(30px,6.2vh,46px)':T<=16?'clamp(24px,4.6vh,36px)':T<=24?'clamp(20px,3.6vh,30px)':'clamp(17px,3vh,25px)'));v.innerHTML=h}
-function setupQ(){const q=S.q=gen(S.cur);$('cap').textContent=q.cap;drawVis(q);
+function setupQ(){S.qT0=performance.now();const q=S.q=gen(S.cur);$('cap').textContent=q.cap;drawVis(q);
  $('eq').innerHTML=`${q.a}<i>${q.sym}</i>${q.b}<i>=</i><span class="qm" id="qm">?</span>`;
  const col=[['#35b97c','#218a58'],['#ff6f91','#c94568'],['#4aa3ff','#2a74c9']];
  $('choices').style.gridTemplateColumns=`repeat(${q.ch.length},minmax(0,1fr))`;
@@ -867,11 +869,12 @@ function countUp(){let els;if(S.cur==='div'){drawVis(S.q,true);els=$('vis').quer
 function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){const s=document.createElement('i');s.className='sp';const g=Math.PI*2*k/12,d=70+Math.random()*70;
  s.style.cssText=`left:${c.left+c.width/2}px;top:${c.top+c.height/2}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),850)}}
 function good(el){S.lock=true;sfx.ok();burst(el);let p=pq(Math.min(S.miss,2));
+ let fb=0;if(S.cur!=='write'&&S.first&&FAST[S.cur]&&(performance.now()-(S.qT0||0))/1000<=FAST[S.cur]){fb=Math.max(1,Math.round(p*.25));p+=fb}
  if(S.cur==='write'){const ws=(performance.now()-(S.wT0||performance.now()))/1000;S.wSec=Math.round(ws);p=Math.max(1,Math.round(p*wFactor(ws)))}if(S.first)S.earn++;
  /* ตอบถูกครั้งแรกติดกันครบทุก 5 ข้อ ได้โล่ 1 อัน (เก็บได้ไม่เกิน 5) */
  S.streak=S.first?(S.streak||0)+1:0;checkBadges();if(S.first){petXP();mission('ans');mission('combo',0,S.streak)}if(S.cur==='write')mission('write');if(S.first&&S.streak%5===0&&(P.shields||0)<5){P.shields=(P.shields||0)+1;saveP();setTimeout(()=>toast(`<span class="tpic">${SHIELD}</span><span>ตอบถูกติดกัน 5 ข้อ ได้โล่ 1 อัน</span>`),700)}S.pts+=p;S.total+=p;saveT();
- S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q} (${S.wSec} วิ)`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,mx:pq(0)});track(S.first);
- const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
+ S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q} (${S.wSec} วิ)`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,fb,mx:pq(0)});track(S.first);
+ const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent=fb?`+${p} ตอบไว!`:'+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
  const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
 function answer(n,btn){if(S.lock)return;
  if(n===S.q.ans){btn.classList.add('ok');const qm=$('qm');qm.textContent=n;qm.classList.add('ans');if(S.cur==='div')drawVis(S.q,true);good(btn)}
@@ -912,8 +915,8 @@ function gotWeapon(){const k=S.stage,wi=k,lvw=A.medals+1,isNew=(A.w[wi]||0)<lvw;
  $('wpv').innerHTML=`${fs.map(m=>`<span class="mm">${monSVG(m)}</span>`).join('')}<span>ศัตรู: ${fs.length>1?'ฝูง '+fs.length+' ตัว':esc(fs[0].n)}<br>พลังชีวิตรวม ${fs.reduce((a,m)=>a+m.hp,0)}</span>`;
  rollMode();drawItemsUse();say((isNew?'ได้อาวุธใหม่ ':'')+WPN[wi].n)}
 /* สรุปรอบตอบเลข: แต้มที่ได้ และข้อไหนตอบผิด (พร้อมคำตอบที่เลือกผิด) */
-function sumHTML(){const max=S.log.reduce((a,l)=>a+(l.mx||0),0),got=S.log.reduce((s,l)=>s+l.p,0),bad=S.log.filter(l=>l.miss).length;
- return `<b>ตอบเลขได้ ${got} จาก ${max} แต้ม${bad?` ผิด ${bad} ข้อ`:' ถูกทุกข้อ'}</b>`+S.log.map((l,i)=>`<div class="${l.miss?'bad':''}"><span>${i+1}. ${l.t}</span><span>${l.miss?`ผิด ${l.miss} ครั้ง${l.wr.length?' (ตอบ '+l.wr.join(', ')+')':''}`:'ถูกเลย'} +${l.p}</span></div>`).join('')}
+function sumHTML(){const max=S.log.reduce((a,l)=>a+(l.mx||0),0),got=S.log.reduce((s,l)=>s+l.p,0),fb=S.log.reduce((s,l)=>s+(l.fb||0),0),bad=S.log.filter(l=>l.miss).length;
+ return `<b>ตอบเลขได้ ${got-fb} จาก ${max} แต้ม${fb?` + โบนัสตอบไว ${fb}`:''}${bad?` · ผิด ${bad} ข้อ`:' · ถูกทุกข้อ'}</b>`+S.log.map((l,i)=>`<div class="${l.miss?'bad':''}"><span>${i+1}. ${l.t}</span><span>${l.miss?`ผิด ${l.miss} ครั้ง${l.wr.length?' (ตอบ '+l.wr.join(', ')+')':''}`:(l.fb?'ถูกเลย ตอบไว':'ถูกเลย')} +${l.p}</span></div>`).join('')}
 /* วิธีสู้: สุ่มทุกครั้งที่ได้อาวุธ (ไม่ซ้ำกับรอบก่อน) · มือถือกับคอมมีชุดของตัวเอง เพราะนิ้วกับเมาส์/คีย์บอร์ดเล่นถนัดคนละแบบ */
 const FMD={stand:{n:'ยืนสู้',t:['กดกระโดดหลบลูกไฟ แล้วกดโจมตี','Space กระโดด · Enter หรือ X โจมตี · Z ไม้ตาย']},
  walk:{n:'เดินสู้ 3 มิติ',t:['มือซ้ายเดิน มือขวาต่อยหรือใช้อาวุธ','ลูกศรหรือ WASD เดิน · J ต่อย · K อาวุธ · Space กระโดด']},
@@ -1445,7 +1448,7 @@ function weekHTML(){const D=P.days||{},cur=[0,1,2,3,4,5,6].map(dAgo),prev=[7,8,9
  return `<h3>สรุป 7 วันล่าสุด</h3><div class="wk"><div><b>${a.n}</b>ข้อที่ทำ</div><div><b>${a.n?pc(a.ok,a.n)+'%':'-'}</b>ถูกครั้งแรก</div><div><b>${a.play}/7</b>วันที่เล่น</div><div><b>${a.mis}</b>วันทำภารกิจครบ</div><div><b>${a.w}</b>ชนะการสู้</div></div>
  ${topics?`<table class="pt"><tr><th>เรื่อง</th><th>ทำ (ข้อ)</th><th>ถูกครั้งแรก</th><th>สัปดาห์ก่อน</th></tr>${topics}</table>`:'<div class="note">สัปดาห์นี้ยังไม่ได้ตอบเลข</div>'}
  <table class="pt"><tr><th>วันที่</th><th>ทำ (ข้อ)</th><th>ถูกครั้งแรก</th><th>ภารกิจ</th></tr>${days}</table>
- <div class="note">แต้มต่อข้อ: เขียนเลข x0.75 (ช้าได้น้อยลง) · บวก ลบ x1 · คูณ x1.5 · หาร x2<br>ดีขึ้น/ลดลง = ถูกครั้งแรกต่างจากสัปดาห์ก่อนตั้งแต่ 5 จุดขึ้นไป · เริ่มนับตั้งแต่ ${Object.keys(D).sort()[0]||today()}</div>`}
+ <div class="note">แต้มต่อข้อ: เขียนเลข x0.75 (ช้าได้น้อยลง) · บวก ลบ x1 · คูณ x1.5 · หาร x2 · ตอบถูกไว (บวกลบ 6 วิ คูณ 8 วิ หาร 9 วิ) ได้โบนัส 25% ช้าไม่หัก<br>ดีขึ้น/ลดลง = ถูกครั้งแรกต่างจากสัปดาห์ก่อนตั้งแต่ 5 จุดขึ้นไป · เริ่มนับตั้งแต่ ${Object.keys(D).sort()[0]||today()}</div>`}
 /* จำกัดเวลาเล่น: นับเฉพาะตอนหน้าจอเปิดอยู่ · ห่างจากเกมเกิน 10 นาที = เริ่มนับใหม่ · ครบเวลาแล้วขึ้นหน้าพัก ผู้ปกครองกดค้าง 3 วิเพื่อเล่นต่ออีก 1 ช่วง */
 const PT_LIM=()=>{try{return +localStorage.getItem('fnf_limit')||0}catch(e){return 0}};
 let PLAY={used:0,last:Date.now()};try{const v=JSON.parse(localStorage.getItem('fnf_play'));if(v&&Date.now()-v.last<6e5)PLAY=v}catch(e){}
