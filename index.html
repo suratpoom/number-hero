@@ -385,6 +385,30 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 .shi{display:inline-block;width:24px;height:24px;margin-left:2px}.shi svg{width:100%;height:100%}
 .fb.shielded::before{content:"";position:absolute;inset:-8%;border-radius:50%;border:4px solid rgba(74,163,255,.85);box-shadow:0 0 18px 4px rgba(74,163,255,.55),inset 0 0 14px rgba(74,163,255,.4);animation:glow 1.4s ease-in-out infinite}
 #hcur.fist{width:40px;height:40px;margin:-20px 0 0 -20px;background:radial-gradient(circle,#fff 0,#ff8a3d 45%,rgba(255,138,61,0) 72%);box-shadow:0 0 20px 8px rgba(255,138,61,.7)}
+#home .ic{width:42px;height:42px}
+.hpet{position:absolute;bottom:2%;left:calc(50% + min(12vh,110px));width:min(13vh,84px);aspect-ratio:1;animation:bob 1.8s ease-in-out infinite;filter:drop-shadow(0 8px 8px rgba(20,10,60,.4))}
+.pet{position:absolute;pointer-events:none;filter:drop-shadow(0 4px 4px rgba(20,10,60,.4))}
+.pet svg{display:block;width:100%;height:100%}
+.arena.tapm .pet{left:25%;bottom:5%;width:58px;height:58px}
+.pet.zap{animation:pzap .3s}
+@keyframes pzap{50%{transform:scale(1.35) rotate(-10deg)}}
+.ichips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.ichips button{display:flex;align-items:center;gap:6px;border:0;border-radius:16px;padding:6px 12px 6px 6px;font:inherit;font-weight:800;font-size:13px;background:rgba(30,20,70,.55);color:rgba(255,255,255,.7);text-decoration:line-through}
+.ichips button.on{background:#35b97c;color:#fff;text-decoration:none}
+.ichips span{width:28px;height:28px}.ichips svg{width:100%;height:100%}
+.pcur{display:flex;gap:12px;align-items:center;background:#fff;border:2px solid #efd6ae;border-radius:18px;padding:10px}
+.pcur .pic{width:84px;height:84px;flex:none}.pcur .pic svg{width:100%;height:100%}
+.pcur small{display:block;font-size:12px;color:#7a5a3a;margin-top:4px}
+.mb{display:block;height:10px;border-radius:5px;background:#efe3cf;margin-top:6px;overflow:hidden}.mb i{display:block;height:100%;background:linear-gradient(90deg,#35b97c,#ffc21a);border-radius:5px}
+.ml{display:grid;gap:8px}
+.mi2{background:#fff;border:2px solid #efd6ae;border-radius:16px;padding:10px 12px}
+.mi2 small{display:block;font-size:12px;color:#7a5a3a;margin-top:4px}
+.mi2.ok{border-color:#35b97c;background:#effaf3}
+.hatch{display:flex;flex-direction:column;align-items:center;gap:6px;margin-bottom:10px;animation:pop .5s cubic-bezier(.3,1.6,.5,1)}
+.hatch .pic{width:110px;height:110px}.hatch .pic svg{width:100%;height:100%}
+.hatch b{font-size:20px}
+.pills{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pills .inst{padding:8px 14px;font-size:14px}
 </style>
 </head>
 <body>
@@ -404,6 +428,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
       <button class="ic" id="snd" aria-label="เสียง"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg></button>
       <button class="ic" id="bbook" aria-label="สมุดสะสม"><svg viewBox="0 0 24 24"><path d="M4 5a2 2 0 0 1 2-2h13v16H6a2 2 0 0 0-2 2zM4 21V5M9 8h6"/></svg></button>
       <button class="ic" id="bshop" aria-label="ร้านแต่งตัว"><svg viewBox="0 0 24 24"><path d="M2 18h20M6 18v-6a6 6 0 0 1 12 0v6"/></svg></button>
+      <button class="ic" id="bpet" aria-label="สัตว์เลี้ยง"><svg viewBox="0 0 24 24"><circle cx="6" cy="10" r="2"/><circle cx="10" cy="5.500" r="2"/><circle cx="14" cy="5.500" r="2"/><circle cx="18" cy="10" r="2"/><path d="M7.500 18c0-3.500 2.200-6 4.500-6s4.500 2.500 4.500 6c0 2-2 2.500-4.500 2.500S7.500 20 7.500 18z"/></svg></button>
       <button class="ic" id="bpar" aria-label="สำหรับผู้ปกครอง"><svg viewBox="0 0 24 24"><path d="M5 20V11M11 20V5M17 20v-6M21 20H3"/></svg></button>
       <div class="starc"><i class="st"></i><span class="scv">0</span></div>
     </div>
@@ -411,18 +436,21 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
       <h1 class="title">เจ้าคุณผจญภัย</h1>
       <div class="sub">ตอบเลขเก็บอาวุธ แล้วไปสู้กับสัตว์ประหลาด</div>
     </div>
-    <div class="hero"><div class="fox" id="heroFox"></div></div>
+    <div class="hero"><div class="fox" id="heroFox"></div><div class="hpet" id="heroPet" hidden></div></div>
     <div class="wrap seclab">ระดับความยาก</div>
     <div class="wrap lv" id="lv"></div>
     <div class="wrap lvhint" id="lvhint"></div>
     <button class="wrap mode advbtn" id="adv"><span class="pico" id="advic"></span><span class="advt"><b>ออกผจญภัย</b><small id="advsub"></small><span class="dots" id="advdots"></span></span><span class="go"><svg viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg></span></button>
     <div class="wrap seclab">หรือฝึกทีละเรื่อง</div>
     <div class="wrap modes" id="modes"></div>
+    <div class="wrap pills">
     <button class="inst" id="inst" hidden>ติดตั้งเกมลงเครื่อง</button>
     <button class="inst" id="glog" hidden>เลือกผู้เล่น</button>
+    <button class="inst" id="mis">ภารกิจวันนี้</button>
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
-    <div class="ver">v1.20</div>
+    </div>
+    <div class="ver">v1.21</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -446,6 +474,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <div class="sum" id="wps"></div>
     <div class="vs" id="wpv"></div>
     <div class="vs wmode" id="wpmode"></div>
+    <div class="ichips" id="wpitems"></div>
     <div class="wact"><button class="ch" id="wpgo3" style="--c:#8f7bd6;--d:#5d49a8;font-size:19px">สุ่มใหม่</button><button class="ch" id="wpgo" style="--c:#e8384f;--d:#a81c33;font-size:22px">สู้เลย</button></div>
   </section>
 
@@ -457,7 +486,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
       <div class="hud mon"><span class="mhp"><b id="mname"></b><span class="hpb"><i id="hpf"></i></span></span><span class="av" id="avmon"></span></div>
     </div>
     <div class="arena" id="arena"><div class="tip" id="ftip"></div><div class="tq" id="tq" hidden></div><div class="ground" id="ground"></div>
-      <svg class="floor3" id="floor3" hidden viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,100 100,100 100,94 85,44 15,44 0,94" fill="#33276e"/><polygon points="15,44 85,44 85,42 15,42" fill="#7a63c9"/><g stroke="rgba(255,255,255,.16)" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"><path d="M3.750 81.500h92.500M7.500 69h85M11.250 56.500h77.500M0 94 15 44M25 94l7.500-50M50 94V44M75 94l-7.500-50M100 94 85 44" vector-effect="non-scaling-stroke"/></g></svg><div class="fm" id="fm"></div><div class="fb" id="fb"></div>
+      <svg class="floor3" id="floor3" hidden viewBox="0 0 100 100" preserveAspectRatio="none"><polygon points="0,100 100,100 100,94 85,44 15,44 0,94" fill="#33276e"/><polygon points="15,44 85,44 85,42 15,42" fill="#7a63c9"/><g stroke="rgba(255,255,255,.16)" stroke-width="1" vector-effect="non-scaling-stroke" fill="none"><path d="M3.750 81.500h92.500M7.500 69h85M11.250 56.500h77.500M0 94 15 44M25 94l7.500-50M50 94V44M75 94l-7.500-50M100 94 85 44" vector-effect="non-scaling-stroke"/></g></svg><div class="fm" id="fm"></div><div class="fb" id="fb"></div><div class="pet" id="fpet" hidden></div>
       <div class="qov" id="tov" hidden><div class="qcard tcard"><span class="tpic2" id="tpic"></span><div class="tt" id="ttl"></div><div class="cap" id="tbody"></div><button class="ch" id="tovok" style="--c:#35b97c;--d:#218a58;font-size:22px">เข้าใจแล้ว</button></div></div>
       <div class="qov" id="qov" hidden><div class="qcard"><div class="cap">ตอบถูก ปล่อยท่าไม้ตาย</div><div class="eq" id="qeq"></div><div class="choices" id="qch"></div></div></div>
     </div>
@@ -668,6 +697,7 @@ const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',
 function praise(){const p=PRAISE[r(0,PRAISE.length-1)],n=kidName();return n&&Math.random()<.5?n+' '+p:p}
 function drawHome(){$('advsub').textContent=(kidName()?kidName()+' ':'')+(A.adv>=NS?'ไปเปิดหีบสมบัติ':`ด่านที่ ${A.adv+1} จาก ${NS}`)+(A.medals?` ได้เหรียญแล้ว ${A.medals}`:'');
  try{$('advic').innerHTML=iconSVG(P.icon)}catch(e){}
+ try{ensurePets();const pt=activePet();$('heroPet').hidden=!pt;if(pt)$('heroPet').innerHTML=petSVG(pt.i,petLv(pt)>=5)}catch(e){}
  $('advdots').innerHTML=STAGES.map((_,k)=>`<i class="${k<A.adv?'on':k===A.adv?'cur':''}"></i>`).join('')}
 function goHome(){drawHome();show('home')}
 function openMap(g){show('map');$('mtg').innerHTML='<span>เรื่องที่จะเจอ แตะเพื่อปิดหรือเปิด</span>'+topicChips();
@@ -701,8 +731,8 @@ $('mapin').onclick=e=>{const b=e.target.closest('.mn');if(!b||mmoved)return;cons
 function confetti(box){const col=['#ffc83d','#ff6f91','#4aa3ff','#35b97c','#fff'];
  for(let k=0;k<46;k++){const c=document.createElement('i');c.className='cf';c.style.cssText=`left:${r(0,100)}%;background:${col[k%5]};animation-duration:${2+Math.random()*2.5}s;animation-delay:${Math.random()*1.2}s`;box.appendChild(c);setTimeout(()=>c.remove(),6000)}}
 function reward(){show('reward');const c=$('chest');c.classList.remove('open');c.innerHTML=CHEST+'<i class="medal"></i>';
- A.adv=0;A.stars=[];A.medals++;saveA();setTimeout(checkUnlocks,2600);S.total+=PT.chest;saveT();
- $('rwp').innerHTML=`เหรียญนักผจญภัย เหรียญที่ ${A.medals}<br>ได้เพิ่ม ${PT.chest} แต้ม`;
+ A.adv=0;A.stars=[];A.medals++;saveA();P.eggs=(P.eggs||0)+1;saveP();setTimeout(checkUnlocks,2600);S.total+=PT.chest;saveT();
+ $('rwp').innerHTML=`เหรียญนักผจญภัย เหรียญที่ ${A.medals}<br>ได้เพิ่ม ${PT.chest} แต้ม และไข่สัตว์เลี้ยง 1 ฟอง`;
  $('rwgo').textContent=!S.auto&&S.lv<2?'ผจญภัยรอบใหม่ ยากขึ้นอีกนิด':'ผจญภัยรอบใหม่';
  setTimeout(()=>{c.classList.add('open');sfx.win();confetti($('reward'));say('เจอสมบัติแล้ว เก่งที่สุดเลย')},500)}
 $('rwgo').onclick=()=>{sfx.tap();if(!S.auto&&S.lv<2){S.lv++;saveLv();drawLv()}openMap()};
@@ -775,7 +805,7 @@ function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){cons
  s.style.cssText=`left:${c.left+c.width/2}px;top:${c.top+c.height/2}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),850)}}
 function good(el){S.lock=true;sfx.ok();burst(el);const p=pq(Math.min(S.miss,2));if(S.first)S.earn++;
  /* ตอบถูกครั้งแรกติดกันครบทุก 5 ข้อ ได้โล่ 1 อัน (เก็บได้ไม่เกิน 5) */
- S.streak=S.first?(S.streak||0)+1:0;if(S.first&&S.streak%5===0&&(P.shields||0)<5){P.shields=(P.shields||0)+1;saveP();setTimeout(()=>toast(`<span class="tpic">${SHIELD}</span><span>ตอบถูกติดกัน 5 ข้อ ได้โล่ 1 อัน</span>`),700)}S.pts+=p;S.total+=p;saveT();
+ S.streak=S.first?(S.streak||0)+1:0;if(S.first){petXP();mission('ans');mission('combo',0,S.streak)}if(S.cur==='write')mission('write');if(S.first&&S.streak%5===0&&(P.shields||0)<5){P.shields=(P.shields||0)+1;saveP();setTimeout(()=>toast(`<span class="tpic">${SHIELD}</span><span>ตอบถูกติดกัน 5 ข้อ ได้โล่ 1 อัน</span>`),700)}S.pts+=p;S.total+=p;saveT();
  S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q}`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,mx:pq(0)});track(S.first);
  const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
  const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
@@ -816,7 +846,7 @@ function gotWeapon(){const k=S.stage,wi=k,lvw=A.medals+1,isNew=(A.w[wi]||0)<lvw;
  $('wpp').innerHTML=`${WPN[wi].n} พลังโจมตี ${atkOf(wi)}<br>${WPN[wi].d}`+(S.hearts>3?'<br>ตอบถูกทุกข้อ<br>ได้หัวใจเพิ่ม 1 ดวง':'');
  $('wps').innerHTML=sumHTML();
  $('wpv').innerHTML=`${fs.map(m=>`<span class="mm">${monSVG(m)}</span>`).join('')}<span>ศัตรู: ${fs.length>1?'ฝูง '+fs.length+' ตัว':esc(fs[0].n)}<br>พลังชีวิตรวม ${fs.reduce((a,m)=>a+m.hp,0)}</span>`;
- rollMode();say((isNew?'ได้อาวุธใหม่ ':'')+WPN[wi].n)}
+ rollMode();drawItemsUse();say((isNew?'ได้อาวุธใหม่ ':'')+WPN[wi].n)}
 /* สรุปรอบตอบเลข: แต้มที่ได้ และข้อไหนตอบผิด (พร้อมคำตอบที่เลือกผิด) */
 function sumHTML(){const max=S.log.reduce((a,l)=>a+(l.mx||0),0),got=S.log.reduce((s,l)=>s+l.p,0),bad=S.log.filter(l=>l.miss).length;
  return `<b>ตอบเลขได้ ${got} จาก ${max} แต้ม${bad?` ผิด ${bad} ข้อ`:' ถูกทุกข้อ'}</b>`+S.log.map((l,i)=>`<div class="${l.miss?'bad':''}"><span>${i+1}. ${l.t}</span><span>${l.miss?`ผิด ${l.miss} ครั้ง${l.wr.length?' (ตอบ '+l.wr.join(', ')+')':''}`:'ถูกเลย'} +${l.p}</span></div>`).join('')}
@@ -829,7 +859,9 @@ const FMD={stand:{n:'ยืนสู้',t:['กดกระโดดหลบ�
  type:{n:'พิมพ์เลขสู้',t:['พิมพ์คำตอบแล้วกด Enter เพื่อโจมตี · Space กระโดด','พิมพ์คำตอบแล้วกด Enter เพื่อโจมตี · Space กระโดด · Z ไม้ตาย']}};
 const TOUCH=matchMedia('(pointer: coarse)').matches||(navigator.maxTouchPoints>0&&!matchMedia('(pointer: fine)').matches),FPOOL=TOUCH?['stand','walk','tap','swipe']:['stand','walk','click','type'];
 /* สุ่มวิธีสู้ + อาวุธที่ถือ (ได้อาวุธของด่านนี้ 40% ที่เหลือสุ่มจากที่เก็บไว้) · พลังโจมตีไม่ต่ำกว่า 80% ของอาวุธแรงสุด อาวุธเบาจะได้ไม่เสียเปรียบเกิน */
-function rollMode(){const o=FPOOL.filter(x=>x!==S.fmode);S.fmode=o[Math.floor(Math.random()*o.length)];const d=FMD[S.fmode];
+function rollMode(){const o=FPOOL.filter(x=>x!==S.fmode);S.fmode=o[Math.floor(Math.random()*o.length)];
+ /* เปิดพลังมือ + เน้นแตะจับตัว: 3 ใน 4 รอบได้แบบแตะ/คลิกจับตัว เพราะใช้มือง่ายสุด (ชี้แล้วกำ ไม่ต้องกะจังหวะกระโดด) */
+ if(typeof H!=='undefined'&&H.want&&H.easy&&Math.random()<.75)S.fmode=TOUCH?'tap':'click';const d=FMD[S.fmode];
  const own=WPN.map((_,i)=>i).filter(i=>A.w[i]),prev=S.fw;S.fw=A.w[S.stage]&&Math.random()<.4?S.stage:pick1(own);if(own.length>1&&S.fw===prev)S.fw=pick1(own.filter(i=>i!==prev));
  $('wpmode').innerHTML=`<span class="mm">${WPN[S.fw].svg}</span><span>วิธีสู้รอบนี้: <b>${d.n}</b><br>${d.t[TOUCH?0:1]}<br>อาวุธรอบนี้: <b>${WPN[S.fw].n}</b></span>`}
 $('wpgo').onclick=()=>{sfx.tap();fight(S.fmode)};
@@ -850,7 +882,13 @@ function fight(mode){mode=FMD[mode]?mode:'stand';const k=S.stage,kk=k%NW,w2=k>=N
  F={mode,k,w,d3,foes,wave:0,swap:false,hp:1,max:1,h:S.hearts,maxh:S.hearts,atk:Math.max(atkOf(w),Math.round(atkOf(bestW())*.8)),act:null,kit:['fire'],j:0,jy:0,cd:0,pcd:0,tcd:0,inv:0,next:2.2,charge:null,shots:[],ps:[],bombs:[],over:false,last:performance.now(),
   v:Math.min(.75,(30+kk*3+(w2?8:0)+S.lv*5)/100),intv:Math.max(1.1,2.6-kk*.18-(w2?.3:0)-S.lv*.3),hi,en:0,paused:false,qlock:false,auto:false,dash:null,
   P:{x:.18,z:d3?.5:0},M:{x:tapm?.6:d3?.8:.72,y:.45,z:d3?.5:0},tgt:null,mv:{x:0,z:0},keys:{},slam:null,slamCd:2,mz:.12+kk*.03+(w2?.05:0)+S.lv*.04,typed:'',tqq:null,sw:null};
- F.shield=(P.shields||0)>0;$('fb').classList.toggle('shielded',F.shield);setFoe(foes[0]);drawHearts();setEn();$('qov').hidden=true;ar.classList.remove('shake');
+ F.shield=(P.shields||0)>0;$('fb').classList.toggle('shielded',F.shield);
+ F.cdm=1;F.spd=1;const used=[],nu=P.noUse||{};
+ if((P.potions||0)>0&&!nu.potions){P.potions--;F.h++;F.maxh++;used.push('ยาเพิ่มหัวใจ')}
+ if((P.boots||0)>0&&!nu.boots){P.boots--;F.cdm=.7;F.spd=1.4;used.push('รองเท้าวิ่งเร็ว')}
+ if(used.length){saveP();setTimeout(()=>toast(`<span>ใช้${used.join(' และ ')}</span>`),400)}
+ const pt=activePet(),pe=$('fpet');pe.style.cssText='';pe.className='pet';pe.hidden=!pt;F.pet=null;
+ if(pt){const lv=petLv(pt);pe.innerHTML=petSVG(pt.i,lv>=5);F.pet={lv,t:2,cd:Math.max(1.6,3.2-.15*lv)}}setFoe(foes[0]);drawHearts();setEn();$('qov').hidden=true;ar.classList.remove('shake');
  $('ftip').textContent=FMD[mode].t[TOUCH?0:1];if(mode==='type')newTQ();
  say('สู้กับ'+(foes.length>1?'สัตว์ประหลาด '+foes.length+' ตัว':foes[0].n));tick(F.last);runLoop(F)}
 function setFoe(m){if(F.act){if(F.act.e)F.act.e.remove();F.M.x=F.act.hx;F.act=null}$('fm').classList.remove('wind');F.kit=m.kit||['fire'];F.hp=F.max=m.hp;$('mname').textContent=m.n+(F.foes.length>1?` (${F.wave+1}/${F.foes.length})`:'');$('avmon').innerHTML=monSVG(m);$('fm').innerHTML=`<div>${monSVG(m)}</div>`;$('hpf').style.width='100%'}
@@ -877,7 +915,8 @@ function tickTap(ts){if(F.paused){F.last=ts;return}const dt=Math.max(0,Math.min(
   if(b.tree){x=b.x0+(b.x1-b.x0)*u;y=b.y0+(b.y1-b.y0)*u+Math.sin(Math.PI*u)*.18;d=62*(click?.85:1)}else d=(28+46*u)*(click?.85:1);
   b.e.style.cssText=`width:${d}px;height:${d}px;left:${x*W-d/2}px;bottom:${y*H-d/2}px;--u:${u}`;
   if(u>=1){b.dead=true;boomFx(x*W,y*H);if(F.inv<=0)hurt()}}
- F.bombs=F.bombs.filter(b=>{if(b.dead)b.e.remove();return!b.dead})}
+ F.bombs=F.bombs.filter(b=>{if(b.dead)b.e.remove();return!b.dead});
+ if(F.pet){F.pet.t-=dt;if(F.pet.t<=0&&!F.swap){F.pet.t=F.pet.cd;const pe=$('fpet');pe.classList.remove('zap');void pe.offsetWidth;pe.classList.add('zap');hitMon(Math.max(1,Math.round(F.atk*(.25+.05*F.pet.lv))),false)}}}
 function boomFx(x,y){const e=document.createElement('i');e.className='boomfx';e.style.left=x+'px';e.style.bottom=y+'px';$('arena').appendChild(e);setTimeout(()=>e.remove(),450);tone(110,0,.2,'sawtooth',.08)}
 /* แตะ/คลิก/กำมือ ที่จุด x,y ในโหมดแตะจับตัว: ทำลายระเบิดหรือต้นไม้ก่อน ไม่โดนค่อยตีสัตว์ประหลาด */
 function tapAt(x,y){
@@ -930,7 +969,7 @@ function proj(x,z){const ar=$('arena'),W=ar.clientWidth,H=ar.clientHeight;
 function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.paused){F.last=ts;return}const dt=Math.max(0,Math.min(.05,(ts-F.last)/1000));F.last=ts;
  const ar=$('arena'),fb=$('fb'),fm=$('fm'),bh=fb.offsetHeight,P=F.P,M=F.M,rr=Math.max(15,bh*.2);
  if(F.d3){const mx=clamp(F.mv.x+(F.keys.r?1:0)-(F.keys.l?1:0),-1,1),mz=clamp(F.mv.z+(F.keys.u?1:0)-(F.keys.d?1:0),-1,1);
-  if(!F.dash){P.x=clamp(P.x+mx*.5*dt,.08,M.x-.14);P.z=clamp(P.z+mz*.8*dt,0,1)}
+  if(!F.dash){P.x=clamp(P.x+mx*.5*dt*(F.spd||1),.08,M.x-.14);P.z=clamp(P.z+mz*.8*dt*(F.spd||1),0,1)}
   const dz=P.z-M.z;M.z+=Math.sign(dz)*Math.min(Math.abs(dz),F.mz*dt)}
  /* ฟันระยะประชิด: 40% แรกวิ่งเข้า · ถึงตัวแล้วฟัน 1 ครั้ง · ครึ่งหลังถอยกลับจุดเดิม · ระหว่างนั้นโดนลูกไฟได้ ต้องดูจังหวะและกดกระโดดเอง */
  if(F.dash){const d=F.dash;d.t+=dt;const u=d.t/d.dur,k=u<.4?u/.4:u<.5?1:Math.max(0,1-(u-.5)/.5);
@@ -941,6 +980,8 @@ function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.pa
  F.cd-=dt;F.pcd-=dt;F.inv-=dt;
  const pp=proj(P.x,P.z),pm=proj(M.x,M.z);
  fb.style.left=pp.sx+'px';fb.style.bottom=pp.fy+'px';fb.style.transform=`translate(-50%,${-F.jy*pp.sc}px) scale(${pp.sc})`;fb.style.zIndex=zi(P.z);
+ if(F.pet){const pe=$('fpet'),qp=proj(Math.max(.03,P.x-.09),P.z),ps=bh*.5*qp.sc;pe.style.cssText=`width:${ps}px;height:${ps}px;left:${qp.sx-ps/2}px;bottom:${qp.fy+bh*.6*qp.sc+Math.sin(ts/300)*6}px;z-index:${zi(P.z)+1}`;
+  F.pet.t-=dt;if(F.pet.t<=0&&!F.swap){F.pet.t=F.pet.cd;petShot(P,bh)}}
  fm.style.left=pm.sx+'px';fm.style.bottom=(pm.fy-pm.H*.01)+'px';fm.style.transform=`translateX(-50%) scale(${pm.sc})`;fm.style.zIndex=zi(M.z);
  /* ลูกไฟ: ชาร์จให้เห็นก่อน 0.6 วิ แล้วพุ่งตามแนวที่สัตว์ประหลาดยืนอยู่ตอนปล่อย */
  F.next-=dt*(F.hp<F.max*.4?1.3:1);
@@ -966,7 +1007,7 @@ function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.pa
   if(F.slam){const s=F.slam;s.t-=dt;const q=proj(s.x,s.z),w=q.W*.4*q.sc;s.e.style.cssText=`width:${w}px;height:${w*.42}px;left:${q.sx-w/2}px;bottom:${q.fy-w*.21}px;opacity:${.35+.65*(1-Math.max(0,s.t)/.9)}`;
    if(s.t<=0){s.e.remove();F.slam=null;F.slamCd=1.8;tone(110,0,.2,'sawtooth',.08);ar.classList.remove('shake');void ar.offsetWidth;ar.classList.add('shake');
     if(F.inv<=0&&Math.abs(P.x-s.x)<.2&&Math.abs(P.z-s.z)<.26&&F.jy<bh*.3)hurt()}}}}
-function attack(){if(!F||F.over||F.paused||F.cd>0||F.dash)return;const wp=WPN[F.w];F.cd=wp.cd;
+function attack(){if(!F||F.over||F.paused||F.cd>0||F.dash)return;const wp=WPN[F.w];F.cd=wp.cd*(F.cdm||1);
  if(wp.melee){F.dash={t:0,dur:wp.dd,x:F.P.x,z:F.P.z,hit:false,dmg:Math.max(1,Math.round(F.atk*wp.mul))};tone(520,0,.08,'square',.05)}else shoot(false)}
 /* big = ท่าไม้ตาย: ดาเมจ 4 เท่า และทำลายลูกไฟที่ขวางทาง */
 function shoot(big){const wp=WPN[F.w],fb=$('fb'),bh=fb.offsetHeight,e=document.createElement('i');
@@ -984,14 +1025,14 @@ function openQ(){if(!F||F.over||F.paused||F.en<1)return;F.paused=true;F.qlock=fa
 $('qch').onclick=e=>{const b=e.target.closest('.ch');if(!b||!F||!F.paused||F.qlock)return;F.qlock=true;const me=F,ok=+b.dataset.n===F.q.ans;
  [...$('qch').children].forEach(c=>{if(+c.dataset.n===me.q.ans)c.classList.add('ok');else if(c===b)c.classList.add('no')});
  if(ok){const p=pq(0);S.pts+=p;S.total+=p;saveT();say(praise())}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
- setTimeout(()=>{if(F!==me)return;$('qov').hidden=true;me.qlock=false;me.paused=false;me.last=performance.now();me.en=0;setEn();if(ok&&!me.over)shoot(true)},ok?500:1200)};
+ setTimeout(()=>{if(F!==me)return;$('qov').hidden=true;me.qlock=false;me.paused=false;me.last=performance.now();me.en=0;setEn();if(ok&&!me.over)shoot(true);if(ok)mission('sp')},ok?500:1200)};
 function jump(){if(!F||F.over||F.paused||F.j>0)return;F.j=JUMP;tone(420,0,.12,'triangle',.1);tone(620,.07,.12,'triangle',.1)}
 function hitMon(dmg,big){if(F.over||F.swap)return;F.hp-=dmg;$('hpf').style.width=Math.max(0,F.hp/F.max*100)+'%';const fm=$('fm'),ar=$('arena');fm.classList.add('hit');setTimeout(()=>fm.classList.remove('hit'),120);
  if(!big){F.en=Math.min(1,F.en+.125);setEn()}
  if(big||WPN[F.w].shake){ar.classList.remove('shake');void ar.offsetWidth;ar.classList.add('shake')}
  const q=F.mode==='tap'||F.mode==='click'?{sx:F.M.x*ar.clientWidth,fy:F.M.y*ar.clientHeight,sc:.7}:proj(F.M.x,F.M.z),d=document.createElement('div');d.className='dmg';d.textContent='-'+dmg;if(big)d.style.fontSize='46px';
  d.style.left=q.sx+'px';d.style.bottom=(q.fy+fm.offsetHeight*q.sc*.85)+'px';d.style.zIndex=70;ar.appendChild(d);setTimeout(()=>d.remove(),800);tone(160,0,.1,'square',.07);
- if(F.hp<=0){P.kills=(P.kills||0)+1;const me=F;fm.classList.add('dead');sfx.ok();
+ if(F.hp<=0){P.kills=(P.kills||0)+1;mission('kill');const me=F;fm.classList.add('dead');sfx.ok();
   /* ยังมีตัวต่อไปในฝูง: ตัวใหม่โผล่มาแทนหลังพักสั้นๆ */
   if(F.wave<F.foes.length-1){F.swap=true;setTimeout(()=>{if(F!==me||me.over)return;me.wave++;fm.className='fm';setFoe(me.foes[me.wave]);me.swap=false;me.tgt=null;
    toast(`<span>ตัวที่ ${me.wave+1} มาแล้ว</span>`);say(me.foes[me.wave].n+' มาแล้ว')},900);return}
@@ -1000,7 +1041,7 @@ function hurt(){if(F.shield){F.shield=false;P.shields=Math.max(0,(P.shields||0)-
   tone(1000,0,.12,'triangle',.1);tone(600,.08,.15,'triangle',.08);toast(`<span class="tpic">${SHIELD}</span><span>โล่กันไว้ได้</span>`);return}
  F.h--;F.inv=1;drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
  if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
-function finishStage(){if(!$('fight').classList.contains('on'))return;P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
+function finishStage(){if(!$('fight').classList.contains('on'))return;mission('win');P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
  const b=Math.round(PT.stage*LVX[S.lv]);S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
 const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
 tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);$('bsp').onclick=$('psp').onclick=()=>openQ();tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
@@ -1159,10 +1200,61 @@ function iconSVG(i,plain){const ic=ICONS[i]||ICONS[0],n=ic.c.length,inner=dress(
 const SHOP={h:{list:HATS,own:'owned',cur:'hat',t:'หมวก'},s:{list:SHIRTS,own:'ownS',cur:'shirt',t:'เสื้อ'},p:{list:PANTS,own:'ownP',cur:'pants',t:'กางเกง'},
  o:{list:SHOES,own:'ownSh',cur:'shoe',t:'รองเท้า'},f:{list:FX,own:'ownF',cur:'fx',t:'เอฟเฟกต์'},i:{list:ICONS,own:'ownI',cur:'icon',t:'ไอคอน'}};
 let shopTab='h';
+const PETS=[{n:'ลูกไก่ไฟ',c:'#ffb41f',f:'chick'},{n:'แมวสายฟ้า',c:'#ffd34d',f:'cat'},{n:'เต่าน้ำแข็ง',c:'#6fd0ff',f:'turtle'},{n:'กระต่ายใบไม้',c:'#7bd389',f:'bunny'},{n:'นกฮูกดวงดาว',c:'#a78bfa',f:'owl'},{n:'มังกรน้อย',c:'#ff6f91',f:'dragon'}];
+const STARP='<svg viewBox="0 0 60 60"><path d="M30 4l7 17 18 2-14 12 4 18-15-9-15 9 4-18L5 23l18-2z" fill="#ffd34d" stroke="#fff" stroke-width="2"/></svg>';
+function petSVG(i,ev){const p=PETS[i]||PETS[0],c=p.c;let ex='';
+ if(p.f==='cat')ex=`<path d="M16 28 20 6l14 16zM48 28 44 6 30 22z" fill="${c}"/>`;
+ if(p.f==='bunny')ex=`<ellipse cx="22" cy="12" rx="6" ry="14" fill="${c}"/><ellipse cx="42" cy="12" rx="6" ry="14" fill="${c}"/>`;
+ if(p.f==='chick')ex=`<path d="M32 6q-7 7 0 12q7-5 0-12z" fill="#e8384f"/>`;
+ if(p.f==='owl')ex=`<path d="M12 24 16 8l12 12zM52 24 48 8 36 20z" fill="${c}"/>`;
+ if(p.f==='dragon')ex=`<path d="M20 22 16 4l10 12zM44 22 48 4 38 16z" fill="#fff3e0"/><path d="M8 42 0 26l14 8zM56 42l8-16-14 8z" fill="${c}" opacity=".8"/>`;
+ if(p.f==='turtle')ex=`<ellipse cx="32" cy="48" rx="26" ry="13" fill="#2f9d68"/>`;
+ return `<svg viewBox="0 0 64 64" width="100%" height="100%">${ex}<circle cx="32" cy="36" r="22" fill="${c}"/><ellipse cx="32" cy="45" rx="12" ry="7" fill="#fff" opacity=".35"/><circle cx="24" cy="33" r="4" fill="#2a1e3f"/><circle cx="40" cy="33" r="4" fill="#2a1e3f"/><circle cx="25.300" cy="31.600" r="1.400" fill="#fff"/><circle cx="41.300" cy="31.600" r="1.400" fill="#fff"/>${p.f==='chick'||p.f==='owl'?'<path d="M29 39h6l-3 4z" fill="#ff8a3d"/>':'<path d="M28 40q4 4 8 0" fill="none" stroke="#2a1e3f" stroke-width="2" stroke-linecap="round"/>'}${ev?'<path d="M20 16l4-9 4 6 4-10 4 10 4-6 4 9z" fill="#ffd34d" stroke="#c98f0a" stroke-width="1"/>':''}</svg>`}
+/* เลเวล 1-10 · ได้ 1 XP ต่อข้อที่ตอบถูกครั้งแรก · 15 XP ต่อเลเวล · เลเวล 5 วิวัฒนาการ (มีมงกุฎ) */
+const petLv=p=>Math.min(10,1+Math.floor((p.xp||0)/15));
+function ensurePets(){if(!P.pets){P.pets=[];P.pet=-1;P.eggs=Math.max(P.eggs||0,1);saveP()}}
+const activePet=()=>P.pets&&P.pets[P.pet]||null;
+function petXP(){const p=activePet();if(!p)return;const l0=petLv(p);p.xp=(p.xp||0)+1;const l1=petLv(p);
+ if(l1>l0)setTimeout(()=>toast(`<span class="tpic">${petSVG(p.i,l1>=5)}</span><span>${PETS[p.i].n} ${l1===5?'วิวัฒนาการแล้ว':'เลเวล '+l1}</span>`),900)}
+function hatch(){ensurePets();if((P.eggs||0)<1)return;P.eggs--;const own=P.pets.map(p=>p.i),pool=PETS.map((_,i)=>i).filter(i=>!own.includes(i));let i,dup=false;
+ if(pool.length){i=pick1(pool);P.pets.push({i,xp:0});P.pet=P.pets.length-1}else{i=pick1(own);dup=true;P.pets.find(p=>p.i===i).xp+=15}
+ saveP();drawHome();sfx.win();openPets(`<div class="hatch"><span class="pic">${petSVG(i)}</span><b>${dup?PETS[i].n+' ได้ XP เพิ่ม 15':'ได้ '+PETS[i].n+'!'}</b></div>`);say(dup?PETS[i].n+' เก่งขึ้น':'ได้'+PETS[i].n)}
+function openPets(top){ensurePets();const a=activePet();
+ const cur=a?`<div class="pcur"><span class="pic">${petSVG(a.i,petLv(a)>=5)}</span><div><b>${PETS[a.i].n}</b> เลเวล ${petLv(a)}${petLv(a)>=5?' (วิวัฒนาการแล้ว)':''}<span class="mb"><i style="width:${petLv(a)>=10?100:((a.xp||0)%15)/15*100}%"></i></span><small>ช่วยยิงดาวทุกๆ ${Math.max(1.6,3.2-.15*petLv(a)).toFixed(1)} วินาที · ตอบเลขถูกครั้งแรก 1 ข้อ ได้ 1 XP</small></div></div>`:'<div class="note">ยังไม่มีสัตว์เลี้ยง ฟักไข่เพื่อเริ่ม</div>';
+ const grid=`<div class="cg">${PETS.map((p,i)=>{const k=P.pets.findIndex(x=>x.i===i);if(k<0)return `<div class="cc no"><span class="pic">${petSVG(i)}</span>ยังไม่เจอ</div>`;
+  return `<div class="cc"><span class="pic">${petSVG(i,petLv(P.pets[k])>=5)}</span>${p.n} เลเวล ${petLv(P.pets[k])}<button data-pet="${k}" class="${P.pet===k?'on':''}">${P.pet===k?'อยู่กับเรา':'พาไปด้วย'}</button></div>`}).join('')}</div>`;
+ sheet('สัตว์เลี้ยง',(top||'')+cur+`<h3>ไข่ ${P.eggs||0} ฟอง</h3><div class="nm"><button data-hatch="1" ${(P.eggs||0)<1?'disabled':''} style="padding:10px 18px">ฟักไข่</button></div><div class="note">ได้ไข่จาก: เปิดหีบสมบัติ · ทำภารกิจวันนี้ครบ 3 อย่าง · ซื้อในร้านแท็บไอเทม</div><h3>สัตว์เลี้ยงที่มี ${P.pets.length}/${PETS.length}</h3>`+grid)}
+$('bpet').onclick=()=>{sfx.tap();openPets()};
+function petShot(P_,bh){const e=document.createElement('i');e.className='pshot spin';e.innerHTML=STARP;e.style.left='-999px';$('arena').appendChild(e);
+ F.ps.push({e,x:P_.x,z:P_.z,up:bh*.85,d:bh*.3,sp:1.5,dmg:Math.max(1,Math.round(F.atk*(.25+.05*F.pet.lv))),kill:false,big:false});tone(1100,0,.05,'triangle',.04)}
+
+/* ภารกิจวันนี้ (แบบ Khan Kids / SplashLearn: เป้าเล็กๆ รายวัน) · ไม่เล่นวันไหนก็ไม่โดนหักอะไร */
+const MPOOL=[{k:'ans',t:n=>`ตอบเลขถูกครั้งแรก ${n} ข้อ`,n:[8,12,15]},{k:'win',t:n=>`ชนะการสู้ ${n} ครั้ง`,n:[1,2]},{k:'kill',t:n=>`ปราบสัตว์ประหลาด ${n} ตัว`,n:[3,5]},
+ {k:'sp',t:n=>`ปล่อยท่าไม้ตาย ${n} ครั้ง`,n:[1,2]},{k:'write',t:n=>`เขียนเลขผ่าน ${n} ตัว`,n:[3,5]},{k:'combo',t:n=>`ตอบถูกติดกัน ${n} ข้อ`,n:[5,8]}],MREW=40;
+const MP=k=>MPOOL.find(x=>x.k===k),today=()=>new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Bangkok'});
+function daily(){if(!P.daily||P.daily.d!==today()){P.daily={d:today(),m:MPOOL.slice().sort(()=>Math.random()-.5).slice(0,3).map(x=>({k:x.k,n:pick1(x.n),c:0})),bonus:false};saveP()}return P.daily}
+function mission(k,inc,abs){try{const D=daily();let ch=false;
+ for(const m of D.m){if(m.k!==k||m.c>=m.n)continue;const c=abs!=null?Math.max(m.c,abs):m.c+(inc||1);if(c===m.c)continue;m.c=Math.min(m.n,c);ch=true;
+  if(m.c>=m.n){S.total+=MREW;saveT();sfx.win();setTimeout(()=>toast(`<span>ภารกิจสำเร็จ: ${MP(m.k).t(m.n)} +${MREW} แต้ม</span>`),1200)}}
+ if(ch){if(!D.bonus&&D.m.every(m=>m.c>=m.n)){D.bonus=true;P.eggs=(P.eggs||0)+1;setTimeout(()=>toast(`<span class="tpic">${EGG}</span><span>ทำภารกิจครบ 3 อย่าง ได้ไข่สัตว์เลี้ยง</span>`),3400)}saveP();drawMis()}}catch(e){}}
+function drawMis(){try{const D=daily();$('mis').textContent=`ภารกิจวันนี้ ${D.m.filter(m=>m.c>=m.n).length}/3`}catch(e){}}
+function openMis(){const D=daily();sheet('ภารกิจวันนี้',`<div class="ml">${D.m.map(m=>{const ok=m.c>=m.n;return `<div class="mi2 ${ok?'ok':''}"><b>${MP(m.k).t(m.n)}</b><span class="mb"><i style="width:${m.c/m.n*100}%"></i></span><small>${ok?'สำเร็จแล้ว':m.c+'/'+m.n} · รางวัล ${MREW} แต้ม</small></div>`}).join('')}</div>
+ <div class="note">${D.bonus?'ทำครบ 3 อย่างแล้ว ได้ไข่สัตว์เลี้ยงไปแล้ว':'ทำครบ 3 อย่าง ได้ไข่สัตว์เลี้ยงเพิ่ม 1 ฟอง'}<br>ภารกิจใหม่มาทุกวัน ไม่ได้เล่นวันไหนก็ไม่เสียอะไร</div>`)}
+$('mis').onclick=()=>{sfx.tap();openMis()};
 const SHIELD='<svg viewBox="0 0 60 60"><path d="M30 4 52 12v18c0 14-10 22-22 26C18 52 8 44 8 30V12z" fill="#4aa3ff" stroke="#fff" stroke-width="3"/><path d="M30 14l4 9 9 1-7 6 2 9-8-5-8 5 2-9-7-6 9-1z" fill="#ffd34d"/></svg>';
 const SHIELD_P=40,SHIELD_MAX=5;
-function shieldCard(){const n=P.shields||0,c=SHIELD_P*PRICE_X,full=n>=SHIELD_MAX,dis=full||S.total<c;
- return `<div class="cc"><span class="pic">${SHIELD}</span>โล่กันท่า<small>กันโดนตี 1 ครั้งต่อการสู้ ใช้ให้เองอัตโนมัติ</small><button data-buy="shield" ${dis?'disabled':''}>${full?'เต็มแล้ว':S.total<c?`ขาดอีก ${c-S.total}`:c+' แต้ม'}</button></div>`}
+const POTION='<svg viewBox="0 0 60 60"><rect x="24" y="4" width="12" height="10" rx="2" fill="#8a5a2b"/><path d="M22 14h16v8l10 14c4 10-4 20-18 20S8 46 12 36l10-14z" fill="#fff" stroke="#d5dae2" stroke-width="2"/><path d="M14 38c6-4 26-4 32 0 2 8-6 14-16 14S12 46 14 38z" fill="#ff4d6d"/><path d="M30 34c-3-3-7 1 0 6 7-5 3-9 0-6z" fill="#fff"/></svg>';
+const BOOTS='<svg viewBox="0 0 60 60"><path d="M16 8h16v26l14 6c6 2 8 6 8 12H12z" fill="#ff8a3d" stroke="#c9611d" stroke-width="2"/><path d="M12 48h42v6H12z" fill="#3b2a4a"/><path d="M2 24h10M3 32h9M4 40h7" stroke="#ffd34d" stroke-width="3" stroke-linecap="round"/></svg>';
+const EGG='<svg viewBox="0 0 60 60"><path d="M30 4C16 4 8 26 8 38c0 12 10 18 22 18s22-6 22-18C52 26 44 4 30 4z" fill="#fff8ec" stroke="#e3cba6" stroke-width="2"/><circle cx="22" cy="30" r="5" fill="#8f7bd6" opacity=".6"/><circle cx="38" cy="22" r="4" fill="#4aa3ff" opacity=".6"/><circle cx="36" cy="42" r="6" fill="#ff6f91" opacity=".6"/></svg>';
+/* ไอเทมใช้แล้วหมด · k = ชื่อช่องเก็บใน P · p = ราคาฐาน (คูณ PRICE_X) · เก็บได้ช่องละไม่เกิน ITEM_MAX */
+const ITEMS=[{k:'shields',n:'โล่กันท่า',p:40,svg:SHIELD,d:'กันโดนตี 1 ครั้งต่อการสู้ ใช้ให้เอง'},{k:'potions',n:'ยาเพิ่มหัวใจ',p:50,svg:POTION,d:'เริ่มสู้ด้วยหัวใจเพิ่ม 1 ดวง'},
+ {k:'boots',n:'รองเท้าวิ่งเร็ว',p:40,svg:BOOTS,d:'โจมตีไวขึ้น เดินเร็วขึ้น 1 การสู้'},{k:'eggs',n:'ไข่สัตว์เลี้ยง',p:150,svg:EGG,d:'ฟักเป็นสัตว์เลี้ยงช่วยสู้'}],ITEM_MAX=5;
+function itemCards(){return ITEMS.map(it=>{const n=P[it.k]||0,c=it.p*PRICE_X,full=n>=ITEM_MAX,dis=full||S.total<c;
+ return `<div class="cc"><span class="pic">${it.svg}</span>${it.n} (มี ${n})<small>${it.d}</small><button data-buy="${it.k}" ${dis?'disabled':''}>${full?'เต็มแล้ว':S.total<c?`ขาดอีก ${c-S.total}`:c+' แต้ม'}</button></div>`}).join('')}
+/* หน้าได้อาวุธ: เลือกว่ารอบนี้จะใช้ยาเพิ่มหัวใจ/รองเท้าวิ่งเร็วไหม (ค่าเริ่มต้นใช้) */
+function drawItemsUse(){const nu=P.noUse||{},b=['potions','boots'].filter(k=>(P[k]||0)>0).map(k=>{const it=ITEMS.find(x=>x.k===k);return `<button data-use="${k}" class="${nu[k]?'':'on'}"><span>${it.svg}</span>${nu[k]?'ไม่ใช้':'ใช้'}${it.n} (มี ${P[k]})</button>`});
+ $('wpitems').innerHTML=b.join('');$('wpitems').hidden=!b.length}
+$('wpitems').onclick=e=>{const b=e.target.closest('button[data-use]');if(!b)return;sfx.tap();P.noUse=P.noUse||{};P.noUse[b.dataset.use]=!P.noUse[b.dataset.use];saveP();drawItemsUse()};
 const ARMS='<path d="M45 74 35 89M75 74l10 15" stroke="#e3b088"',ARMS_UP='<path d="M45 72 32 55M75 72l13-17" stroke="#e3b088"';
 /* ของที่ปลดล็อกจากความสำเร็จ: แจ้งครั้งเดียวต่อชิ้น (P.seen) · เข้าร้านแล้วนับเป็นของเราเลย */
 function eachUnlock(fn){Object.keys(SHOP).forEach(k=>{const d=SHOP[k];d.list.forEach((it,i)=>{if(it.a&&it.a.ok())fn(k,d,i,it)})})}
@@ -1184,7 +1276,7 @@ const canBuy=(d,i)=>{const it=d.list[i];return !owns(d,i)&&!it.a&&(it.g?P.gems[i
 function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:P.pants,o:P.shoe,f:P.fx};
  const tabs=`<div class="tabs"><button data-tab="now" class="${k==='now'?'on':''}">ซื้อได้ตอนนี้</button><button data-tab="item" class="${k==='item'?'on':''}">ไอเทม</button>${Object.keys(SHOP).map(x=>`<button data-tab="${x}" class="${x===k?'on':''}">${SHOP[x].t}</button>`).join('')}</div>`;
  let head,cards='';
- if(k==='item'){head=`ไอเทม · มีโล่ ${P.shields||0}/${SHIELD_MAX} อัน · ตอบเลขถูกครั้งแรกติดกัน 5 ข้อ ได้โล่ฟรี 1 อัน`;cards=shieldCard()}
+ if(k==='item'){head='ไอเทมใช้แล้วหมด · ตอบเลขถูกครั้งแรกติดกัน 5 ข้อ ได้โล่ฟรี 1 อัน';cards=itemCards()}
  else if(k==='now'){const list=[];Object.keys(SHOP).forEach(x=>SHOP[x].list.forEach((_,i)=>{if(canBuy(SHOP[x],i))list.push([x,i])}));
   if(list.length){head=`ซื้อได้ตอนนี้ ${list.length} ชิ้น`;cards=list.map(([x,i])=>shopCard(x,i,now)).join('')}
   else{let min=Infinity;Object.values(SHOP).forEach(d=>d.list.forEach((it,i)=>{if(!owns(d,i)&&it.p)min=Math.min(min,cost(it))}));
@@ -1193,7 +1285,7 @@ function openShop(keep){claimUnlocks();const k=shopTab,now={h:P.hat,s:P.shirt,p:
  const sc=$('sheet').querySelector('.shc'),y=keep?sc.scrollTop:0;
  sheet('ร้านแต่งตัว',`<h3>มี ${S.total} แต้ม</h3>${tabs}<h3>${head}</h3><div class="cg">${cards}</div>`);sc.scrollTop=y}
 $('shb').onclick=e=>{const by=e.target.closest('button[data-buy]');
- if(by){const c=SHIELD_P*PRICE_X;if((P.shields||0)>=SHIELD_MAX||S.total<c)return;S.total-=c;saveT();P.shields=(P.shields||0)+1;saveP();sfx.win();openShop(true);return}
+ if(by){const it=ITEMS.find(x=>x.k===by.dataset.buy),c=it.p*PRICE_X;if((P[it.k]||0)>=ITEM_MAX||S.total<c)return;S.total-=c;saveT();P[it.k]=(P[it.k]||0)+1;saveP();sfx.win();openShop(true);return}
  const ga=e.target.closest('button[data-g]');
  if(ga){sfx.tap();openWho();return}
  const wb=e.target.closest('button[data-who]');if(wb){sfx.tap();pickWho(wb.dataset.who);return}
@@ -1202,6 +1294,10 @@ $('shb').onclick=e=>{const by=e.target.closest('button[data-buy]');
  const sp=e.target.closest('button[data-setpin]');if(sp){sfx.tap();savePin();return}
  const hb=e.target.closest('button[data-hand]');if(hb){sfx.tap();hSet(hb.dataset.hand==='1');openHand();return}
  const hs=e.target.closest('button[data-hsp]');if(hs){sfx.tap();H.speed=+hs.dataset.hsp;try{localStorage.setItem('fnf_hsp',H.speed)}catch(e){}openHand();return}
+ const hf=e.target.closest('button[data-hfs],button[data-hjs]');if(hf){sfx.tap();const k=hf.dataset.hfs!=null?'fs':'js';H[k]=+(hf.dataset.hfs??hf.dataset.hjs);try{localStorage.setItem('fnf_h'+k,H[k])}catch(e){}openHand();return}
+ const he=e.target.closest('button[data-heasy]');if(he){sfx.tap();H.easy=he.dataset.heasy==='1';try{localStorage.setItem('fnf_heasy',H.easy?'1':'0')}catch(e){}openHand();return}
+ const pb=e.target.closest('button[data-pet]');if(pb){sfx.tap();P.pet=+pb.dataset.pet;saveP();drawHome();openPets(undefined);return}
+ const hb2=e.target.closest('button[data-hatch]');if(hb2){hatch();return}
  const nb=e.target.closest('button[data-name]');
  if(nb){P.name=$('pname').value.trim().slice(0,12);saveP();drawHome();sfx.tap();toast('<span>บันทึกชื่อแล้ว</span>');return}
  const tb=e.target.closest('button[data-tab]');if(tb){shopTab=tb.dataset.tab;sfx.tap();openShop();return}
@@ -1222,7 +1318,7 @@ function openParent(){const rows=['add','sub','mul','div','write'].map(m=>{const
  sheet('สำหรับผู้ปกครอง',whoHTML()+instHTML()+tg+`<table class="pt"><tr><th>เรื่อง</th><th>ทำไป (ข้อ)</th><th>ถูกครั้งแรก</th><th>ระดับที่เหมาะ</th></tr>${rows}</table>
  <h3>ข้อที่ยังตอบผิด เกมจะสุ่มกลับมาถามซ้ำ</h3>${P.miss.length?P.miss.map(x=>`${x.a} ${SYM[x.m]} ${x.b}`).join(' , '):'ยังไม่มี'}`)}
 $('bbook').onclick=()=>{sfx.tap();openBook()};$('bshop').onclick=()=>{sfx.tap();shopTab=$('bshop').classList.contains('dot')?'now':shopTab==='now'?'h':shopTab;openShop()};$('bpar').onclick=()=>{sfx.tap();openParent()};
-if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();drawHome();
+if(!P.off)P.off={};if(!P.ownSh)P.ownSh=[0];if(!P.ownI)P.ownI=[0];P.icon=P.icon||0;if(!P.ownF)P.ownF=[0];P.shoe=P.shoe||0;P.fx=P.fx||0;wear();drawModes();drawHome();drawMis();
 /* ============ ติดตั้งลงเครื่อง + เล่นไม่ใช้เน็ต ============ */
 const STANDALONE=matchMedia('(display-mode: standalone)').matches||navigator.standalone===true,IOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
 let instEvt=null;
@@ -1293,8 +1389,9 @@ $('glog').onclick=()=>{sfx.tap();openWho()};
    กล้องเปิดเฉพาะตอนอยู่ในด่าน กลับหน้าแรกหรือแผนที่แล้วปิดเอง · ตัวจับมือ (MediaPipe) โหลดจากเน็ตตอนเปิดใช้ครั้งแรกเท่านั้น */
 const MP_V='https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14',MP_MODEL='https://storage.googleapis.com/mediapipe-models/hand_landmarker/hand_landmarker/float16/1/hand_landmarker.task';
 const HCFG={DWELL:[900,1400,2000],IN_PAD:14,KEEP_PAD:44,ARM_MOVE:60,FRESH:400,STREAK:2,SMOOTH:.9,GRACE:700};
-const H={want:false,on:false,busy:false,speed:1,stream:null,lm:null,ptr:null,ptrAt:0,last:0,gap:0,streak:0,lastNorm:null,vt:-1,t:0,raf:0,sig:'',grace:0,armFrom:null,armed:new WeakSet(),dwell:new Map()};
-try{H.want=localStorage.getItem('fnf_hand')==='1';const v=localStorage.getItem('fnf_hsp');if(v!==null)H.speed=clamp(+v||0,0,2)}catch(e){}
+const HFIST=[[.72,.85],[.62,.75],[.52,.66]],HJMP=[1,1.4,1.9];  /* กำมือ: [นิ้วกลาง-นาง-ก้อย, นิ้วชี้] เทียบฝ่ามือ · ยกมือ: ความเร็วขั้นต่ำ (เท่าของความสูงจอต่อวินาที) · ลำดับ ไว/กลาง/ต้องชัด */
+const H={fs:1,js:1,easy:true,want:false,on:false,busy:false,speed:1,stream:null,lm:null,ptr:null,ptrAt:0,last:0,gap:0,streak:0,lastNorm:null,vt:-1,t:0,raf:0,sig:'',grace:0,armFrom:null,armed:new WeakSet(),dwell:new Map()};
+try{H.want=localStorage.getItem('fnf_hand')==='1';['fs','js'].forEach(k=>{const v=localStorage.getItem('fnf_h'+k);if(v!==null)H[k]=clamp(+v||0,0,2)});if(localStorage.getItem('fnf_heasy')==='0')H.easy=false;const v=localStorage.getItem('fnf_hsp');if(v!==null)H.speed=clamp(+v||0,0,2)}catch(e){}
 function handOK(lm){if(!lm||lm.length<21)return false;const d=(a,b)=>Math.hypot(lm[a].x-lm[b].x,lm[a].y-lm[b].y),pw=d(5,17),pl=d(0,9);
  if(pw<1e-4||pl<1e-4)return false;const ra=pl/pw;if(ra<.55||ra>2.8)return false;const mid=d(9,12);
  if(mid<pl*.15||mid>pl*2.4)return false;return Math.max(pl,mid)>=.04}
@@ -1308,7 +1405,7 @@ function hTake(list,now){let best=null,bs=-1;for(const lm of list||[]){if(!handO
  if(!best){H.streak=0;if(now-H.last>900){H.ptr=null;H.lastNorm=null}return}
  H.streak++;H.lastNorm={x:best.cx,y:best.cy};if(H.streak<HCFG.STREAK&&!H.ptr)return;hApply(best.lm,now);
  /* กำมือ = ปลายนิ้วกลาง นาง ก้อย อยู่ใกล้โคนนิ้วกลาง และนิ้วชี้งอด้วย (เทียบกับความยาวฝ่ามือ) · ต้องเห็นติดกัน 2 เฟรมถึงนับ */
- const lm=best.lm,d=(a,b)=>Math.hypot(lm[a].x-lm[b].x,lm[a].y-lm[b].y),pl=d(0,9),avg=(d(12,9)+d(16,9)+d(20,9))/3,f=avg<pl*.62&&d(8,9)<pl*.75;   // ชี้นิ้วเดียว (นิ้วชี้เหยียด) ไม่นับเป็นกำมือ
+ const lm=best.lm,d=(a,b)=>Math.hypot(lm[a].x-lm[b].x,lm[a].y-lm[b].y),pl=d(0,9),avg=(d(12,9)+d(16,9)+d(20,9))/3,f=avg<pl*HFIST[H.fs][0]&&d(8,9)<pl*HFIST[H.fs][1];   // ชี้นิ้วเดียว (นิ้วชี้เหยียด) ไม่นับเป็นกำมือ
  H.fistN=f?(H.fistN||0)+1:0;H.fist=H.fistN>=2}
 /* ปุ่มที่มือกดได้ ณ ตอนนี้ */
 function hTargets(){const scr=document.querySelector('.screen.on');if(!scr||!$('sheet').hidden)return[];
@@ -1341,7 +1438,7 @@ function hFight(now){const on=$('fight').classList.contains('on')&&F&&!F.over&&!
   if(F.mode==='tap'||F.mode==='click')tapAt(x,y);
   else{const r=$('fm').getBoundingClientRect(),p=40;if(x>r.left-p&&x<r.right+p&&y>r.top-p&&y<r.bottom+p)attack();else tone(200,0,.05,'sine',.04)}}
  H.wasFist=H.fist;
- if(F.mode!=='tap'&&F.mode!=='click'&&!H.fist){if(H.py!=null){const vy=(H.ptr.y-H.py.y)/Math.max(1,now-H.py.t)*1000;if(vy<-innerHeight*1.4)jump()}H.py={y:H.ptr.y,t:now}}else H.py=null}
+ if(F.mode!=='tap'&&F.mode!=='click'&&!H.fist){if(H.py!=null){const vy=(H.ptr.y-H.py.y)/Math.max(1,now-H.py.t)*1000;if(vy<-innerHeight*HJMP[H.js])jump()}H.py={y:H.ptr.y,t:now}}else H.py=null}
 async function hStart(){if(H.on||H.busy)return;H.busy=true;toast('<span>กำลังเปิดกล้อง รอสักครู่</span>');
  try{if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('no_camera');
   H.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:640},height:{ideal:480},frameRate:{ideal:60}},audio:false});
@@ -1359,6 +1456,10 @@ function drawHand(){$('hbtn').textContent='พลังมือ: '+(H.want?'เ
 function openHand(){sheet('พลังมือวิเศษ',`<div class="note">เจ้าคุณมีพลังมือวิเศษ ยกมือขึ้นหน้ากล้อง มือจะกลายเป็นลูกแก้วทอง ชี้คำตอบค้างไว้จนแถบทองเต็ม คำตอบนั้นจะถูกเลือก</div>
  <h3>เปิดใช้พลังมือ</h3><div class="tg"><button data-hand="1" class="${H.want?'on':''}">เปิด</button><button data-hand="0" class="${H.want?'':'on'}">ปิด</button></div>
  <h3>ต้องชี้ค้างนานแค่ไหน</h3><div class="tabs">${['ไว','กลาง','ช้า'].map((t,i)=>`<button data-hsp="${i}" class="${H.speed===i?'on':''}">${t}</button>`).join('')}</div>
+ <h3>ตอนสู้: กำมือแค่ไหนถึงนับว่าตี</h3><div class="tabs">${['กำนิดเดียว','กลาง','ต้องกำแน่น'].map((t,i)=>`<button data-hfs="${i}" class="${H.fs===i?'on':''}">${t}</button>`).join('')}</div>
+ <h3>ยกมือแรงแค่ไหนถึงกระโดด</h3><div class="tabs">${['ยกเบาๆ','กลาง','ต้องยกแรง'].map((t,i)=>`<button data-hjs="${i}" class="${H.js===i?'on':''}">${t}</button>`).join('')}</div>
+ <div class="note">ตีหรือกระโดดเองบ่อย = เลื่อนไปทางขวา · กำหรือยกแล้วไม่ติด = เลื่อนไปทางซ้าย</div>
+ <h3>แบบสู้ตอนเปิดพลังมือ</h3><div class="tg"><button data-heasy="1" class="${H.easy?'on':''}">เน้นแตะจับตัว (ง่ายสุด)</button><button data-heasy="0" class="${H.easy?'':'on'}">สุ่มทุกแบบ</button></div>
  <h3>ตอนสู้</h3><div class="note">ชี้ลูกแก้วไปที่สัตว์ประหลาดแล้วกำมือ = ตี · ยกมือขึ้นเร็วๆ = กระโดด · แถบไม้ตายเต็มแล้วชี้ค้างที่ปุ่มไม้ตาย<br>โหมดแตะจับตัว: กำมือตรงไหน = แตะตรงนั้น</div>
  <div class="note">กล้องเปิดเฉพาะตอนอยู่ในด่าน ภาพจากกล้องไม่ถูกบันทึกหรือส่งไปที่ไหน ด่านเขียนเลขและการเดินในโหมด 3 มิติยังใช้นิ้ว แตะจอได้ตลอดแม้เปิดพลังมือ</div>`)}
 $('hbtn').onclick=()=>{sfx.tap();openHand()};drawHand();
