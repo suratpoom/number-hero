@@ -453,6 +453,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 .cc small.fxp{color:#5d49a8}
 .wtimer{font-weight:900;font-size:15px;padding:4px 14px;border-radius:14px;background:#e9f9f0;color:#218a58}
 .wtimer.z1{background:#fff6d6;color:#a87a00}.wtimer.z2{background:#ffe9dc;color:#c9611d}.wtimer.z3{background:#ffe1e6;color:#b81f3a}
+.visual.later{display:none}
 </style>
 </head>
 <body>
@@ -494,7 +495,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
     </div>
-    <div class="ver">v1.25</div>
+    <div class="ver">v1.26</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -735,7 +736,7 @@ let A={adv:0,medals:0,stars:[],w:[]}; /* w[k] = ขั้นของอาว�
 const atkOf=k=>Math.round(WPN[k].a*(1+.5*((A.w[k]||1)-1)));
 const bestW=()=>{let b=-1;WPN.forEach((_,k)=>{if(A.w[k]&&(b<0||atkOf(k)>atkOf(b)))b=k});return b};
 /* โลก 2 วัดจากอาวุธแรงสุด (ดาบดวงดาว) และโตขึ้นทุกด่าน ไม่ให้ด่านแรกของโลก 2 อ่อนกว่าท้ายโลก 1 */
-const monHP=k=>Math.round(MON[k%NW].hits*WPN[k].a*(k>=NW?1.25:1)*(1+.5*A.medals)*[.75,1,1.3][S.lv]);
+const monHP=k=>Math.round(MON[k%NW].hits*WPN[k].a*(k>=NW?1.25:1)*(1+.5*A.medals)*[.55,1,1.3][S.lv]*(k<3?[.6,.75,.9][k]:1));   // ระดับง่าย .55 · ด่าน 1-3 ของโลก 1 อ่อนลงอีก
 /* ศัตรูของด่าน: ด่านบอสมีตัวเดียว · ด่านอื่นมาเป็นฝูง 1-3 ตัวตามความไกลของด่าน (แบ่งพลังชีวิตรวมกัน) ส่วนใหญ่เป็นตัวสุ่มใหม่ */
 /* พลังชีวิตศัตรู: เพิ่มขึ้น 20% ทุกตัว (ชดเชยคอมโบ/คริ) +15% ถ้ามีสัตว์เลี้ยงช่วย +10% ถ้าใส่เอฟเฟกต์ที่ช่วยยิง (Surat ขอ 2026-11-22) */
 const foeMul=()=>1.2*(typeof activePet==='function'&&activePet()?1.15:1)*((P.fx||0)>0?1.1:1);
@@ -850,7 +851,7 @@ function drawVis(q,reveal){const m=S.cur,v=$('vis');let h='',T;
  else if(m==='mul'){T=q.a*q.b;for(let k=0;k<q.a;k++)h+=grp(q.b,k%2?'b':'')}
  else{T=q.a;if(reveal){for(let k=0;k<q.b;k++)h+=grp(q.ans,k%2?'b':'')}else h=grp(q.a,'',0,true)}
  v.style.setProperty('--s',(T<=10?'clamp(30px,6.2vh,46px)':T<=16?'clamp(24px,4.6vh,36px)':T<=24?'clamp(20px,3.6vh,30px)':'clamp(17px,3vh,25px)'));v.innerHTML=h}
-function setupQ(){S.qT0=performance.now();const q=S.q=gen(S.cur);$('cap').textContent=q.cap;drawVis(q);
+function setupQ(){S.qT0=performance.now();const q=S.q=gen(S.cur);$('cap').textContent=q.cap;drawVis(q);$('vis').classList.add('later');   // รูปช่วยนับซ่อนไว้ก่อน ให้คิดเอง
  $('eq').innerHTML=`${q.a}<i>${q.sym}</i>${q.b}<i>=</i><span class="qm" id="qm">?</span>`;
  const col=[['#35b97c','#218a58'],['#ff6f91','#c94568'],['#4aa3ff','#2a74c9']];
  $('choices').style.gridTemplateColumns=`repeat(${q.ch.length},minmax(0,1fr))`;
@@ -878,7 +879,7 @@ function good(el){S.lock=true;sfx.ok();burst(el);let p=pq(Math.min(S.miss,2));
  const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
 function answer(n,btn){if(S.lock)return;
  if(n===S.q.ans){btn.classList.add('ok');const qm=$('qm');qm.textContent=n;qm.classList.add('ans');if(S.cur==='div')drawVis(S.q,true);good(btn)}
- else{S.first=false;S.miss++;S.wr.push(n);noteMiss();btn.classList.add('no');sfx.no();const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');say('ลองนับดูอีกทีนะ');countUp()}}
+ else{S.first=false;S.miss++;S.wr.push(n);noteMiss();$('vis').classList.remove('later');btn.classList.add('no');sfx.no();const c=$('card');c.classList.remove('shake');void c.offsetWidth;c.classList.add('shake');say('ลองนับดูอีกทีนะ');countUp()}}
 
 /* ============ เขียนเลข ============ */
 const gctx=$('guide').getContext('2d'),ictx=$('ink').getContext('2d',{willReadFrequently:true});
@@ -933,7 +934,7 @@ function rollMode(){const o=FPOOL.filter(x=>x!==S.fmode);S.fmode=o[Math.floor(Ma
  $('wpmode').innerHTML=`<span class="mm">${WPN[S.fw].svg}</span><span>วิธีสู้รอบนี้: <b>${d.n}</b><br>${d.t[TOUCH?0:1]}<br>อาวุธรอบนี้: <b>${WPN[S.fw].n}</b></span>`}
 $('wpgo').onclick=()=>{sfx.tap();fight(S.fmode)};
 $('wpgo3').onclick=()=>{sfx.tap();rollMode()};
-let F=null;const JUMP=.9,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),zi=z=>Math.round(60-z*40);
+let F=null;const JUMP=1.2   /* กระโดดนาน 1.2 วิ (เดิม .9) และค้างช่วงบนนานขึ้น ลงมาไม่โดนของที่ตามมาง่ายๆ (Surat 2026-11-22) */,clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),zi=z=>Math.round(60-z*40);
 const HEART='<svg viewBox="0 0 24 24"><path d="M12 21C5 15 2 11.500 2 8a5 5 0 0 1 10-1.500A5 5 0 0 1 22 8c0 3.500-3 7-10 13z"/></svg>';
 function drawHearts(){$('hearts').innerHTML=Array.from({length:F.maxh},(_,i)=>HEART.replace('<svg',`<svg class="${i<F.h?'':'off'}"`)).join('')+(F.shield?`<span class="shi">${SHIELD}</span>`:'')}
 /* ฉากสู้ 2 แบบใช้เครื่องยนต์เดียวกัน: d3=false ยืนสู้ (กระโดดหลบ) · d3=true เดินได้ทั้งซ้ายขวาและลึกตื้น มีต่อยระยะประชิด
@@ -947,7 +948,7 @@ function fight(mode){mode=FMD[mode]?mode:'stand';const k=S.stage,kk=k%NW,w2=k>=N
  /* ยิ่งด่านไกล โลก 2 และระดับยาก: ลูกไฟเร็วขึ้น ถี่ขึ้น และมีลูกลอยสูง (ห้ามกระโดด) ปนมา */
  const hi=S.lv===0?(kk>=4||w2?.2:0):(kk>=2||w2?.3:0)+(S.lv===2?.15:0);
  F={mode,k,w,d3,foes,wave:0,swap:false,hp:1,max:1,h:S.hearts,maxh:S.hearts,atk:Math.max(atkOf(w),Math.round(atkOf(bestW())*.8)),act:null,kit:['fire'],j:0,jy:0,cd:0,pcd:0,tcd:0,inv:0,next:2.2,charge:null,shots:[],ps:[],bombs:[],over:false,last:performance.now(),
-  v:Math.min(.75,(30+kk*3+(w2?8:0)+S.lv*5)/100),intv:Math.max(1.05,(2.6-kk*.18-(w2?.3:0)-S.lv*.3)*.92),hi,en:0,paused:false,qlock:false,auto:false,dash:null,
+  v:Math.min(.75,(30+kk*3+(w2?8:0)+S.lv*5)/100)*(S.lv===0?.85:1)*(k<2?.9:1),intv:Math.max(1.05,(2.6-kk*.18-(w2?.3:0)-S.lv*.3)*.92)*(S.lv===0?1.15:1)+(k<2?.4:0),hi,en:0,paused:false,qlock:false,auto:false,dash:null,
   P:{x:.18,z:d3?.5:0},M:{x:tapm?.6:d3?.8:.72,y:.45,z:d3?.5:0},tgt:null,mv:{x:0,z:0},keys:{},slam:null,slamCd:2,mz:.12+kk*.03+(w2?.05:0)+S.lv*.04,typed:'',tqq:null,sw:null};
  F.shield=(P.shields||0)>0;$('fb').classList.toggle('shielded',F.shield);
  const fxi=P.fx||0;F.fx=fxi>0?Object.assign({t:1.2},fxPow(fxi)):null;
@@ -1048,8 +1049,8 @@ function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.pa
   P.x=d.x+(M.x-.17-d.x)*k;P.z=d.z+(M.z-d.z)*k;
   if(!d.hit&&u>=.4){d.hit=true;fb.classList.remove('swing');void fb.offsetWidth;fb.classList.add('swing');hitMon(d.dmg,false)}
   if(u>=1){P.x=d.x;P.z=d.z;F.dash=null}}
- if(F.j>0){F.j-=dt;F.jy=Math.sin(Math.PI*(1-Math.max(0,F.j)/JUMP))*bh*1.25}else F.jy=0;
- F.cd-=dt;F.pcd-=dt;F.inv-=dt;
+ if(F.j>0){F.j-=dt;F.jy=Math.pow(Math.sin(Math.PI*(1-Math.max(0,F.j)/JUMP)),.7)*bh*1.3}else F.jy=0;
+ F.cd-=dt;F.pcd-=dt;F.inv-=dt;F.time=(F.time||0)+dt;
  const pp=proj(P.x,P.z),pm=proj(M.x,M.z);
  fb.style.left=pp.sx+'px';fb.style.bottom=pp.fy+'px';fb.style.transform=`translate(-50%,${-F.jy*pp.sc}px) scale(${pp.sc})`;fb.style.zIndex=zi(P.z);
  if(F.pet){const pe=$('fpet'),qp=proj(Math.max(.03,P.x-.09),P.z),ps=bh*.5*qp.sc;pe.style.cssText=`width:${ps}px;height:${ps}px;left:${qp.sx-ps/2}px;bottom:${qp.fy+bh*.6*qp.sc+Math.sin(ts/300)*6}px;z-index:${zi(P.z)+1}`;
@@ -1058,16 +1059,18 @@ function tick(ts){if(F.mode==='tap'||F.mode==='click')return tickTap(ts);if(F.pa
  fm.style.left=pm.sx+'px';fm.style.bottom=(pm.fy-pm.H*.01)+'px';fm.style.transform=`translateX(-50%) scale(${pm.sc})`;fm.style.zIndex=zi(M.z);
  /* ลูกไฟ: ชาร์จให้เห็นก่อน 0.6 วิ แล้วพุ่งตามแนวที่สัตว์ประหลาดยืนอยู่ตอนปล่อย */
  F.next-=dt*(F.hp<F.max*.4?1.3:1);
- if(!F.charge&&!F.act&&!F.swap&&F.next<=.6){const t=pick1(F.kit);
-  if(t==='fire'||t==='tree'){const tr=t==='tree',hi=!tr&&Math.random()<F.hi,e=document.createElement('i');e.className='shot '+(tr?'tree':hi?'hi':'lo');if(tr)e.innerHTML=TREE;ar.appendChild(e);F.charge={e,hi,tr,x:M.x,z:M.z,go:false};showTut(tr?'tree':hi?'fireHi':'fireLo')}
+ /* เว้นจังหวะ: ท่าถัดไปต้องมาถึงตัวเราหลังท่าก่อนอย่างน้อย JUMP+0.35 วิ (กระโดดหลบอันแรกแล้วลงมาทันกระโดดอันถัดไป) */
+ if(!F.charge&&!F.act&&!F.swap&&F.next<=.6){const t=pick1(F.kit),eta=t==='charge'?1.25:t==='beam'?1.3:.6+Math.max(0,M.x-P.x)/(F.v*(t==='tree'?.6:1)),arr=F.time+eta;
+  if(arr<(F.free||0))F.next=.6+(F.free-arr);
+  else if(F.free=arr+JUMP+.35,t==='fire'||t==='tree'){const tr=t==='tree',hi=!tr&&Math.random()<F.hi,e=document.createElement('i');e.className='shot '+(tr?'tree':hi?'hi':'lo');if(tr)e.innerHTML=TREE;ar.appendChild(e);F.charge={e,hi,tr,x:M.x,z:M.z,go:false};showTut(tr?'tree':hi?'fireHi':'fireLo')}
   else{startAct(t);showTut(t==='charge'?'charge':F.act.hi?'beamHi':'beamLo')}}
  if(F.act&&!F.swap)actTick(dt,bh);
  if(F.charge){F.charge.z=M.z;if(F.next<=0){F.charge.go=true;F.shots.push(F.charge);F.charge=null;F.next=F.intv*(.8+Math.random()*.4);tone(300,0,.12,'sawtooth',.05)}}
  const all=F.charge?F.shots.concat(F.charge):F.shots;
- for(const s of all){if(s.go)s.x-=F.v*(s.tr?.6:1)*dt;const q=proj(s.x,s.z),sy=s.hi?bh*1.6:s.tr?bh*.3:bh*.22,hr=s.tr?rr*.9:rr*.5,d=rr*(s.tr?3.4:2)*(s.go?1:Math.max(.2,1-F.next/.6))*q.sc;
+ for(const s of all){if(s.go)s.x-=F.v*(s.tr?.6:1)*dt;const q=proj(s.x,s.z),sy=s.hi?bh*1.6:s.tr?bh*.28:bh*.22,hr=s.tr?rr*.8:rr*.5,d=rr*(s.tr?3.4:2)*(s.go?1:Math.max(.2,1-F.next/.6))*q.sc;
   s.e.style.cssText=`width:${d}px;height:${d}px;left:${q.sx-d/2}px;bottom:${q.fy+sy*q.sc-d/2}px;z-index:${zi(s.z)}`;
   /* ช่วงโดนตัวต้องแคบกว่าเวลาลอยกลางอากาศมาก (แคบ 0.09 ของสนาม เทียบกับลอย ~0.75 วิ) ไม่งั้นกระโดดไม่พ้น */
-  if(s.go&&!s.dead&&F.inv<=0&&Math.abs(s.x-P.x)<(s.tr?.035:.045)&&Math.abs(s.z-P.z)<.17&&sy+hr>F.jy&&sy-hr<F.jy+bh*.92){s.dead=true;hurt()}
+  if(s.go&&!s.dead&&F.inv<=0&&Math.abs(s.x-P.x)<Math.max(.02,Math.min(1,F.v*(s.tr?.6:1)/.45)*(s.tr?.03:.045))&&   /* ของช้า กรอบชนแคบตาม ให้ช่วงกระโดดพ้นยาวเท่าของเร็ว */ Math.abs(s.z-P.z)<.17&&sy+hr>F.jy&&sy-hr<F.jy+bh*.92){s.dead=true;hurt()}
   if(s.x<-.12)s.dead=true}
  for(const p of F.ps){p.x+=p.sp*dt;const q=proj(p.x,p.z),d=p.d*q.sc;p.e.style.width=p.e.style.height=d+'px';p.e.style.left=(q.sx-d/2)+'px';p.e.style.bottom=(q.fy+p.up*q.sc-d/2)+'px';p.e.style.zIndex=zi(p.z);
   if(p.kill)for(const s of F.shots)if(!s.dead&&Math.abs(s.x-p.x)<.08&&Math.abs(s.z-p.z)<.2){s.dead=true;tone(900,0,.06,'triangle',.06)}
