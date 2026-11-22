@@ -451,6 +451,8 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
 .fb.fxz>svg{animation:fxzap .3s}
 @keyframes fxzap{50%{filter:brightness(1.6) drop-shadow(0 0 10px #fff3a8)}}
 .cc small.fxp{color:#5d49a8}
+.wtimer{font-weight:900;font-size:15px;padding:4px 14px;border-radius:14px;background:#e9f9f0;color:#218a58}
+.wtimer.z1{background:#fff6d6;color:#a87a00}.wtimer.z2{background:#ffe9dc;color:#c9611d}.wtimer.z3{background:#ffe1e6;color:#b81f3a}
 </style>
 </head>
 <body>
@@ -492,7 +494,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
     <button class="inst" id="hbtn">พลังมือ: ปิด</button>
     <button class="inst" id="more">เกมอื่นของเจ้าคุณ</button>
     </div>
-    <div class="ver">v1.23</div>
+    <div class="ver">v1.24</div>
   </section>
 
   <!-- แผนที่ผจญภัย -->
@@ -579,6 +581,7 @@ html,body{overscroll-behavior:none;-webkit-touch-callout:none}
       <div class="cap" id="cap"></div>
       <div class="visual" id="vis"></div>
       <div class="eq" id="eq"></div>
+      <div class="wtimer" id="wtimer" hidden></div>
       <div class="wwrap" id="wwrap" hidden>
         <canvas id="guide" width="600" height="600"></canvas>
         <canvas id="ink" width="600" height="600"></canvas>
@@ -717,7 +720,11 @@ const NW=6,STAGES=[{m:'add',n:'ทุ่งแอปเปิล'},{m:'sub',n:'�
  {m:'add',n:'ป่าเห็ดยักษ์'},{m:'sub',n:'ทะเลสาบน้ำแข็ง'},{m:'write',n:'หอคอยตัวเลข'},{m:'mul',n:'เมืองขนมหวาน'},{m:'div',n:'ทะเลทรายแบ่งปัน'},{m:'mix',n:'ปราสาทมังกรเงา'}];
 const NS=STAGES.length,PT={q:[4,2,1],stage:8,chest:50}; /* แต้มต่อข้อ: ถูกครั้งแรก 4 · ผิด 1 ครั้ง 2 · ผิดมากกว่านั้น 1 แล้วคูณตามระดับ LVX (ง่าย x1 กลาง x2.5 ยาก x5)
    Surat ขอ 2026-11-22 ให้ระดับง่ายได้แต้มน้อย ต้องเล่นหลายรอบถึงซื้อเสื้อได้: ง่ายเต็มด่านได้ราว 28 แต้ม (เสื้อ 300 = ราว 11 ด่าน) */
-const LVX=[1,2.5,5],pq=i=>Math.round(PT.q[i]*LVX[S.lv]);
+/* แต้มตามความยากของเรื่อง (Surat 2026-11-22): เขียนเลขน้อยสุด < บวก/ลบ < คูณ < หาร · โจทย์รวมมิตรนับเท่าคูณ */
+const OPW={write:.75,add:1,sub:1,mul:1.5,div:2,mix:1.5};
+const LVX=[1,2.5,5],pq=(i,m)=>Math.max(1,Math.round(PT.q[i]*LVX[S.lv]*(OPW[m||S.cur]||1)));
+/* เขียนเลข: จับเวลาตั้งแต่ขึ้นโจทย์ถึงเขียนผ่าน · ไม่เกิน 8 วิ ได้เต็ม · 15 วิ 70% · 25 วิ 50% · ช้ากว่านั้น 30% */
+const wFactor=s=>s<=8?1:s<=15?.7:s<=25?.5:.3;
 const LOCK='<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 const CHEST=`<svg viewBox="0 0 200 180"><rect x="30" y="88" width="140" height="74" rx="10" fill="#a5622a"/><rect x="30" y="88" width="140" height="13" fill="#e9a91c"/><rect x="48" y="88" width="13" height="74" fill="#e9a91c"/><rect x="139" y="88" width="13" height="74" fill="#e9a91c"/>
 <g class="lid"><path d="M30 90V70q0-30 30-30h80q30 0 30 30v20z" fill="#bf7632"/><rect x="48" y="40" width="13" height="50" fill="#e9a91c"/><rect x="139" y="40" width="13" height="50" fill="#e9a91c"/><rect x="88" y="76" width="24" height="28" rx="5" fill="#ffd34d" stroke="#8a5a12" stroke-width="3"/></g></svg>`;
@@ -811,7 +818,7 @@ S.run=0; /* เลขรอบ: ตัวจับเวลาของรอบ
 function start(mode){S.run++;sfx.tap();S.mode=mode;S.i=0;S.earn=0;S.pts=0;S.log=[];S.round=new Set();S.hints=petPw()==='hint'?(petLv(activePet())>=5?2:1):0;show('play');drawTrack();next()}
 function next(){try{$('hintb').hidden=true}catch(e){}if(S.i>=ROUNDS)return win();S.first=true;S.lock=false;S.tries=0;S.miss=0;S.wr=[];
  S.cur=S.mode==='mix'?pickOp():S.mode;if(S.auto)S.lv=autoLv(S.cur);
- const w=S.cur==='write';$('wwrap').hidden=!w;$('wbtns').hidden=!w;$('choices').hidden=w;$('vis').hidden=w;$('eq').hidden=w;
+ const w=S.cur==='write';$('wwrap').hidden=!w;$('wtimer').hidden=!w;$('wbtns').hidden=!w;$('choices').hidden=w;$('vis').hidden=w;$('eq').hidden=w;
  w?setupWrite():setupQ()}
 
 /* โจทย์ไม่ซ้ำ: ไล่ทุกข้อที่เป็นไปได้ของเรื่อง+ระดับนั้น แล้วสุ่มจากข้อที่ยังไม่ออกในรอบนี้ (S.round ล้างทุกครั้งที่เริ่มรอบ) และไม่อยู่ใน 8 ข้อล่าสุด
@@ -859,10 +866,11 @@ function countUp(){let els;if(S.cur==='div'){drawVis(S.q,true);els=$('vis').quer
  els.forEach((el,k)=>{el.classList.remove('num');setTimeout(()=>{el.firstChild.textContent=k+1;el.classList.add('num');tone(500+k*30,0,.08,'triangle',.08)},350+k*230)})}
 function burst(el){const c=el.getBoundingClientRect();for(let k=0;k<12;k++){const s=document.createElement('i');s.className='sp';const g=Math.PI*2*k/12,d=70+Math.random()*70;
  s.style.cssText=`left:${c.left+c.width/2}px;top:${c.top+c.height/2}px;--dx:${Math.cos(g)*d}px;--dy:${Math.sin(g)*d}px`;document.body.appendChild(s);setTimeout(()=>s.remove(),850)}}
-function good(el){S.lock=true;sfx.ok();burst(el);const p=pq(Math.min(S.miss,2));if(S.first)S.earn++;
+function good(el){S.lock=true;sfx.ok();burst(el);let p=pq(Math.min(S.miss,2));
+ if(S.cur==='write'){const ws=(performance.now()-(S.wT0||performance.now()))/1000;S.wSec=Math.round(ws);p=Math.max(1,Math.round(p*wFactor(ws)))}if(S.first)S.earn++;
  /* ตอบถูกครั้งแรกติดกันครบทุก 5 ข้อ ได้โล่ 1 อัน (เก็บได้ไม่เกิน 5) */
  S.streak=S.first?(S.streak||0)+1:0;checkBadges();if(S.first){petXP();mission('ans');mission('combo',0,S.streak)}if(S.cur==='write')mission('write');if(S.first&&S.streak%5===0&&(P.shields||0)<5){P.shields=(P.shields||0)+1;saveP();setTimeout(()=>toast(`<span class="tpic">${SHIELD}</span><span>ตอบถูกติดกัน 5 ข้อ ได้โล่ 1 อัน</span>`),700)}S.pts+=p;S.total+=p;saveT();
- S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q}`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,mx:pq(0)});track(S.first);
+ S.log.push({t:S.cur==='write'?`เขียนเลข ${S.q} (${S.wSec} วิ)`:`${S.q.a} ${S.q.sym} ${S.q.b} = ${S.q.ans}`,miss:S.miss,wr:S.wr.slice(),p,mx:pq(0)});track(S.first);
  const c=el.getBoundingClientRect(),f=document.createElement('div');f.className='fl';f.textContent='+'+p;f.style.left=(c.left+c.width/2)+'px';f.style.top=c.top+'px';document.body.appendChild(f);setTimeout(()=>f.remove(),1000);
  const run=S.run;say(praise());S.i++;setTimeout(()=>{if(run===S.run)moveFox()},250);setTimeout(()=>{if(run===S.run)next()},1700)}
 function answer(n,btn){if(S.lock)return;
@@ -875,7 +883,7 @@ const mask=document.createElement('canvas');mask.width=mask.height=600;const mct
 const DFONT='bold 440px "Arial Rounded MT Bold","Segoe UI",Arial,sans-serif';
 function glyph(c,d){c.font=DFONT;c.textAlign='center';c.textBaseline='middle';c.lineJoin='round';return[String(d),300,325]}
 let digits=[];
-function setupWrite(){if(S.i===0)digits=[0,1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-.5).slice(0,ROUNDS);
+function setupWrite(){S.wT0=performance.now();if(S.i===0)digits=[0,1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-.5).slice(0,ROUNDS);
  const d=S.q=digits[S.i];$('cap').textContent=`ลากนิ้วเขียนเลข ${d} ตามรอย`;
  gctx.clearRect(0,0,600,600);ictx.clearRect(0,0,600,600);mctx.clearRect(0,0,600,600);
  let t=glyph(gctx,d);if(L().fill){gctx.fillStyle=`rgba(255,138,61,${L().fill})`;gctx.fillText(...t)}gctx.setLineDash([16,14]);gctx.lineWidth=5;gctx.strokeStyle='rgba(255,138,61,.75)';gctx.strokeText(...t);
@@ -1081,13 +1089,13 @@ function shoot(big){if(F.mode==='tap'||F.mode==='click'){if(big){hitMon(F.atk*4,
 function punch(){if(!F||F.over||F.paused||F.pcd>0)return;F.pcd=.35;const fb=$('fb');fb.classList.remove('punch');void fb.offsetWidth;fb.classList.add('punch');tone(240,0,.06,'square',.06);
  if(F.M.x-F.P.x<.24&&Math.abs(F.P.z-F.M.z)<.22)hitMon(Math.max(1,Math.round(F.atk*1.2)),false)}
 function openQ(){if(!F||F.over||F.paused||F.en<1)return;F.paused=true;F.qlock=false;F.mv.x=F.mv.z=0;F.keys={};$('knob').style.transform='';
- const sm=stageMode(F.k),m=sm==='mix'||sm==='write'?pickOp():sm,q=F.q=gen(m);
+ const sm=stageMode(F.k),m=sm==='mix'||sm==='write'?pickOp():sm,q=F.q=gen(m);F.qm=m;
  $('qeq').innerHTML=`${q.a}<i>${q.sym}</i>${q.b}<i>=</i><span class="qm">?</span>`;
  const col=[['#35b97c','#218a58'],['#ff6f91','#c94568'],['#4aa3ff','#2a74c9']],qc=$('qch');qc.style.gridTemplateColumns=`repeat(${q.ch.length},minmax(0,1fr))`;
  qc.innerHTML=q.ch.map((n,k)=>`<button class="ch" data-n="${n}" style="--c:${col[k][0]};--d:${col[k][1]}">${n}</button>`).join('');$('qov').hidden=false;say(q.q)}
 $('qch').onclick=e=>{const b=e.target.closest('.ch');if(!b||!F||!F.paused||F.qlock)return;F.qlock=true;const me=F,ok=+b.dataset.n===F.q.ans;
  [...$('qch').children].forEach(c=>{if(+c.dataset.n===me.q.ans)c.classList.add('ok');else if(c===b)c.classList.add('no')});
- if(ok){const p=pq(0);S.pts+=p;S.total+=p;saveT();say(praise())}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
+ if(ok){const p=pq(0,F.qm);S.pts+=p;S.total+=p;saveT();say(praise())}else{sfx.no();say('ไม่เป็นไร เก็บพลังใหม่นะ')}
  setTimeout(()=>{if(F!==me)return;$('qov').hidden=true;me.qlock=false;me.paused=false;me.last=performance.now();me.en=0;setEn();if(ok&&!me.over)shoot(true);if(ok)mission('sp')},ok?500:1200)};
 function jump(){if(!F||F.over||F.paused||F.j>0)return;F.j=JUMP;tone(420,0,.12,'triangle',.1);tone(620,.07,.12,'triangle',.1)}
 const MT_HI=['แฮ่!','จับได้แล้ว!','หนีไม่พ้นหรอก','ตัวเลขเป็นของข้า!','มาสู้กันเลย'],MT_ACT=['รับไปซะ!','ฮึ่ย!','ระวังนะ!','ฮ่าๆๆ'],MT_LOW=['โอ๊ย!','เจ็บนะ!','ยอมแล้วๆ','ไว้ชีวิตข้าด้วย'];
@@ -1115,7 +1123,7 @@ function hurt(){if(F.shield){F.shield=false;P.shields=Math.max(0,(P.shields||0)-
  drawHearts();sfx.no();const fb=$('fb');fb.classList.remove('hurt');void fb.offsetWidth;fb.classList.add('hurt');
  if(F.h<=0){const me=F;F.over=true;setTimeout(()=>{if(F!==me||!$('fight').classList.contains('on'))return;show('lose');say('แพ้แล้วไม่เป็นไร ไปฝึกเลขแล้วกลับมาสู้ใหม่นะ')},700)}}
 function finishStage(){if(!$('fight').classList.contains('on'))return;mission('win');dayRec().w=(dayRec().w||0)+1;if(F&&!F.lost){const pb=Math.round(5*LVX[S.lv]);S.total+=pb;saveT();P.perfect=(P.perfect||0)+1;setTimeout(()=>toast(`<span>ชนะแบบไม่โดนเลย +${pb} แต้ม</span>`),1500)}checkBadges();P.mon[S.stage]=true;saveP();A.stars[S.stage]=Math.max(A.stars[S.stage]||0,S.earn);if(S.stage===A.adv)A.adv++;saveA();
- const b=Math.round(PT.stage*LVX[S.lv]);S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
+ const b=Math.round(PT.stage*LVX[S.lv]*(OPW[stageMode(S.stage)]||1));S.pts+=b;S.total+=b;saveT();showWin(true);checkUnlocks()}
 const tap=(id,fn)=>{$(id).onpointerdown=e=>{e.preventDefault();fn()}};
 tap('bjump',jump);tap('batk',attack);tap('bsp',openQ);$('bsp').onclick=$('psp').onclick=()=>openQ();tap('pjump',jump);tap('pwpn',attack);tap('ppunch',punch);tap('psp',openQ);
 /* จอยมือซ้าย: ลากจากกลางวงเพื่อเดิน (ขึ้น = เดินลึกเข้าไป) */
@@ -1437,7 +1445,7 @@ function weekHTML(){const D=P.days||{},cur=[0,1,2,3,4,5,6].map(dAgo),prev=[7,8,9
  return `<h3>สรุป 7 วันล่าสุด</h3><div class="wk"><div><b>${a.n}</b>ข้อที่ทำ</div><div><b>${a.n?pc(a.ok,a.n)+'%':'-'}</b>ถูกครั้งแรก</div><div><b>${a.play}/7</b>วันที่เล่น</div><div><b>${a.mis}</b>วันทำภารกิจครบ</div><div><b>${a.w}</b>ชนะการสู้</div></div>
  ${topics?`<table class="pt"><tr><th>เรื่อง</th><th>ทำ (ข้อ)</th><th>ถูกครั้งแรก</th><th>สัปดาห์ก่อน</th></tr>${topics}</table>`:'<div class="note">สัปดาห์นี้ยังไม่ได้ตอบเลข</div>'}
  <table class="pt"><tr><th>วันที่</th><th>ทำ (ข้อ)</th><th>ถูกครั้งแรก</th><th>ภารกิจ</th></tr>${days}</table>
- <div class="note">ดีขึ้น/ลดลง = ถูกครั้งแรกต่างจากสัปดาห์ก่อนตั้งแต่ 5 จุดขึ้นไป · เริ่มนับตั้งแต่ ${Object.keys(D).sort()[0]||today()}</div>`}
+ <div class="note">แต้มต่อข้อ: เขียนเลข x0.75 (ช้าได้น้อยลง) · บวก ลบ x1 · คูณ x1.5 · หาร x2<br>ดีขึ้น/ลดลง = ถูกครั้งแรกต่างจากสัปดาห์ก่อนตั้งแต่ 5 จุดขึ้นไป · เริ่มนับตั้งแต่ ${Object.keys(D).sort()[0]||today()}</div>`}
 /* จำกัดเวลาเล่น: นับเฉพาะตอนหน้าจอเปิดอยู่ · ห่างจากเกมเกิน 10 นาที = เริ่มนับใหม่ · ครบเวลาแล้วขึ้นหน้าพัก ผู้ปกครองกดค้าง 3 วิเพื่อเล่นต่ออีก 1 ช่วง */
 const PT_LIM=()=>{try{return +localStorage.getItem('fnf_limit')||0}catch(e){return 0}};
 let PLAY={used:0,last:Date.now()};try{const v=JSON.parse(localStorage.getItem('fnf_play'));if(v&&Date.now()-v.last<6e5)PLAY=v}catch(e){}
@@ -1623,6 +1631,10 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)flush()});
 cloudBoot();
 if('serviceWorker'in navigator&&location.protocol==='https:')window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 if(S.auto)S.lv=autoLv();
+
+/* ตัวจับเวลาด่านเขียนเลข: บอกเวลาและแต้มที่จะได้ เปลี่ยนสีตามช่วง */
+setInterval(()=>{const t=$('wtimer');if(t.hidden||S.lock||S.cur!=='write'||!$('play').classList.contains('on'))return;const s=(performance.now()-(S.wT0||performance.now()))/1000,f=wFactor(s);
+ t.textContent=`เวลา ${Math.floor(s)} วิ · ${f===1?'เร็ว ได้แต้มเต็ม':'ได้แต้ม '+Math.round(f*100)+'%'}`;t.className='wtimer z'+(f===1?0:f>=.7?1:f>=.5?2:3)},250);
 </script>
 </body>
 </html>
